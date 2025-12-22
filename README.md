@@ -33,5 +33,5 @@ The system also sends **automated profile completion emails** and supports secur
 
 1. Clone the repo:  
 ```bash
-git clone https://github.com/yourusername/ipa-internship-system.git
-cd ipa-internship-system
+git clone https://github.com/utujesandrine456/IPA.git
+cd ipa
