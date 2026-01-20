@@ -1,0 +1,609 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Users,
+  Star,
+  Calendar,
+  MessageSquare,
+  FileText,
+  X,
+  Check,
+  Plus,
+  Send
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+// ----- Type Definitions -----
+interface Student {
+  id: number;
+  name: string;
+  supervisorId: number;
+  user?: { name: string; email: string };
+  phone?: string;
+  address?: string;
+  companyName?: string;
+  companyAddress?: string;
+  supervisorName?: string;
+  supervisorEmail?: string;
+}
+
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
+  date: string;
+  studentId: number;
+  student?: { user: { name: string } };
+}
+
+interface NewTask {
+  studentId: number | "";
+  title: string;
+  description: string;
+  dueDate: string;
+}
+
+// ----- Component -----
+export default function SupervisorDashboard() {
+  const [activeTab, setActiveTab] = useState<"students" | "tasks" | "ratings" | "attendance" | "chat">("students");
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [newTask, setNewTask] = useState<NewTask>({
+    studentId: "",
+    title: "",
+    description: "",
+    dueDate: "",
+  });
+  const [ratingValue, setRatingValue] = useState(7);
+  const [ratingComment, setRatingComment] = useState("");
+
+  const searchParams = useSearchParams();
+  const supervisorIdParam = searchParams.get("supervisorId");
+  const supervisorId = supervisorIdParam ? Number(supervisorIdParam) : undefined;
+
+  // ----- Fetch Data -----
+  useEffect(() => {
+    if (supervisorId) fetchStudents();
+  }, [supervisorId]);
+
+  useEffect(() => {
+    if (supervisorId && activeTab === "tasks") fetchTasks();
+  }, [activeTab, supervisorId]);
+
+  const fetchStudents = async () => {
+    try {
+      const res = await fetch("/api/students");
+      const data = await res.json();
+      setStudents((data.students || []).filter((s: any) => s.supervisorId === supervisorId));
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
+  };
+
+  const fetchTasks = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/tasks?supervisorId=${supervisorId}`);
+      const data = await res.json();
+      setTasks(data.tasks || []);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ----- Task Handlers -----
+  const handleApproveTask = async (taskId: string) => {
+    try {
+      await fetch("/api/tasks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId, status: "COMPLETED" }),
+      });
+      fetchTasks();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRejectTask = async (taskId: string) => {
+    try {
+      await fetch("/api/tasks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId, status: "PENDING" }),
+      });
+      fetchTasks();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleAssignTask = async () => {
+    if (newTask.studentId === "" || !newTask.title) return;
+    try {
+      await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: newTask.studentId,
+          title: newTask.title,
+          description: newTask.description,
+          date: newTask.dueDate || new Date().toISOString(),
+        }),
+      });
+      setNewTask({ studentId: "", title: "", description: "", dueDate: "" });
+      setShowTaskModal(false);
+      fetchTasks();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRateTask = async () => {
+    if (!selectedTask) return;
+    try {
+      await fetch("/api/tasks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          taskId: selectedTask.id,
+          status: "COMPLETED",
+          rating: ratingValue,
+          comment: ratingComment,
+          supervisorId,
+        }),
+      });
+      fetchTasks();
+      setShowRatingModal(false);
+      setSelectedTask(null);
+      setRatingValue(7);
+      setRatingComment("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-neutral/10 pb-6">
+        <div className="flex gap-8 overflow-x-auto pb-2 md:pb-0">
+          {[
+            { id: "students", label: "Students", icon: Users },
+            { id: "tasks", label: "Student Logs", icon: FileText },
+            { id: "ratings", label: "Ratings", icon: Star },
+            { id: "attendance", label: "Attendance", icon: Calendar },
+            { id: "chat", label: "Team Chat", icon: MessageSquare },
+          ].map((tab) => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={cn( "flex items-center gap-2 pb-2 text-sm font-medium transition-colors relative whitespace-nowrap", activeTab === tab.id ? "text-primary" : "text-primary/60 hover:text-primary" )}>
+              <tab.icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {activeTab === "students" && (
+          <motion.div
+            key="students"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            {students.map((student) => {
+              const studentTasks = tasks.filter((t) => t.studentId === student.id);
+              const totalTasks = studentTasks.length || 1;
+              const completed = studentTasks.filter((t) => t.status === "COMPLETED").length;
+              const progress = Math.round((completed / totalTasks) * 100);
+              const initials = student.user?.name
+                ? student.user.name.split(" ").map((n) => n[0]).join("")
+                : "ST";
+              const status =
+                progress >= 80 ? "Excellent" : progress < 50 ? "Behind" : "On Track";
+
+              return (
+                <Card key={student.id} className="hover:border-primary/50 transition-colors group">
+                  <CardContent className="p-6 flex flex-col items-center text-center">
+                    <div className="relative mb-4">
+                      {/* Progress Ring */}
+                      <div className="h-24 w-24 rounded-full border-4 border-neutral/10 flex items-center justify-center relative">
+                        <svg
+                          className="absolute inset-0 h-full w-full -rotate-90"
+                          viewBox="0 0 100 100"
+                        >
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="46"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="8"
+                            className="text-primary"
+                            strokeDasharray={`${progress * 2.89} 289`}
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <div className="h-20 w-20 rounded-full bg-primary/5 flex items-center justify-center text-xl font-bold text-primary">
+                          {initials}
+                        </div>
+                      </div>
+                      <span className="absolute bottom-0 right-0 h-6 w-6 rounded-full bg-white border border-neutral/10 flex items-center justify-center shadow-sm">
+                        <span
+                          className={cn(
+                            "h-2.5 w-2.5 rounded-full",
+                            status === "Excellent"
+                              ? "bg-primary"
+                              : status === "Behind"
+                                ? "bg-primary/50"
+                                : "bg-primary/70"
+                          )}
+                        ></span>
+                      </span>
+                    </div>
+
+                    <h3 className="font-bold text-lg text-primary mb-1">
+                      {student.user?.name || student.name}
+                    </h3>
+                    <p className="text-sm text-primary mb-4">{progress}% Tasks Completed</p>
+
+                    <div className="flex gap-2 w-full mb-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 text-xs"
+                        onClick={() => {
+                          setSelectedStudent(student);
+                          setShowProfileModal(true);
+                        }}
+                      >
+                        View Profile
+                      </Button>
+                    </div>
+                    <div className="flex gap-2 w-full">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="flex-1 text-xs"
+                        onClick={() => {
+                          setSelectedStudent(student);
+                          setShowRatingModal(true);
+                        }}
+                      >
+                        Rate
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1 text-xs"
+                        onClick={() => {
+                          setNewTask({ ...newTask, studentId: student.id });
+                          setShowTaskModal(true);
+                        }}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Assign Task
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </motion.div>
+        )}
+
+        {activeTab === "tasks" && (
+          <motion.div
+            key="tasks"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>Student Log Submissions</CardTitle>
+                <CardDescription>
+                  Review and approve student daily/weekly logs
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="text-center text-primary py-8">Loading tasks...</div>
+                ) : tasks.length === 0 ? (
+                  <div className="text-center text-primary py-8">No pending tasks</div>
+                ) : (
+                  <div className="space-y-4">
+                    {tasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className="border border-primary/20 rounded-xl p-4 hover:border-primary transition-colors bg-white"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                                {task.student?.user.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("") || "ST"}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-primary">{task.title}</h4>
+                                <p className="text-xs text-primary">
+                                  {task.student?.user.name || "Student"} •{" "}
+                                  {new Date(task.date).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                            <p className="text-sm text-primary whitespace-pre-wrap mb-3">
+                              {task.description}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            {task.status === "PENDING" && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-primary hover:bg-primary/10"
+                                  onClick={() => handleRejectTask(task.id.toString())}
+                                >
+                                  <X className="h-4 w-4 mr-1" />
+                                  Request Changes
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="bg-primary hover:bg-primary/90 text-white"
+                                  onClick={() => {
+                                    setSelectedTask(task);
+                                    setRatingValue(7);
+                                    setRatingComment("");
+                                    setShowRatingModal(true);
+                                  }}
+                                >
+                                  <Star className="h-4 w-4 mr-1" />
+                                  Rate & Complete
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Other tabs like attendance, chat can be added similarly */}
+      </AnimatePresence>
+
+      {/* Task Modal */}
+      <AnimatePresence>
+        {showTaskModal && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          >
+            <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="p-6 border-b border-primary/10 flex items-center justify-between">
+                <h3 className="text-xl font-bold text-primary">Assign New Task</h3>
+                <button
+                  onClick={() => setShowTaskModal(false)}
+                  className="text-primary hover:text-primary/80"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-primary mb-2 block">Task Title *</label>
+                  <Input
+                    placeholder="e.g., Design database schema"
+                    value={newTask.title}
+                    onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-primary mb-2 block">Description</label>
+                  <textarea
+                    className="w-full rounded-lg border border-primary/20 bg-white px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary min-h-[100px]"
+                    placeholder="Describe task..."
+                    value={newTask.description}
+                    onChange={(e) =>
+                      setNewTask({ ...newTask, description: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-primary mb-2 block">Due Date</label>
+                  <Input
+                    type="date"
+                    value={newTask.dueDate}
+                    onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 bg-primary/5 border-t border-primary/10 flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowTaskModal(false)}>Cancel</Button>
+                <Button
+                  onClick={handleAssignTask}
+                  className="bg-primary hover:bg-primary/90 text-white"
+                  disabled={!newTask.title || !newTask.studentId}
+                >
+                  <Send className="h-4 w-4 mr-2" /> Assign Task
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Rating Modal */}
+      <AnimatePresence>
+        {showRatingModal && (selectedStudent || selectedTask) && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          >
+            <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="p-6 border-b border-primary/10 flex items-center justify-between">
+                <h3 className="text-xl font-bold text-primary">
+                  {selectedTask ? `Rate Task: ${selectedTask.title}` : `Rate ${selectedStudent?.name}`}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowRatingModal(false);
+                    setSelectedTask(null);
+                  }}
+                  className="text-primary hover:text-primary/80"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {selectedTask && (
+                  <div className="bg-primary/5 p-4 rounded-lg">
+                    <p className="text-sm text-primary font-medium mb-2">Task Description:</p>
+                    <p className="text-sm text-primary">{selectedTask.description}</p>
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-sm font-medium text-primary mb-3 block">Overall Rating (1-10)</label>
+                  <input
+                    type="range"
+                    min={1}
+                    max={10}
+                    value={ratingValue}
+                    className="w-full accent-primary"
+                    onChange={(e) => setRatingValue(Number(e.target.value))}
+                  />
+                  <div className="flex justify-between text-xs text-primary mt-1">
+                    <span>Poor (1)</span>
+                    <span>Excellent (10)</span>
+                  </div>
+                  <p className="text-center text-sm text-primary mt-2">Selected: {ratingValue}</p>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-primary mb-2 block">Comments</label>
+                  <textarea
+                    placeholder="Optional feedback..."
+                    className="w-full rounded-lg border border-primary/20 bg-white px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary min-h-20"
+                    value={ratingComment}
+                    onChange={(e) => setRatingComment(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 bg-primary/5 border-t border-primary/10 flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowRatingModal(false)}>Cancel</Button>
+                <Button
+                  onClick={handleRateTask}
+                  className="bg-primary hover:bg-primary/90 text-white"
+                >
+                  <Check className="h-4 w-4 mr-2" /> Submit Rating
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Profile Modal */}
+      <AnimatePresence>
+        {showProfileModal && selectedStudent && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          >
+            <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="p-6 border-b border-primary/10 flex items-center justify-between">
+                <h3 className="text-xl font-bold text-primary">Student Profile</h3>
+                <button
+                  onClick={() => setShowProfileModal(false)}
+                  className="text-primary hover:text-primary/80"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div className="text-center mb-6">
+                  <div className="h-20 w-20 rounded-full bg-primary/10 mx-auto flex items-center justify-center text-2xl font-bold text-primary mb-3">
+                    {selectedStudent.user?.name?.split(" ").map((n) => n[0]).join("") || "ST"}
+                  </div>
+                  <h4 className="font-bold text-lg text-primary">{selectedStudent.user?.name}</h4>
+                  <p className="text-sm text-primary/60">{selectedStudent.user?.email}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className="text-xs font-semibold text-primary/60 uppercase tracking-wider">Contact Info</label>
+                    <div className="mt-1 p-3 bg-neutral/5 rounded-lg">
+                      <p className="text-sm text-primary flex items-center gap-2">
+                        <span className="font-medium">Phone:</span> {selectedStudent.phone || "N/A"}
+                      </p>
+                      <p className="text-sm text-primary flex items-center gap-2 mt-1">
+                        <span className="font-medium">Address:</span> {selectedStudent.address || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="text-xs font-semibold text-primary/60 uppercase tracking-wider">Internship Placement</label>
+                    <div className="mt-1 p-3 bg-neutral/5 rounded-lg">
+                      <p className="text-sm text-primary font-bold">{selectedStudent.companyName || "No Company Assigned"}</p>
+                      <p className="text-sm text-primary/80">{selectedStudent.companyAddress}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-primary/60 uppercase tracking-wider">Field Supervisor</label>
+                    <div className="mt-1 p-3 bg-neutral/5 rounded-lg">
+                      <p className="text-sm text-primary font-medium">{selectedStudent.supervisorName || "N/A"}</p>
+                      <p className="text-xs text-primary/60">{selectedStudent.supervisorEmail}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 bg-primary/5 border-t border-primary/10 flex justify-end">
+                <Button onClick={() => setShowProfileModal(false)}>Close</Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

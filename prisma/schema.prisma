@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  SUPERVISOR
+  STUDENT
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  SUBMITTED
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+
+model Student {
+  id                Int       @id @default(autoincrement())
+  userId            Int       @unique
+
+  studentNumber     String    @unique
+  fullName          String
+  sex               String?
+  idOrPassport      String?
+  year              String?
+  phone             String?
+  email             String? 
+
+  address           String?
+  profileCompleted  Boolean   @default(false)
+  profileToken      String?   @unique 
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  companyName       String?
+  companyAddress    String?
+  companyPhone      String?
+  companyEmail      String?
+  supervisorName    String?
+  supervisorEmail   String?
+  internshipStart   DateTime?
+  internshipEnd     DateTime?
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  supervisorId      Int
+  supervisor        Supervisor @relation(fields: [supervisorId], references: [id])
+  tasks             Task[]
+  logEntries        LogEntry[]
+  ratings           Rating[]
+}
+
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  name          String
+  role          UserRole
+  password      String?   
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  studentProfile     Student?
+  supervisorProfile  Supervisor?
+
+  sentMessages      Message[] @relation("SentMessages")
+  receivedMessages  Message[] @relation("ReceivedMessages")
+
+  @@map("users")
+}
+
+
+model Supervisor {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @unique
+  phone     String?
+  department String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  students  Student[]
+  ratings   Rating[]
+
+  @@map("supervisors")
+}
+
+model Task {
+  id            Int       @id @default(autoincrement())
+  studentId     Int
+  title         String
+  description   String?
+  submissionContent String?
+  status        TaskStatus @default(PENDING)
+  rating        Int?       // 1-5
+  date          DateTime   @default(now())
+  completedAt   DateTime?
+  submittedAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  student       Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  comments      Comment[]
+
+  @@map("tasks")
+}
+
+model LogEntry {
+  id            Int      @id @default(autoincrement())
+  studentId     Int
+  content       String
+  date          DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("log_entries")
+}
+
+model Comment {
+  id            Int      @id @default(autoincrement())
+  taskId        Int
+  supervisorId  Int?
+  content       String
+  createdAt     DateTime @default(now())
+
+  task          Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Rating {
+  id            Int        @id @default(autoincrement())
+  studentId     Int
+  supervisorId  Int
+  rating        Int
+  comment       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  student       Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  supervisor    Supervisor  @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
+
+  @@map("ratings")
+}
+
+model Message {
+  id            Int       @id @default(autoincrement())
+  senderId      Int
+  receiverId    Int
+  content       String
+  read          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  sender        User      @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver      User      @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
