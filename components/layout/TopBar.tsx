@@ -1,7 +1,38 @@
 import { Bell, Search } from "lucide-react";
+import { useEffect, useState } from "react";
 
+interface User {
+    name: string;
+    role: string;
+}
 
-export function TopBar() {
+interface TopBarProps {
+    role: "admin" | "supervisor" | "student";
+}
+
+export function TopBar({ role }: TopBarProps) {
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (e) {
+                console.error("Failed to parse user from localStorage", e);
+            }
+        }
+    }, []);
+
+    const getRoleTitle = (role: string) => {
+        switch (role) {
+            case "admin": return "Coordinator";
+            case "supervisor": return "Supervisor";
+            case "student": return "Student";
+            default: return "User";
+        }
+    };
+
     return (
         <header className="fixed top-0 z-30 ml-64 flex h-16 w-[calc(100%-16rem)] items-center justify-between border-b border-neutral/10 bg-white/80 px-6 backdrop-blur-sm">
             <div className="w-96">
@@ -23,11 +54,8 @@ export function TopBar() {
 
                 <div className="flex items-center gap-3 border-l border-neutral/20 pl-4">
                     <div className="text-right hidden sm:block">
-                        <p className="text-sm font-medium text-neutral-dark">Admin User</p>
-                        <p className="text-xs text-neutral">Superteacher</p>
-                    </div>
-                    <div className="h-10 w-10 overflow-hidden rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold">
-                        AU
+                        <p className="text-sm font-medium text-neutral-dark">{user?.name || "Premium User"}</p>
+                        <p className="text-xs text-neutral">{getRoleTitle(role)}</p>
                     </div>
                 </div>
             </div>

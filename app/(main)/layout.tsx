@@ -18,7 +18,7 @@ export default function MainLayout({
     return (
         <div className="min-h-screen bg-background">
             <Sidebar role={role} />
-            <TopBar />
+            <TopBar role={role} />
             <main className="ml-64 pt-16 min-h-screen">
                 <div className="p-8 max-w-[1600px] mx-auto">
                     {children}

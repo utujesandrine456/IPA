@@ -27,12 +27,13 @@ export function Sidebar({ role }: SidebarProps) {
         supervisor: [
             { href: "/supervisor/dashboard", label: "Dashboard", icon: LayoutDashboard },
             { href: "/supervisor/students", label: "My Students", icon: Users },
+            { href: "/supervisor/chat", label: "Chats", icon: Users },
             { href: "/supervisor/ratings", label: "Ratings", icon: FileText },
         ],
         student: [
             { href: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
             { href: "/student/logbook", label: "Logbook", icon: FileText },
-            { href: "/student/chat", label: "Peer Chat", icon: Users },
+            { href: "/student/chat", label: "Chats", icon: Users },
         ],
     };
 

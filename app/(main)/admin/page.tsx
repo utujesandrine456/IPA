@@ -16,6 +16,7 @@ interface Student {
         email: string;
     };
     supervisor?: {
+        id: number;
         user: {
             name: string;
         }
@@ -314,8 +315,8 @@ export default function AdminDashboard() {
                         color: "text-primary",
                     },
                     {
-                        label: "Total Supervisors / Teachers",
-                        value: "-",
+                        label: "Total Supervisors",
+                        value: String(supervisors.length),
                         sub: "Managed from Add User section below",
                         icon: TrendingUp,
                         color: "text-primary",
@@ -597,9 +598,9 @@ export default function AdminDashboard() {
                                                 <td className="px-6 py-4 text-primary">{student.user.email}</td>
                                                 <td className="px-6 py-4 text-primary">{student.studentId}</td>
                                                 <td className="px-6 py-4">
-                                                    <select className="bg-white border border-primary/20 text-primary text-xs rounded p-1 max-w-[150px]" value={student.supervisor?.user.name ?? ""} onChange={(e) => handleAssignSupervisor(student.id, e.target.value)}>
+                                                    <select className="bg-white border border-primary/20 text-primary text-xs rounded p-1 max-w-[150px]" value={student.supervisor?.id ?? ""} onChange={(e) => handleAssignSupervisor(student.id, e.target.value)}>
                                                         <option value="" disabled>
-                                                            {student.supervisor?.user.name || "Assign Supervisor"}
+                                                            Select Supervisor
                                                         </option>
                                                         {supervisors.map((s) => (
                                                             <option key={s.id} value={s.id}>

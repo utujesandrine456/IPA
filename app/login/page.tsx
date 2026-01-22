@@ -44,9 +44,6 @@ export default function LoginPage() {
                     if (profileCompleted) {
                         router.push(`/student/${id}`);
                     } else {
-                        // Redirect to complete profile if not completed
-                        // We might need a token for this, or just pass the user ID if authenticated
-                        // For now, let's assume we can route them there and the page handles it via the Auth Token we just saved
                         router.push(`/complete-profile?token=login_${id}`);
                     }
                 } else {
@@ -56,12 +53,12 @@ export default function LoginPage() {
                 setError(data.error || "Invalid credentials");
             }
         } catch (error) {
-            console.error("Login error:", error);
             setError("An error occurred. Please try again.");
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-background flex items-center justify-center p-6">
@@ -79,9 +76,6 @@ export default function LoginPage() {
                             <CardTitle className="text-3xl font-bold text-primary mb-2">
                                 Sign in to your dashboard
                             </CardTitle>
-                            <CardDescription className="text-primary">
-                                Superteachers, supervisors, and students can access their dashboards here.
-                            </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleSubmit} className="space-y-6">
@@ -103,7 +97,7 @@ export default function LoginPage() {
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             required
-                                            className="pl-10 border-primary/20 focus:border-primary focus:ring-primary"
+                                            className="pl-4 border-primary/20 focus:border-primary focus:ring-primary"
                                         />
                                     </div>
                                 </div>
@@ -120,7 +114,7 @@ export default function LoginPage() {
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             required
-                                            className="pl-10 border-primary/20 focus:border-primary focus:ring-primary"
+                                            className="pl-4 border-primary/20 focus:border-primary focus:ring-primary"
                                         />
                                     </div>
                                 </div>
