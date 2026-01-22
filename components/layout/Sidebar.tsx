@@ -10,12 +10,34 @@ import {
     LogOut,
 } from "lucide-react";
 
+import { useEffect, useState } from "react";
+
 interface SidebarProps {
     role: "admin" | "supervisor" | "student";
 }
 
+interface User {
+    id: number;
+    name: string;
+    role: string;
+}
+
 export function Sidebar({ role }: SidebarProps) {
     const pathname = usePathname();
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (e) {
+                console.error("Failed to parse user", e);
+            }
+        }
+    }, []);
+
+    const userId = user?.id;
 
     const links = {
         admin: [
@@ -25,13 +47,13 @@ export function Sidebar({ role }: SidebarProps) {
             { href: "/admin/visits", label: "LO Visits", icon: MapPin },
         ],
         supervisor: [
-            { href: "/supervisor/dashboard", label: "Dashboard", icon: LayoutDashboard },
+            { href: userId ? `/supervisor/${userId}?supervisorId=${userId}` : "/supervisor/dashboard", label: "Dashboard", icon: LayoutDashboard },
             { href: "/supervisor/students", label: "My Students", icon: Users },
             { href: "/supervisor/chat", label: "Chats", icon: Users },
             { href: "/supervisor/ratings", label: "Ratings", icon: FileText },
         ],
         student: [
-            { href: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
+            { href: userId ? `/student/${userId}` : "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
             { href: "/student/logbook", label: "Logbook", icon: FileText },
             { href: "/student/chat", label: "Chats", icon: Users },
         ],

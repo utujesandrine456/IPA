@@ -7,7 +7,6 @@ export async function GET(request: NextRequest) {
             include: {
                 studentProfile: true,
                 supervisorProfile: true,
-                teacherProfile: true,
             },
             orderBy: {
                 createdAt: 'desc',

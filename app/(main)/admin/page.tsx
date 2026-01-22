@@ -424,7 +424,7 @@ export default function AdminDashboard() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
-                            <CardTitle className="text-primary">Add Supervisor / Teacher</CardTitle>
+                            <CardTitle className="text-primary">Add Supervisor</CardTitle>
                             <CardDescription className="text-primary">
                                 Create new supervisor or teacher accounts that can manage students and tasks.
                             </CardDescription>

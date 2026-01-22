@@ -66,12 +66,11 @@ export async function GET(request: NextRequest) {
     const users = await prisma.user.findMany({
       where: {
         role: {
-          in: ['SUPERVISOR', 'TEACHER'],
+          in: ['SUPERVISOR'],
         },
       },
       include: {
         supervisorProfile: true,
-        teacherProfile: true,
       },
       orderBy: {
         createdAt: 'desc',

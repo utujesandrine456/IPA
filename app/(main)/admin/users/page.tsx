@@ -116,8 +116,7 @@ export default function UsersPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* User List */}
-                <Card className="lg:col-span-2">
+                <Card className="lg:col-span-3">
                     <CardHeader>
                         <CardTitle>User List</CardTitle>
                         <CardDescription>
@@ -144,6 +143,18 @@ export default function UsersPage() {
                                 <option value="SUPERVISOR">Supervisors</option>
                                 <option value="STUDENT">Students</option>
                             </select>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    setLoading(true);
+                                    fetchUsers();
+                                }}
+                                disabled={loading}
+                                className="h-9"
+                            >
+                                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
+                            </Button>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -185,61 +196,6 @@ export default function UsersPage() {
                                 )}
                             </div>
                         )}
-                    </CardContent>
-                </Card>
-
-                {/* Create User Form */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Add New User</CardTitle>
-                        <CardDescription>Create Supervisor or Teacher account</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleCreateUser} className="space-y-4">
-                            <Input
-                                label="Full Name"
-                                value={newUser.name}
-                                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                                required
-                            />
-                            <Input
-                                label="Email"
-                                type="email"
-                                value={newUser.email}
-                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                                required
-                            />
-                            <div>
-                                <label className="text-sm font-medium mb-1 block">Role</label>
-                                <select
-                                    className="w-full px-3 py-2 border rounded-lg text-sm bg-white"
-                                    value={newUser.role}
-                                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value as any })}
-                                >
-                                    <option value="SUPERVISOR">Supervisor</option>
-                                </select>
-                            </div>
-                            <Input
-                                label="Department"
-                                value={newUser.department}
-                                onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
-                            />
-                            <Input
-                                label="Phone"
-                                value={newUser.phone}
-                                onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-                            />
-                            <Input
-                                label="Password"
-                                type="password"
-                                value={newUser.password}
-                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                            />
-                            <Button type="submit" className="w-full bg-primary text-white" disabled={creatingUser}>
-                                {creatingUser ? <Loader2 className="animate-spin h-4 w-4" /> : <Plus className="h-4 w-4 mr-2" />}
-                                Create User
-                            </Button>
-                        </form>
                     </CardContent>
                 </Card>
             </div>
