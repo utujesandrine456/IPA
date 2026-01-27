@@ -79,16 +79,17 @@ model User {
 }
 
 model Notification {
-  id        Int      @id @default(autoincrement())
-  userId    Int
+  id        Int       @id @default(autoincrement())
+  userId    Int?
+  targetRole UserRole?
   title     String
   message   String
-  type      String   @default("INFO") // INFO, SUCCESS, WARNING, ERROR, TASK, MESSAGE
+  type      String    @default("INFO") // INFO, SUCCESS, WARNING, ERROR, TASK, MESSAGE
   link      String?
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
 }

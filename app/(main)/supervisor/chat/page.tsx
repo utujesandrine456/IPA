@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -32,21 +33,70 @@ export default function SupervisorChatPage() {
     const [loading, setLoading] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Mock Supervisor ID. In a real app, get from auth context.
-    const currentSupervisorId = 1;
-    const currentSupervisorUserId = 1; // Used for message senderId
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+
+    // State to hold IDs after fetching
+    const [currentSupervisorId, setCurrentSupervisorId] = useState<number | null>(null);
+    const [currentSupervisorUserId, setCurrentSupervisorUserId] = useState<number | null>(null);
 
     useEffect(() => {
-        fetchStudents();
-    }, []);
+        // Try to extract from URL path first (e.g., /supervisor/2/chat -> 2)
+        const pathParts = pathname.split('/').filter(Boolean);
+        if (pathParts.length >= 2 && pathParts[0] === 'supervisor') {
+            const userId = Number(pathParts[1]);
+            if (!isNaN(userId)) {
+                // Fetch supervisor data to get supervisor ID
+                fetchSupervisorData(userId);
+                return;
+            }
+        }
+
+        // Fallback to search params
+        const supervisorIdParam = searchParams.get("supervisorId");
+        const userIdParam = searchParams.get("userId");
+
+        let sId = 1;
+        let uId = 1;
+
+        if (supervisorIdParam && !isNaN(Number(supervisorIdParam))) {
+            sId = Number(supervisorIdParam);
+        }
+        if (userIdParam && !isNaN(Number(userIdParam))) {
+            uId = Number(userIdParam);
+        }
+
+        setCurrentSupervisorId(sId);
+        setCurrentSupervisorUserId(uId);
+    }, [pathname, searchParams]);
+
+    const fetchSupervisorData = async (userId: number) => {
+        try {
+            const res = await fetch(`/api/user/current?userId=${userId}`);
+            const data = await res.json();
+
+            if (data.user && data.user.supervisorProfile) {
+                setCurrentSupervisorId(data.user.supervisorProfile.id);
+                setCurrentSupervisorUserId(data.user.id);
+            }
+        } catch (error) {
+            console.error("Error fetching supervisor data:", error);
+        }
+    };
 
     useEffect(() => {
-        if (selectedStudent) {
+        if (currentSupervisorId) {
+            fetchStudents();
+        }
+    }, [currentSupervisorId]);
+
+    useEffect(() => {
+        if (selectedStudent && currentSupervisorUserId) {
             fetchMessages();
             const interval = setInterval(fetchMessages, 5000);
             return () => clearInterval(interval);
         }
-    }, [selectedStudent]);
+    }, [selectedStudent, currentSupervisorUserId]);
 
     useEffect(() => {
         scrollToBottom();
@@ -57,6 +107,7 @@ export default function SupervisorChatPage() {
     };
 
     const fetchStudents = async () => {
+        if (!currentSupervisorId) return;
         try {
             const res = await fetch(`/api/students?supervisorId=${currentSupervisorId}`);
             const data = await res.json();
@@ -69,7 +120,7 @@ export default function SupervisorChatPage() {
     };
 
     const fetchMessages = async () => {
-        if (!selectedStudent) return;
+        if (!selectedStudent || !currentSupervisorUserId) return;
         try {
             const res = await fetch(`/api/chat?userId=${currentSupervisorUserId}&otherUserId=${selectedStudent.user.id}`);
             const data = await res.json();
@@ -126,8 +177,8 @@ export default function SupervisorChatPage() {
                                 key={student.id}
                                 onClick={() => setSelectedStudent(student)}
                                 className={`w-full text-left p-3 rounded-xl flex items-center gap-3 transition-colors ${selectedStudent?.id === student.id
-                                        ? "bg-primary/10 border-primary/20"
-                                        : "hover:bg-neutral/5 border border-transparent"
+                                    ? "bg-primary/10 border-primary/20"
+                                    : "hover:bg-neutral/5 border border-transparent"
                                     }`}
                             >
                                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">

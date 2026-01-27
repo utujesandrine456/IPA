@@ -12,11 +12,13 @@ export async function GET(request: NextRequest) {
                 createdAt: 'desc',
             },
         });
+        
         return NextResponse.json({ users });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+
 
 export async function DELETE(request: NextRequest) {
     try {

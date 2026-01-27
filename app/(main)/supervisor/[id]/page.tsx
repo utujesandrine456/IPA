@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -24,7 +24,7 @@ interface Student {
   id: number;
   name: string;
   supervisorId: number;
-  user?: { name: string; email: string };
+  user?: { id: number; name: string; email: string };
   phone?: string;
   address?: string;
   companyName?: string;
@@ -50,6 +50,14 @@ interface NewTask {
   dueDate: string;
 }
 
+interface Message {
+  id: number;
+  content: string;
+  senderId: number;
+  createdAt: string;
+  sender: { name: string };
+}
+
 // ----- Component -----
 export default function SupervisorDashboard() {
   const [activeTab, setActiveTab] = useState<"students" | "tasks" | "ratings" | "attendance" | "chat">("students");
@@ -61,6 +69,13 @@ export default function SupervisorDashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Chat State
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [chatNewMessage, setChatNewMessage] = useState("");
+  const [selectedStudentForChat, setSelectedStudentForChat] = useState<Student | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
   const [newTask, setNewTask] = useState<NewTask>({
     studentId: "",
     title: "",
@@ -82,6 +97,30 @@ export default function SupervisorDashboard() {
   useEffect(() => {
     if (supervisorId && activeTab === "tasks") fetchTasks();
   }, [activeTab, supervisorId]);
+
+  // Chat Effects
+  useEffect(() => {
+    if (activeTab === 'chat' && students.length > 0 && !selectedStudentForChat) {
+      setSelectedStudentForChat(students[0]);
+    }
+  }, [activeTab, students]);
+
+  useEffect(() => {
+    if (selectedStudentForChat && activeTab === 'chat') {
+      fetchChatMessages();
+      const interval = setInterval(fetchChatMessages, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [selectedStudentForChat, activeTab]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatMessages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
 
   const fetchStudents = async () => {
     try {
@@ -105,6 +144,98 @@ export default function SupervisorDashboard() {
       setLoading(false);
     }
   };
+
+  const fetchChatMessages = async () => {
+    if (!selectedStudentForChat || !supervisorId) return;
+    // supervisorId parameter is the Supervisor ID (table supervisors), but for chat we need User ID.
+    // Assuming supervisor's User ID is fetched or available. 
+    // Ideally we should have user context. For now, let's assume we can rely on the API finding the user via supervisorId if we pass it, 
+    // or we fetch the supervisor's details to get userId.
+    // However, the previous chat implementation used 'userId' and 'otherUserId'.
+    // Let's first fetch the supervisor's user ID if we don't have it.
+    // Actually, let's just use the api/chat endpoint which expects UserIDs.
+
+    // We need the supervisor's USER ID. 
+    // Let's assume we can pass the Supervisor ID to a new endpoint or update the chat endpoint? 
+    // Or we can just include the supervisor's user id in the page params or auth session.
+    // For this refactor, I'll fetch the supervisor details first if needed, or better, 
+    // let's Assume the 'supervisorId' param is the ID from the 'supervisors' table.
+    // We can fetch the supervisor's userId using the /api/supervisors endpoint if it exists, or just hack it for now if we don't have that endpoint ready.
+    // Wait, simpler: The chat API already supports finding messages. 
+    // Let's Use a helper to get the current user's ID. 
+
+    // ... For now, let's assume we have a way to get the Current User ID (Supervisor's User ID).
+    // Since we don't have a direct "getMe" here, I'll assume we can get it from the 'students' fetch which might return supervisor info?
+    // No, let's fetch the supervisor details once on mount.
+  };
+
+  // Helper to fetch supervisor user ID
+  const [currentSupervisorUserId, setCurrentSupervisorUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const getSupervisorUser = async () => {
+      if (!supervisorId) return;
+      // We can't easily get the User ID from just Supervisor ID without an endpoint.
+      // However, we can use the 'students' list which contains 'supervisor' info if we modify the API.
+      // Alternatively, we can assume the user is logged in and we can get it from localStorage (as seen in TopBar).
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        setCurrentSupervisorUserId(parsed.id);
+      }
+    };
+    getSupervisorUser();
+  }, [supervisorId]);
+
+  const handleSendChatMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatNewMessage.trim() || !selectedStudentForChat || !currentSupervisorUserId) return;
+
+    try {
+      await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderId: currentSupervisorUserId,
+          receiverId: selectedStudentForChat.user?.id, // We need student's User ID
+          content: chatNewMessage
+        })
+      });
+      setChatNewMessage("");
+      fetchChatMessages();
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  // Actual fetch implementation using the state
+  const fetchChatMessagesReal = async () => {
+    if (!selectedStudentForChat || !currentSupervisorUserId) return;
+    try {
+      // We need the student's USER ID. 
+      // The 'students' array items have 'user' object with 'id'.
+      // Let's ensure our 'Student' interface and fetch logic includes this.
+      // The previous fetchStudents calls /api/students. Let's verify it returns 'user' relation.
+      // Yes, the Interface says 'user?: { name: string; email: string }'. It might need 'id' too.
+      // I will update the 'Student' interface above to include 'id' in 'user'.
+
+      const res = await fetch(`/api/chat?userId=${currentSupervisorUserId}&otherUserId=${selectedStudentForChat.user?.id || 0}`); // Need User ID here
+      const data = await res.json();
+      setChatMessages(data.messages || []);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Override the previous empty fetchChatMessages
+  useEffect(() => {
+    if (selectedStudentForChat && activeTab === 'chat' && currentSupervisorUserId) {
+      fetchChatMessagesReal();
+      const interval = setInterval(fetchChatMessagesReal, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [selectedStudentForChat, activeTab, currentSupervisorUserId]);
+
 
   // ----- Task Handlers -----
   const handleApproveTask = async (taskId: string) => {
@@ -178,7 +309,7 @@ export default function SupervisorDashboard() {
     }
   };
 
-  
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-neutral/10 pb-6">
@@ -190,7 +321,7 @@ export default function SupervisorDashboard() {
             { id: "attendance", label: "Attendance", icon: Calendar },
             { id: "chat", label: "Team Chat", icon: MessageSquare },
           ].map((tab) => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={cn( "flex items-center gap-2 pb-2 text-sm font-medium transition-colors relative whitespace-nowrap", activeTab === tab.id ? "text-primary" : "text-primary/60 hover:text-primary" )}>
+            <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={cn("flex items-center gap-2 pb-2 text-sm font-medium transition-colors relative whitespace-nowrap", activeTab === tab.id ? "text-primary" : "text-primary/60 hover:text-primary")}>
               <tab.icon className="h-4 w-4" />
               {tab.label}
             </button>
@@ -209,14 +340,14 @@ export default function SupervisorDashboard() {
           >
             {students.map((student) => {
               const studentTasks = tasks.filter((t) => t.studentId === student.id);
-              const totalTasks = studentTasks.length || 1;
+              const totalTasks = studentTasks.length || 0;
               const completed = studentTasks.filter((t) => t.status === "COMPLETED").length;
-              const progress = Math.round((completed / totalTasks) * 100);
+              const progress = totalTasks > 0 ? Math.round((completed / totalTasks) * 100) : 0;
               const initials = student.user?.name
                 ? student.user.name.split(" ").map((n) => n[0]).join("")
                 : "ST";
               const status =
-                progress >= 80 ? "Excellent" : progress < 50 ? "Behind" : "On Track";
+                progress >= 80 ? "Excellent" : progress < 50 && totalTasks > 0 ? "Behind" : "On Track";
 
               return (
                 <Card key={student.id} className="hover:border-primary/50 transition-colors group">
@@ -249,10 +380,10 @@ export default function SupervisorDashboard() {
                           className={cn(
                             "h-2.5 w-2.5 rounded-full",
                             status === "Excellent"
-                              ? "bg-primary"
+                              ? "bg-green-500"
                               : status === "Behind"
-                                ? "bg-primary/50"
-                                : "bg-primary/70"
+                                ? "bg-red-500"
+                                : "bg-yellow-500"
                           )}
                         ></span>
                       </span>
@@ -261,9 +392,24 @@ export default function SupervisorDashboard() {
                     <h3 className="font-bold text-lg text-primary mb-1">
                       {student.user?.name || student.name}
                     </h3>
-                    <p className="text-sm text-primary mb-4">{progress}% Tasks Completed</p>
+                    <p className="text-sm text-primary mb-1">{progress}% Tasks Completed</p>
+                    <p className="text-xs text-muted-foreground mb-4">{completed}/{totalTasks} tasks done</p>
 
-                    <div className="flex gap-2 w-full mb-2">
+                    <div className="grid grid-cols-2 gap-2 w-full">
+                      <div className="col-span-2">
+                        <Button
+                          size="sm"
+                          className="w-full text-xs"
+                          onClick={() => {
+                            setSelectedStudentForChat(student);
+                            setActiveTab('chat');
+                          }}
+                        >
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          Message
+                        </Button>
+                      </div>
+
                       <Button
                         variant="outline"
                         size="sm"
@@ -273,10 +419,8 @@ export default function SupervisorDashboard() {
                           setShowProfileModal(true);
                         }}
                       >
-                        View Profile
+                        Profile
                       </Button>
-                    </div>
-                    <div className="flex gap-2 w-full">
                       <Button
                         variant="secondary"
                         size="sm"
@@ -290,7 +434,8 @@ export default function SupervisorDashboard() {
                       </Button>
                       <Button
                         size="sm"
-                        className="flex-1 text-xs"
+                        className="flex-1 text-xs col-span-2"
+                        variant="outline"
                         onClick={() => {
                           setNewTask({ ...newTask, studentId: student.id });
                           setShowTaskModal(true);
@@ -388,6 +533,109 @@ export default function SupervisorDashboard() {
                   </div>
                 )}
               </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {activeTab === "chat" && (
+          <motion.div
+            key="chat"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex h-[calc(100vh-200px)] gap-6"
+          >
+            <Card className="w-1/3 flex flex-col overflow-hidden">
+              <div className="p-4 border-b border-neutral/10">
+                <h2 className="font-bold text-primary mb-2">My Students</h2>
+                <input
+                  type="text"
+                  placeholder="Search students..."
+                  className="w-full px-3 py-2 text-sm border border-neutral/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div className="flex-1 overflow-y-auto p-2 space-y-2">
+                {students.map((student) => (
+                  <button
+                    key={student.id}
+                    onClick={() => setSelectedStudentForChat(student)}
+                    className={cn(
+                      "w-full text-left p-3 rounded-xl flex items-center gap-3 transition-colors",
+                      selectedStudentForChat?.id === student.id
+                        ? "bg-primary/10 border-primary/20"
+                        : "hover:bg-neutral/5 border border-transparent"
+                    )}
+                  >
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-primary">
+                        {student.user?.name ? student.user.name.substring(0, 2).toUpperCase() : "ST"}
+                      </span>
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="font-medium text-sm text-primary truncate">{student.user?.name}</p>
+                      <p className="text-xs text-primary/60 truncate">{student.companyName || "No Company"}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </Card>
+
+            <Card className="flex-1 flex flex-col overflow-hidden">
+              {selectedStudentForChat ? (
+                <>
+                  <div className="p-4 border-b border-neutral/10 bg-primary/5 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-xs font-bold text-primary">
+                        {selectedStudentForChat.user?.name ? selectedStudentForChat.user.name.substring(0, 2).toUpperCase() : "ST"}
+                      </span>
+                    </div>
+                    <div>
+                      <h2 className="font-semibold text-primary">{selectedStudentForChat.user?.name}</h2>
+                      <p className="text-xs text-primary/60">{selectedStudentForChat.companyName}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral/5">
+                    {chatMessages.length === 0 ? (
+                      <div className="text-center text-muted-foreground py-10">No messages yet.</div>
+                    ) : (
+                      chatMessages.map((msg) => {
+                        const isMe = msg.senderId === currentSupervisorUserId;
+                        return (
+                          <div key={msg.id} className={cn("flex", isMe ? "justify-end" : "justify-start")}>
+                            <div className={cn(
+                              "max-w-[70%] rounded-2xl p-3 text-sm",
+                              isMe ? "bg-primary text-white rounded-tr-none" : "bg-white border border-neutral/10 text-primary rounded-tl-none"
+                            )}>
+                              <p>{msg.content}</p>
+                              <p className={cn("text-[10px] mt-1", isMe ? "text-white/70" : "text-primary/40")}>
+                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+
+                  <div className="p-4 bg-white border-t border-neutral/10">
+                    <form onSubmit={handleSendChatMessage} className="flex gap-2">
+                      <Input
+                        value={chatNewMessage}
+                        onChange={(e) => setChatNewMessage(e.target.value)}
+                        placeholder="Type a message..."
+                        className="flex-1"
+                      />
+                      <Button type="submit" disabled={!chatNewMessage.trim()} className="bg-primary hover:bg-primary/90 text-white">
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </form>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">Select a student to chat</div>
+              )}
             </Card>
           </motion.div>
         )}

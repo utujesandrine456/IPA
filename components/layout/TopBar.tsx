@@ -6,28 +6,40 @@ interface User {
     id: number;
     name: string;
     role: string;
+    email: string;
 }
 
 interface TopBarProps {
     role: "admin" | "supervisor" | "student";
+    userId: number | null;
 }
 
-export function TopBar({ role }: TopBarProps) {
+export function TopBar({ role, userId }: TopBarProps) {
     const [user, setUser] = useState<User | null>(null);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            try {
-                const parsed = JSON.parse(storedUser);
-                setUser(parsed);
-                fetchUnreadCount(parsed.id);
-            } catch (e) {
-                console.error("Failed to parse user from localStorage", e);
-            }
+        if (userId) {
+            fetchCurrentUser(userId);
         }
-    }, []);
+    }, [userId]);
+
+    const fetchCurrentUser = async (id: number) => {
+        try {
+            const res = await fetch(`/api/user/current?userId=${id}`);
+            const data = await res.json();
+
+            if (data.user) {
+                setUser(data.user);
+                fetchUnreadCount(data.user.id);
+            }
+        } catch (error) {
+            console.error("Error fetching current user:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchUnreadCount = async (userId: number) => {
         try {
@@ -42,16 +54,13 @@ export function TopBar({ role }: TopBarProps) {
 
     const getRoleTitle = (role: string) => {
         switch (role) {
-            case "admin": return "Industrial Coordinator";
-            case "supervisor": return "Academic Supervisor";
-            case "student": return "IAP Student";
+            case "admin": return "Coordinator";
+            case "supervisor": return "Supervisor";
+            case "student": return "Student";
             default: return "User";
         }
     };
 
-    const initials = user?.name
-        ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
-        : "AU";
 
     return (
         <header className="fixed top-0 z-30 ml-64 flex h-16 w-[calc(100%-16rem)] items-center justify-between border-b border-neutral/10 bg-white/80 px-6 backdrop-blur-sm">
@@ -60,7 +69,7 @@ export function TopBar({ role }: TopBarProps) {
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral" />
                     <input
                         type="text"
-                        placeholder="Search students, logs, or companies..."
+                        placeholder="Search..."
                         className="h-10 w-full rounded-full border border-neutral/20 bg-neutral/5 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                     />
                 </div>
@@ -76,11 +85,10 @@ export function TopBar({ role }: TopBarProps) {
 
                 <div className="flex items-center gap-3 border-l border-neutral/20 pl-4">
                     <div className="text-right hidden sm:block">
-                        <p className="text-sm font-medium text-neutral-dark">{user?.name || "Premium User"}</p>
+                        <p className="text-sm font-medium text-neutral-dark">
+                            {user?.name ? user.name.split(" ")[0] : getRoleTitle(role)}
+                        </p>
                         <p className="text-xs text-neutral">{getRoleTitle(role)}</p>
-                    </div>
-                    <div className="h-10 w-10 overflow-hidden rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold">
-                        {initials}
                     </div>
                 </div>
             </div>

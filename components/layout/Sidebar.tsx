@@ -14,28 +14,47 @@ import { useEffect, useState } from "react";
 
 interface SidebarProps {
     role: "admin" | "supervisor" | "student";
+    userId: number | null;
 }
 
 interface User {
     id: number;
     name: string;
     role: string;
+    email: string;
+    studentProfile?: {
+        id: number;
+    };
+    supervisorProfile?: {
+        id: number;
+    };
 }
 
-export function Sidebar({ role }: SidebarProps) {
+export function Sidebar({ role, userId: propUserId }: SidebarProps) {
     const pathname = usePathname();
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch (e) {
-                console.error("Failed to parse user", e);
-            }
+        if (propUserId) {
+            fetchCurrentUser(propUserId);
         }
-    }, []);
+    }, [propUserId]);
+
+    const fetchCurrentUser = async (id: number) => {
+        try {
+            const res = await fetch(`/api/user/current?userId=${id}`);
+            const data = await res.json();
+
+            if (data.user) {
+                setUser(data.user);
+            }
+        } catch (error) {
+            console.error("Error fetching current user:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const userId = user?.id;
 
@@ -47,13 +66,13 @@ export function Sidebar({ role }: SidebarProps) {
             { href: "/admin/visits", label: "LO Visits", icon: MapPin },
         ],
         supervisor: [
-            { href: userId ? `/supervisor/${userId}?supervisorId=${userId}` : "/supervisor/dashboard", label: "Dashboard", icon: LayoutDashboard },
+            { href: `/supervisor/${userId}`, label: "Dashboard", icon: LayoutDashboard },
             { href: "/supervisor/students", label: "My Students", icon: Users },
             { href: "/supervisor/chat", label: "Chats", icon: Users },
             { href: "/supervisor/ratings", label: "Ratings", icon: FileText },
         ],
         student: [
-            { href: userId ? `/student/${userId}` : "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
+            { href: `/student/${userId}`, label: "Dashboard", icon: LayoutDashboard },
             { href: "/student/logbook", label: "Logbook", icon: FileText },
             { href: "/student/chat", label: "Chats", icon: Users },
         ],

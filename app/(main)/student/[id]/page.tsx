@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { motion, AnimatePresence } from "framer-motion";
-import {Clock, ChevronDown, ChevronUp, CheckCircle2, Circle, Upload, X, Users, Mail, Phone } from "lucide-react";
+import { Clock, ChevronDown, ChevronUp, CheckCircle2, Circle, Upload, X, Users, Mail, Phone, MessageSquare } from "lucide-react";
 
 
 interface Task {
@@ -177,6 +177,15 @@ export default function StudentDashboard() {
                         <p className="text-primary">Ready to log your progress for today?</p>
                     </div>
                     <div className="flex items-center gap-4">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.location.href = `/student/chat?studentId=${studentId}`}
+                            className="text-primary border-primary/20 hover:bg-primary/5 gap-2"
+                        >
+                            <MessageSquare className="h-4 w-4" />
+                            Chat with Supervisor
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => setShowProfileModal(true)} className="text-white bg-primary p-3">Update Profile</Button>
                         <div className="flex items-center gap-2">
                             <input
@@ -190,7 +199,7 @@ export default function StudentDashboard() {
                 </div>
 
                 <div className="flex-1 overflow-x-auto">
-                    <div className="flex gap-6 h-full min-w-[1000px]">
+                    <div className="flex gap-6 h-full min-w-[900px]">
                         <div className="flex-1 flex flex-col gap-4 bg-neutral/5 p-4 rounded-xl border border-neutral/10">
                             <div className="flex items-center justify-between mb-2">
                                 <h3 className="font-semibold text-primary flex items-center gap-2">
@@ -412,54 +421,6 @@ export default function StudentDashboard() {
                 </div>
             </div>
 
-            <div className="w-80 flex flex-col bg-white rounded-xl border border-neutral/10 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-neutral/10">
-                    <h3 className="font-semibold text-neutral-dark flex items-center gap-2">
-                        <Users className="h-5 w-5 text-primary" />
-                        My Supervisor
-                    </h3>
-                </div>
-
-                <div className="flex-1 p-6 space-y-6">
-                    {supervisorInfo ? (
-                        <>
-                            <div className="text-center">
-                                <div className="h-20 w-20 rounded-full bg-primary/10 mx-auto flex items-center justify-center text-2xl font-bold text-primary mb-3">
-                                    {supervisorInfo.name.split(" ").map(n => n[0]).join("")}
-                                </div>
-                                <h4 className="font-bold text-lg text-primary">{supervisorInfo.name}</h4>
-                                <p className="text-sm text-primary/60">Academic Supervisor</p>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3 text-sm text-primary">
-                                    <Mail className="h-4 w-4 opacity-50" />
-                                    <span>{supervisorInfo.email}</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-primary">
-                                    <Phone className="h-4 w-4 opacity-50" />
-                                    <span>{supervisorInfo.phone}</span>
-                                </div>
-                            </div>
-
-                            <div className="pt-4 border-t border-neutral/10">
-                                <p className="text-xs text-primary/60 text-center mb-4">
-                                    Contact your supervisor for task clarifications or urgent issues.
-                                </p>
-                                <Button className="w-full bg-primary text-white hover:bg-primary/90">
-                                    <Mail className="h-4 w-4 mr-2" />
-                                    Send Email
-                                </Button>
-                            </div>
-                        </>
-                    ) : (
-                        <div className="text-center py-8 text-primary/60">
-                            <Users className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                            <p>No supervisor assigned yet.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
 
             <AnimatePresence>
                 {showProfileModal && (

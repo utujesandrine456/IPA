@@ -108,6 +108,18 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    if (task.student?.user?.id) {
+      await prisma.notification.create({
+        data: {
+          userId: task.student.user.id,
+          title: 'New Task Assigned',
+          message: `You have been assigned a new task: "${title}"`,
+          type: 'TASK',
+          link: `/student/${studentIdNumber}`
+        }
+      });
+    }
+
     return NextResponse.json(
       { message: 'Task created successfully', task },
       { status: 201 }
@@ -148,6 +160,11 @@ export async function PATCH(request: NextRequest) {
       updateData.completedAt = new Date();
     }
 
+    // Add submission timestamp if status changes to IN_PROGRESS (Review Submitted)
+    if (status === 'IN_PROGRESS') {
+      updateData.submittedAt = new Date();
+    }
+
     const task = await prisma.task.update({
       where: { id: taskIdNumber },
       data: updateData,
@@ -155,11 +172,50 @@ export async function PATCH(request: NextRequest) {
         student: {
           include: {
             user: true,
+            supervisor: {
+              include: {
+                user: true
+              }
+            }
           },
         },
         comments: true,
       },
     });
+
+    // Create Notification
+    if (status === 'IN_PROGRESS' && task.student?.supervisor?.user?.id) {
+      // Notify Supervisor that student submitted work
+      await prisma.notification.create({
+        data: {
+          userId: task.student.supervisor.user.id,
+          title: 'Task Submission',
+          message: `${task.student.user.name} has submitted work for "${task.title}"`,
+          type: 'TASK',
+          link: `/supervisor/${task.student.supervisor.id}?tab=tasks`
+        }
+      });
+    } else if ((status === 'COMPLETED' || status === 'PENDING') && task.student?.user?.id) { // PENDING here likely means "Request Changes" (Rejected) if it was previously IN_PROGRESS, or just reset. 
+      // For "Request Changes", the supervisor usually keeps it PENDING or sends it back to PENDING.
+      // Let's assume PENDING coming from PATCH means "Request Changes" if we want to notify. 
+      // However, the dashboard logic for "Reject" sets status to "PENDING".
+
+      const notifType = status === 'COMPLETED' ? 'SUCCESS' : 'WARNING';
+      const notifTitle = status === 'COMPLETED' ? 'Task Approved' : 'Task Revision Requested';
+      const notifMessage = status === 'COMPLETED'
+        ? `Your work for "${task.title}" has been approved!`
+        : `Your work for "${task.title}" needs revision.`;
+
+      await prisma.notification.create({
+        data: {
+          userId: task.student.user.id,
+          title: notifTitle,
+          message: notifMessage,
+          type: notifType,
+          link: `/student/${task.student.id}` // Link to student dashboard
+        }
+      });
+    }
 
     if (rating || comment) {
       await prisma.comment.create({

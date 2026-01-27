@@ -25,6 +25,11 @@ export async function GET(request: NextRequest) {
               email: true,
             },
           },
+          supervisor: {
+            include: {
+              user: true
+            }
+          }
         },
       });
 
