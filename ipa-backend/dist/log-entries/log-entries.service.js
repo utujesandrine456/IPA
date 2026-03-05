@@ -12,9 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LogEntriesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const weekly_logs_service_1 = require("../weekly-logs/weekly-logs.service");
 let LogEntriesService = class LogEntriesService {
-    constructor(prisma) {
+    constructor(prisma, weeklyLogsService) {
         this.prisma = prisma;
+        this.weeklyLogsService = weeklyLogsService;
     }
     async findByStudent(studentId) {
         if (!studentId)
@@ -30,14 +32,29 @@ let LogEntriesService = class LogEntriesService {
         if (!studentId || !data.content) {
             throw new common_1.BadRequestException('studentId and content are required');
         }
+        const logDate = data.date ? new Date(data.date) : new Date();
+        // Ensure we have a weekly log linked
+        let weeklyLogId = data.weeklyLogId;
+        if (!weeklyLogId) {
+            const week = await this.weeklyLogsService.findOrCreateWeek(studentId, logDate);
+            weeklyLogId = week.id;
+        }
         const log = await this.prisma.logEntry.create({
             data: {
                 studentId,
                 content: data.content,
-                date: new Date(),
+                date: logDate,
+                mood: data.mood,
+                weeklyLogId: weeklyLogId,
             },
         });
         return { message: 'Log entry created', log };
+    }
+    async update(id, data) {
+        return this.prisma.logEntry.update({
+            where: { id },
+            data,
+        });
     }
     async delete(id) {
         return this.prisma.logEntry.delete({ where: { id } });
@@ -46,5 +63,6 @@ let LogEntriesService = class LogEntriesService {
 exports.LogEntriesService = LogEntriesService;
 exports.LogEntriesService = LogEntriesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        weekly_logs_service_1.WeeklyLogsService])
 ], LogEntriesService);

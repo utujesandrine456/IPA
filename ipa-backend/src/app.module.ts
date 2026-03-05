@@ -7,7 +7,8 @@ import { SupervisorsModule } from './supervisors/supervisors.module';
 import { TasksModule } from './tasks/tasks.module';
 import { AdminModule } from './admin/admin.module';
 import { NotificationsModule } from './notifications/notifications.module';
-import { LogEntriesModule } from './log-entries/log-entries.module';import { WeeklyLogsModule } from './weekly-logs/weekly-logs.module';
+import { LogEntriesModule } from './log-entries/log-entries.module';
+import { WeeklyLogsModule } from './weekly-logs/weekly-logs.module';
 import { IapReportsModule } from './iap-reports/iap-reports.module';
 
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -29,6 +30,7 @@ import { APP_GUARD } from '@nestjs/core';
       ttl: 60000,
       limit: 10,
     }]),
+
   ],
   controllers: [AppController],
   providers: [

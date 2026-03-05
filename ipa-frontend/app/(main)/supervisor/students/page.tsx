@@ -50,17 +50,28 @@ export default function SupervisorStudentsPage() {
     const [assessmentComment, setAssessmentComment] = useState("");
     const [assessmentRating, setAssessmentRating] = useState<number>(0);
 
-    const supervisorId = "1"; // Mock Supervisor ID
+    const [supervisorId, setSupervisorId] = useState<number | null>(null);
 
     useEffect(() => {
-        // In a real app, this would filter by the logged-in supervisor's ID
-        apiFetch("/students")
-            .then(data => {
-                setStudents(data.students || []); // normalize if needed (admin page did normalization)
-                setLoading(false);
-            })
-            .catch(err => console.error(err));
-    }, []);
+        const storedUser = typeof window !== 'undefined' ? localStorage.getItem("user") : null;
+        if (storedUser) {
+            try {
+                const user = JSON.parse(storedUser);
+                const supId = user.supervisorId || user.supervisorProfile?.id;
+                if (supId) {
+                    setSupervisorId(supId);
+                    apiFetch(`/students?supervisorId=${supId}`)
+                        .then(data => {
+                            setStudents(data.students || []);
+                            setLoading(false);
+                        })
+                        .catch(err => console.error(err));
+                }
+            } catch (e) {
+                console.error("Error parsing user from localStorage", e);
+            }
+        }
+    }, [activeTab]);
 
     const handleViewStudent = async (student: Student) => {
         setSelectedStudent(student);
@@ -71,7 +82,7 @@ export default function SupervisorStudentsPage() {
 
     const fetchTasks = async (studentId: number) => {
         try {
-            const data = await apiFetch(`/logbook?studentId=${studentId}`);
+            const data = await apiFetch(`/tasks?studentId=${studentId}`);
             setTasks(data.tasks || []);
         } catch (err) { console.error(err); }
     };
@@ -88,7 +99,7 @@ export default function SupervisorStudentsPage() {
         if (!selectedStudent) return;
         setAssigning(true);
         try {
-            await apiFetch("/api/logbook", {
+            await apiFetch("/tasks", {
                 method: "POST",
                 body: JSON.stringify({
                     studentId: selectedStudent.id,
@@ -107,12 +118,13 @@ export default function SupervisorStudentsPage() {
     };
 
     const handleAssessTask = async (taskId: number, status: string) => {
+        if (!supervisorId) return;
         try {
             const body: any = { taskId, status, supervisorId };
             if (assessmentComment) body.feedback = assessmentComment;
             if (status === 'APPROVED' && assessmentRating > 0) body.rating = assessmentRating;
 
-            await apiFetch("/api/logbook", {
+            await apiFetch("/tasks", {
                 method: "PATCH",
                 body: JSON.stringify(body)
             });

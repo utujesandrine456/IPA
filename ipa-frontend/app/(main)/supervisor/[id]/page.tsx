@@ -125,8 +125,8 @@ export default function SupervisorDashboard() {
 
   const fetchStudents = async () => {
     try {
-      const data = await apiFetch("/students");
-      setStudents((data.students || []).filter((s: any) => s.supervisorId === supervisorId));
+      const data = await apiFetch(`/students?supervisorId=${supervisorId}`);
+      setStudents(data.students || []);
     } catch (error) {
       console.error("Error fetching students:", error);
     }

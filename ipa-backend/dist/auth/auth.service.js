@@ -97,6 +97,10 @@ let AuthService = class AuthService {
         };
         if (user.role === 'STUDENT' && user.studentProfile) {
             userResponse.profileCompleted = user.studentProfile.profileCompleted;
+            userResponse.studentId = user.studentProfile.id;
+        }
+        else if (user.role === 'SUPERVISOR' && user.supervisorProfile) {
+            userResponse.supervisorId = user.supervisorProfile.id;
         }
         return {
             message: 'Login successful',

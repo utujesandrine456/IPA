@@ -102,6 +102,11 @@ export class AuthService {
 
     if (user.role === 'STUDENT' && user.studentProfile) {
       userResponse.profileCompleted = user.studentProfile.profileCompleted;
+<<<<<<< HEAD
+      userResponse.studentId = user.studentProfile.id;
+    } else if (user.role === 'SUPERVISOR' && user.supervisorProfile) {
+      userResponse.supervisorId = user.supervisorProfile.id;
+=======
       userResponse.studentProfile = {
         id: user.studentProfile.id,
         profileCompleted: user.studentProfile.profileCompleted,
@@ -113,6 +118,7 @@ export class AuthService {
       userResponse.supervisorProfile = {
         id: user.supervisorProfile.id,
       };
+>>>>>>> 2bbe396d2e25605d5973c961b75a8a4ea493b20b
     }
 
     return {

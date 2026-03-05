@@ -18,12 +18,24 @@ const admin_module_1 = require("./admin/admin.module");
 const notifications_module_1 = require("./notifications/notifications.module");
 const log_entries_module_1 = require("./log-entries/log-entries.module");
 const chat_module_1 = require("./chat/chat.module");
+const weekly_logs_module_1 = require("./weekly-logs/weekly-logs.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, auth_module_1.AuthModule, students_module_1.StudentsModule, supervisors_module_1.SupervisorsModule, tasks_module_1.TasksModule, admin_module_1.AdminModule, notifications_module_1.NotificationsModule, log_entries_module_1.LogEntriesModule, chat_module_1.ChatModule],
+        imports: [
+            prisma_module_1.PrismaModule,
+            auth_module_1.AuthModule,
+            students_module_1.StudentsModule,
+            supervisors_module_1.SupervisorsModule,
+            tasks_module_1.TasksModule,
+            admin_module_1.AdminModule,
+            notifications_module_1.NotificationsModule,
+            log_entries_module_1.LogEntriesModule,
+            weekly_logs_module_1.WeeklyLogsModule,
+            chat_module_1.ChatModule
+        ],
         controllers: [app_controller_1.AppController],
     })
 ], AppModule);
