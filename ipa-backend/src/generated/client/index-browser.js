@@ -140,11 +140,38 @@ exports.Prisma.StudentScalarFieldEnum = {
   companyAddress: 'companyAddress',
   companyPhone: 'companyPhone',
   companyEmail: 'companyEmail',
+  companyPOBox: 'companyPOBox',
   supervisorName: 'supervisorName',
+  supervisorDesignation: 'supervisorDesignation',
   supervisorEmail: 'supervisorEmail',
   internshipStart: 'internshipStart',
   internshipEnd: 'internshipEnd',
   supervisorId: 'supervisorId'
+};
+
+exports.Prisma.WeeklyLogScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  weekNumber: 'weekNumber',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  mondayTask: 'mondayTask',
+  mondayHours: 'mondayHours',
+  tuesdayTask: 'tuesdayTask',
+  tuesdayHours: 'tuesdayHours',
+  wednesdayTask: 'wednesdayTask',
+  wednesdayHours: 'wednesdayHours',
+  thursdayTask: 'thursdayTask',
+  thursdayHours: 'thursdayHours',
+  fridayTask: 'fridayTask',
+  fridayHours: 'fridayHours',
+  totalHours: 'totalHours',
+  generalStatement: 'generalStatement',
+  grade: 'grade',
+  supervisorSignature: 'supervisorSignature',
+  dateSigned: 'dateSigned',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.UserScalarFieldEnum = {
@@ -236,6 +263,19 @@ exports.Prisma.MessageScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.IapReportScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  loVisitCount: 'loVisitCount',
+  isUseful: 'isUseful',
+  improvedUnderstanding: 'improvedUnderstanding',
+  providedExperiences: 'providedExperiences',
+  programmeTypes: 'programmeTypes',
+  otherProgrammeDetails: 'otherProgrammeDetails',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -267,6 +307,7 @@ exports.TaskStatus = exports.$Enums.TaskStatus = {
 
 exports.Prisma.ModelName = {
   Student: 'Student',
+  WeeklyLog: 'WeeklyLog',
   User: 'User',
   Notification: 'Notification',
   Supervisor: 'Supervisor',
@@ -274,7 +315,8 @@ exports.Prisma.ModelName = {
   LogEntry: 'LogEntry',
   Comment: 'Comment',
   Rating: 'Rating',
-  Message: 'Message'
+  Message: 'Message',
+  IapReport: 'IapReport'
 };
 
 /**

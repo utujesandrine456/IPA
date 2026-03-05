@@ -10,6 +10,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+
 export async function sendProfileCompletionEmail(to: string, token: string) {
     const websiteUrl = process.env.WEBSITE_URL || "http://localhost:3000";
     const profileLink = `${websiteUrl}/complete-profile?token=${token}`;

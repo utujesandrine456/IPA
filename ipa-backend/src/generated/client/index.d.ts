@@ -19,6 +19,11 @@ export type PrismaPromise<T> = $Public.PrismaPromise<T>
  */
 export type Student = $Result.DefaultSelection<Prisma.$StudentPayload>
 /**
+ * Model WeeklyLog
+ * 
+ */
+export type WeeklyLog = $Result.DefaultSelection<Prisma.$WeeklyLogPayload>
+/**
  * Model User
  * 
  */
@@ -58,6 +63,11 @@ export type Rating = $Result.DefaultSelection<Prisma.$RatingPayload>
  * 
  */
 export type Message = $Result.DefaultSelection<Prisma.$MessagePayload>
+/**
+ * Model IapReport
+ * 
+ */
+export type IapReport = $Result.DefaultSelection<Prisma.$IapReportPayload>
 
 /**
  * Enums
@@ -222,6 +232,16 @@ export class PrismaClient<
   get student(): Prisma.StudentDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.weeklyLog`: Exposes CRUD operations for the **WeeklyLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more WeeklyLogs
+    * const weeklyLogs = await prisma.weeklyLog.findMany()
+    * ```
+    */
+  get weeklyLog(): Prisma.WeeklyLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.user`: Exposes CRUD operations for the **User** model.
     * Example usage:
     * ```ts
@@ -300,6 +320,16 @@ export class PrismaClient<
     * ```
     */
   get message(): Prisma.MessageDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.iapReport`: Exposes CRUD operations for the **IapReport** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more IapReports
+    * const iapReports = await prisma.iapReport.findMany()
+    * ```
+    */
+  get iapReport(): Prisma.IapReportDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -742,6 +772,7 @@ export namespace Prisma {
 
   export const ModelName: {
     Student: 'Student',
+    WeeklyLog: 'WeeklyLog',
     User: 'User',
     Notification: 'Notification',
     Supervisor: 'Supervisor',
@@ -749,7 +780,8 @@ export namespace Prisma {
     LogEntry: 'LogEntry',
     Comment: 'Comment',
     Rating: 'Rating',
-    Message: 'Message'
+    Message: 'Message',
+    IapReport: 'IapReport'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -768,7 +800,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "student" | "user" | "notification" | "supervisor" | "task" | "logEntry" | "comment" | "rating" | "message"
+      modelProps: "student" | "weeklyLog" | "user" | "notification" | "supervisor" | "task" | "logEntry" | "comment" | "rating" | "message" | "iapReport"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -843,6 +875,80 @@ export namespace Prisma {
           count: {
             args: Prisma.StudentCountArgs<ExtArgs>
             result: $Utils.Optional<StudentCountAggregateOutputType> | number
+          }
+        }
+      }
+      WeeklyLog: {
+        payload: Prisma.$WeeklyLogPayload<ExtArgs>
+        fields: Prisma.WeeklyLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.WeeklyLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.WeeklyLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload>
+          }
+          findFirst: {
+            args: Prisma.WeeklyLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.WeeklyLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload>
+          }
+          findMany: {
+            args: Prisma.WeeklyLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload>[]
+          }
+          create: {
+            args: Prisma.WeeklyLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload>
+          }
+          createMany: {
+            args: Prisma.WeeklyLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.WeeklyLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload>[]
+          }
+          delete: {
+            args: Prisma.WeeklyLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload>
+          }
+          update: {
+            args: Prisma.WeeklyLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.WeeklyLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.WeeklyLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.WeeklyLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.WeeklyLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WeeklyLogPayload>
+          }
+          aggregate: {
+            args: Prisma.WeeklyLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateWeeklyLog>
+          }
+          groupBy: {
+            args: Prisma.WeeklyLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<WeeklyLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.WeeklyLogCountArgs<ExtArgs>
+            result: $Utils.Optional<WeeklyLogCountAggregateOutputType> | number
           }
         }
       }
@@ -1438,6 +1544,80 @@ export namespace Prisma {
           }
         }
       }
+      IapReport: {
+        payload: Prisma.$IapReportPayload<ExtArgs>
+        fields: Prisma.IapReportFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.IapReportFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.IapReportFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload>
+          }
+          findFirst: {
+            args: Prisma.IapReportFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.IapReportFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload>
+          }
+          findMany: {
+            args: Prisma.IapReportFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload>[]
+          }
+          create: {
+            args: Prisma.IapReportCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload>
+          }
+          createMany: {
+            args: Prisma.IapReportCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.IapReportCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload>[]
+          }
+          delete: {
+            args: Prisma.IapReportDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload>
+          }
+          update: {
+            args: Prisma.IapReportUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload>
+          }
+          deleteMany: {
+            args: Prisma.IapReportDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.IapReportUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.IapReportUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload>[]
+          }
+          upsert: {
+            args: Prisma.IapReportUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IapReportPayload>
+          }
+          aggregate: {
+            args: Prisma.IapReportAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateIapReport>
+          }
+          groupBy: {
+            args: Prisma.IapReportGroupByArgs<ExtArgs>
+            result: $Utils.Optional<IapReportGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.IapReportCountArgs<ExtArgs>
+            result: $Utils.Optional<IapReportCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1535,6 +1715,7 @@ export namespace Prisma {
   }
   export type GlobalOmitConfig = {
     student?: StudentOmit
+    weeklyLog?: WeeklyLogOmit
     user?: UserOmit
     notification?: NotificationOmit
     supervisor?: SupervisorOmit
@@ -1543,6 +1724,7 @@ export namespace Prisma {
     comment?: CommentOmit
     rating?: RatingOmit
     message?: MessageOmit
+    iapReport?: IapReportOmit
   }
 
   /* Types for Logging */
@@ -1625,12 +1807,14 @@ export namespace Prisma {
   export type StudentCountOutputType = {
     tasks: number
     logEntries: number
+    weeklyLogs: number
     ratings: number
   }
 
   export type StudentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tasks?: boolean | StudentCountOutputTypeCountTasksArgs
     logEntries?: boolean | StudentCountOutputTypeCountLogEntriesArgs
+    weeklyLogs?: boolean | StudentCountOutputTypeCountWeeklyLogsArgs
     ratings?: boolean | StudentCountOutputTypeCountRatingsArgs
   }
 
@@ -1657,6 +1841,13 @@ export namespace Prisma {
    */
   export type StudentCountOutputTypeCountLogEntriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: LogEntryWhereInput
+  }
+
+  /**
+   * StudentCountOutputType without action
+   */
+  export type StudentCountOutputTypeCountWeeklyLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WeeklyLogWhereInput
   }
 
   /**
@@ -1834,7 +2025,9 @@ export namespace Prisma {
     companyAddress: string | null
     companyPhone: string | null
     companyEmail: string | null
+    companyPOBox: string | null
     supervisorName: string | null
+    supervisorDesignation: string | null
     supervisorEmail: string | null
     internshipStart: Date | null
     internshipEnd: Date | null
@@ -1860,7 +2053,9 @@ export namespace Prisma {
     companyAddress: string | null
     companyPhone: string | null
     companyEmail: string | null
+    companyPOBox: string | null
     supervisorName: string | null
+    supervisorDesignation: string | null
     supervisorEmail: string | null
     internshipStart: Date | null
     internshipEnd: Date | null
@@ -1886,7 +2081,9 @@ export namespace Prisma {
     companyAddress: number
     companyPhone: number
     companyEmail: number
+    companyPOBox: number
     supervisorName: number
+    supervisorDesignation: number
     supervisorEmail: number
     internshipStart: number
     internshipEnd: number
@@ -1926,7 +2123,9 @@ export namespace Prisma {
     companyAddress?: true
     companyPhone?: true
     companyEmail?: true
+    companyPOBox?: true
     supervisorName?: true
+    supervisorDesignation?: true
     supervisorEmail?: true
     internshipStart?: true
     internshipEnd?: true
@@ -1952,7 +2151,9 @@ export namespace Prisma {
     companyAddress?: true
     companyPhone?: true
     companyEmail?: true
+    companyPOBox?: true
     supervisorName?: true
+    supervisorDesignation?: true
     supervisorEmail?: true
     internshipStart?: true
     internshipEnd?: true
@@ -1978,7 +2179,9 @@ export namespace Prisma {
     companyAddress?: true
     companyPhone?: true
     companyEmail?: true
+    companyPOBox?: true
     supervisorName?: true
+    supervisorDesignation?: true
     supervisorEmail?: true
     internshipStart?: true
     internshipEnd?: true
@@ -2091,7 +2294,9 @@ export namespace Prisma {
     companyAddress: string | null
     companyPhone: string | null
     companyEmail: string | null
+    companyPOBox: string | null
     supervisorName: string | null
+    supervisorDesignation: string | null
     supervisorEmail: string | null
     internshipStart: Date | null
     internshipEnd: Date | null
@@ -2136,7 +2341,9 @@ export namespace Prisma {
     companyAddress?: boolean
     companyPhone?: boolean
     companyEmail?: boolean
+    companyPOBox?: boolean
     supervisorName?: boolean
+    supervisorDesignation?: boolean
     supervisorEmail?: boolean
     internshipStart?: boolean
     internshipEnd?: boolean
@@ -2145,6 +2352,8 @@ export namespace Prisma {
     supervisor?: boolean | SupervisorDefaultArgs<ExtArgs>
     tasks?: boolean | Student$tasksArgs<ExtArgs>
     logEntries?: boolean | Student$logEntriesArgs<ExtArgs>
+    weeklyLogs?: boolean | Student$weeklyLogsArgs<ExtArgs>
+    iapReport?: boolean | Student$iapReportArgs<ExtArgs>
     ratings?: boolean | Student$ratingsArgs<ExtArgs>
     _count?: boolean | StudentCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["student"]>
@@ -2168,7 +2377,9 @@ export namespace Prisma {
     companyAddress?: boolean
     companyPhone?: boolean
     companyEmail?: boolean
+    companyPOBox?: boolean
     supervisorName?: boolean
+    supervisorDesignation?: boolean
     supervisorEmail?: boolean
     internshipStart?: boolean
     internshipEnd?: boolean
@@ -2196,7 +2407,9 @@ export namespace Prisma {
     companyAddress?: boolean
     companyPhone?: boolean
     companyEmail?: boolean
+    companyPOBox?: boolean
     supervisorName?: boolean
+    supervisorDesignation?: boolean
     supervisorEmail?: boolean
     internshipStart?: boolean
     internshipEnd?: boolean
@@ -2224,19 +2437,23 @@ export namespace Prisma {
     companyAddress?: boolean
     companyPhone?: boolean
     companyEmail?: boolean
+    companyPOBox?: boolean
     supervisorName?: boolean
+    supervisorDesignation?: boolean
     supervisorEmail?: boolean
     internshipStart?: boolean
     internshipEnd?: boolean
     supervisorId?: boolean
   }
 
-  export type StudentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "studentNumber" | "fullName" | "sex" | "idOrPassport" | "year" | "phone" | "email" | "address" | "profileCompleted" | "profileToken" | "createdAt" | "updatedAt" | "companyName" | "companyAddress" | "companyPhone" | "companyEmail" | "supervisorName" | "supervisorEmail" | "internshipStart" | "internshipEnd" | "supervisorId", ExtArgs["result"]["student"]>
+  export type StudentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "studentNumber" | "fullName" | "sex" | "idOrPassport" | "year" | "phone" | "email" | "address" | "profileCompleted" | "profileToken" | "createdAt" | "updatedAt" | "companyName" | "companyAddress" | "companyPhone" | "companyEmail" | "companyPOBox" | "supervisorName" | "supervisorDesignation" | "supervisorEmail" | "internshipStart" | "internshipEnd" | "supervisorId", ExtArgs["result"]["student"]>
   export type StudentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     supervisor?: boolean | SupervisorDefaultArgs<ExtArgs>
     tasks?: boolean | Student$tasksArgs<ExtArgs>
     logEntries?: boolean | Student$logEntriesArgs<ExtArgs>
+    weeklyLogs?: boolean | Student$weeklyLogsArgs<ExtArgs>
+    iapReport?: boolean | Student$iapReportArgs<ExtArgs>
     ratings?: boolean | Student$ratingsArgs<ExtArgs>
     _count?: boolean | StudentCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -2256,6 +2473,8 @@ export namespace Prisma {
       supervisor: Prisma.$SupervisorPayload<ExtArgs>
       tasks: Prisma.$TaskPayload<ExtArgs>[]
       logEntries: Prisma.$LogEntryPayload<ExtArgs>[]
+      weeklyLogs: Prisma.$WeeklyLogPayload<ExtArgs>[]
+      iapReport: Prisma.$IapReportPayload<ExtArgs> | null
       ratings: Prisma.$RatingPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -2277,7 +2496,9 @@ export namespace Prisma {
       companyAddress: string | null
       companyPhone: string | null
       companyEmail: string | null
+      companyPOBox: string | null
       supervisorName: string | null
+      supervisorDesignation: string | null
       supervisorEmail: string | null
       internshipStart: Date | null
       internshipEnd: Date | null
@@ -2680,6 +2901,8 @@ export namespace Prisma {
     supervisor<T extends SupervisorDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SupervisorDefaultArgs<ExtArgs>>): Prisma__SupervisorClient<$Result.GetResult<Prisma.$SupervisorPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     tasks<T extends Student$tasksArgs<ExtArgs> = {}>(args?: Subset<T, Student$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     logEntries<T extends Student$logEntriesArgs<ExtArgs> = {}>(args?: Subset<T, Student$logEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LogEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    weeklyLogs<T extends Student$weeklyLogsArgs<ExtArgs> = {}>(args?: Subset<T, Student$weeklyLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    iapReport<T extends Student$iapReportArgs<ExtArgs> = {}>(args?: Subset<T, Student$iapReportArgs<ExtArgs>>): Prisma__IapReportClient<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     ratings<T extends Student$ratingsArgs<ExtArgs> = {}>(args?: Subset<T, Student$ratingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RatingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2728,7 +2951,9 @@ export namespace Prisma {
     readonly companyAddress: FieldRef<"Student", 'String'>
     readonly companyPhone: FieldRef<"Student", 'String'>
     readonly companyEmail: FieldRef<"Student", 'String'>
+    readonly companyPOBox: FieldRef<"Student", 'String'>
     readonly supervisorName: FieldRef<"Student", 'String'>
+    readonly supervisorDesignation: FieldRef<"Student", 'String'>
     readonly supervisorEmail: FieldRef<"Student", 'String'>
     readonly internshipStart: FieldRef<"Student", 'DateTime'>
     readonly internshipEnd: FieldRef<"Student", 'DateTime'>
@@ -3177,6 +3402,49 @@ export namespace Prisma {
   }
 
   /**
+   * Student.weeklyLogs
+   */
+  export type Student$weeklyLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
+    where?: WeeklyLogWhereInput
+    orderBy?: WeeklyLogOrderByWithRelationInput | WeeklyLogOrderByWithRelationInput[]
+    cursor?: WeeklyLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: WeeklyLogScalarFieldEnum | WeeklyLogScalarFieldEnum[]
+  }
+
+  /**
+   * Student.iapReport
+   */
+  export type Student$iapReportArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+    where?: IapReportWhereInput
+  }
+
+  /**
    * Student.ratings
    */
   export type Student$ratingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3216,6 +3484,1351 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: StudentInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model WeeklyLog
+   */
+
+  export type AggregateWeeklyLog = {
+    _count: WeeklyLogCountAggregateOutputType | null
+    _avg: WeeklyLogAvgAggregateOutputType | null
+    _sum: WeeklyLogSumAggregateOutputType | null
+    _min: WeeklyLogMinAggregateOutputType | null
+    _max: WeeklyLogMaxAggregateOutputType | null
+  }
+
+  export type WeeklyLogAvgAggregateOutputType = {
+    id: number | null
+    studentId: number | null
+    weekNumber: number | null
+    mondayHours: number | null
+    tuesdayHours: number | null
+    wednesdayHours: number | null
+    thursdayHours: number | null
+    fridayHours: number | null
+    totalHours: number | null
+  }
+
+  export type WeeklyLogSumAggregateOutputType = {
+    id: number | null
+    studentId: number | null
+    weekNumber: number | null
+    mondayHours: number | null
+    tuesdayHours: number | null
+    wednesdayHours: number | null
+    thursdayHours: number | null
+    fridayHours: number | null
+    totalHours: number | null
+  }
+
+  export type WeeklyLogMinAggregateOutputType = {
+    id: number | null
+    studentId: number | null
+    weekNumber: number | null
+    startDate: Date | null
+    endDate: Date | null
+    mondayTask: string | null
+    mondayHours: number | null
+    tuesdayTask: string | null
+    tuesdayHours: number | null
+    wednesdayTask: string | null
+    wednesdayHours: number | null
+    thursdayTask: string | null
+    thursdayHours: number | null
+    fridayTask: string | null
+    fridayHours: number | null
+    totalHours: number | null
+    generalStatement: string | null
+    grade: string | null
+    supervisorSignature: string | null
+    dateSigned: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type WeeklyLogMaxAggregateOutputType = {
+    id: number | null
+    studentId: number | null
+    weekNumber: number | null
+    startDate: Date | null
+    endDate: Date | null
+    mondayTask: string | null
+    mondayHours: number | null
+    tuesdayTask: string | null
+    tuesdayHours: number | null
+    wednesdayTask: string | null
+    wednesdayHours: number | null
+    thursdayTask: string | null
+    thursdayHours: number | null
+    fridayTask: string | null
+    fridayHours: number | null
+    totalHours: number | null
+    generalStatement: string | null
+    grade: string | null
+    supervisorSignature: string | null
+    dateSigned: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type WeeklyLogCountAggregateOutputType = {
+    id: number
+    studentId: number
+    weekNumber: number
+    startDate: number
+    endDate: number
+    mondayTask: number
+    mondayHours: number
+    tuesdayTask: number
+    tuesdayHours: number
+    wednesdayTask: number
+    wednesdayHours: number
+    thursdayTask: number
+    thursdayHours: number
+    fridayTask: number
+    fridayHours: number
+    totalHours: number
+    generalStatement: number
+    grade: number
+    supervisorSignature: number
+    dateSigned: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type WeeklyLogAvgAggregateInputType = {
+    id?: true
+    studentId?: true
+    weekNumber?: true
+    mondayHours?: true
+    tuesdayHours?: true
+    wednesdayHours?: true
+    thursdayHours?: true
+    fridayHours?: true
+    totalHours?: true
+  }
+
+  export type WeeklyLogSumAggregateInputType = {
+    id?: true
+    studentId?: true
+    weekNumber?: true
+    mondayHours?: true
+    tuesdayHours?: true
+    wednesdayHours?: true
+    thursdayHours?: true
+    fridayHours?: true
+    totalHours?: true
+  }
+
+  export type WeeklyLogMinAggregateInputType = {
+    id?: true
+    studentId?: true
+    weekNumber?: true
+    startDate?: true
+    endDate?: true
+    mondayTask?: true
+    mondayHours?: true
+    tuesdayTask?: true
+    tuesdayHours?: true
+    wednesdayTask?: true
+    wednesdayHours?: true
+    thursdayTask?: true
+    thursdayHours?: true
+    fridayTask?: true
+    fridayHours?: true
+    totalHours?: true
+    generalStatement?: true
+    grade?: true
+    supervisorSignature?: true
+    dateSigned?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type WeeklyLogMaxAggregateInputType = {
+    id?: true
+    studentId?: true
+    weekNumber?: true
+    startDate?: true
+    endDate?: true
+    mondayTask?: true
+    mondayHours?: true
+    tuesdayTask?: true
+    tuesdayHours?: true
+    wednesdayTask?: true
+    wednesdayHours?: true
+    thursdayTask?: true
+    thursdayHours?: true
+    fridayTask?: true
+    fridayHours?: true
+    totalHours?: true
+    generalStatement?: true
+    grade?: true
+    supervisorSignature?: true
+    dateSigned?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type WeeklyLogCountAggregateInputType = {
+    id?: true
+    studentId?: true
+    weekNumber?: true
+    startDate?: true
+    endDate?: true
+    mondayTask?: true
+    mondayHours?: true
+    tuesdayTask?: true
+    tuesdayHours?: true
+    wednesdayTask?: true
+    wednesdayHours?: true
+    thursdayTask?: true
+    thursdayHours?: true
+    fridayTask?: true
+    fridayHours?: true
+    totalHours?: true
+    generalStatement?: true
+    grade?: true
+    supervisorSignature?: true
+    dateSigned?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type WeeklyLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WeeklyLog to aggregate.
+     */
+    where?: WeeklyLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WeeklyLogs to fetch.
+     */
+    orderBy?: WeeklyLogOrderByWithRelationInput | WeeklyLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: WeeklyLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WeeklyLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WeeklyLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned WeeklyLogs
+    **/
+    _count?: true | WeeklyLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: WeeklyLogAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: WeeklyLogSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: WeeklyLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: WeeklyLogMaxAggregateInputType
+  }
+
+  export type GetWeeklyLogAggregateType<T extends WeeklyLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateWeeklyLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateWeeklyLog[P]>
+      : GetScalarType<T[P], AggregateWeeklyLog[P]>
+  }
+
+
+
+
+  export type WeeklyLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WeeklyLogWhereInput
+    orderBy?: WeeklyLogOrderByWithAggregationInput | WeeklyLogOrderByWithAggregationInput[]
+    by: WeeklyLogScalarFieldEnum[] | WeeklyLogScalarFieldEnum
+    having?: WeeklyLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: WeeklyLogCountAggregateInputType | true
+    _avg?: WeeklyLogAvgAggregateInputType
+    _sum?: WeeklyLogSumAggregateInputType
+    _min?: WeeklyLogMinAggregateInputType
+    _max?: WeeklyLogMaxAggregateInputType
+  }
+
+  export type WeeklyLogGroupByOutputType = {
+    id: number
+    studentId: number
+    weekNumber: number
+    startDate: Date
+    endDate: Date
+    mondayTask: string | null
+    mondayHours: number | null
+    tuesdayTask: string | null
+    tuesdayHours: number | null
+    wednesdayTask: string | null
+    wednesdayHours: number | null
+    thursdayTask: string | null
+    thursdayHours: number | null
+    fridayTask: string | null
+    fridayHours: number | null
+    totalHours: number | null
+    generalStatement: string | null
+    grade: string | null
+    supervisorSignature: string | null
+    dateSigned: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: WeeklyLogCountAggregateOutputType | null
+    _avg: WeeklyLogAvgAggregateOutputType | null
+    _sum: WeeklyLogSumAggregateOutputType | null
+    _min: WeeklyLogMinAggregateOutputType | null
+    _max: WeeklyLogMaxAggregateOutputType | null
+  }
+
+  type GetWeeklyLogGroupByPayload<T extends WeeklyLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<WeeklyLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof WeeklyLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], WeeklyLogGroupByOutputType[P]>
+            : GetScalarType<T[P], WeeklyLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type WeeklyLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    studentId?: boolean
+    weekNumber?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    mondayTask?: boolean
+    mondayHours?: boolean
+    tuesdayTask?: boolean
+    tuesdayHours?: boolean
+    wednesdayTask?: boolean
+    wednesdayHours?: boolean
+    thursdayTask?: boolean
+    thursdayHours?: boolean
+    fridayTask?: boolean
+    fridayHours?: boolean
+    totalHours?: boolean
+    generalStatement?: boolean
+    grade?: boolean
+    supervisorSignature?: boolean
+    dateSigned?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["weeklyLog"]>
+
+  export type WeeklyLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    studentId?: boolean
+    weekNumber?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    mondayTask?: boolean
+    mondayHours?: boolean
+    tuesdayTask?: boolean
+    tuesdayHours?: boolean
+    wednesdayTask?: boolean
+    wednesdayHours?: boolean
+    thursdayTask?: boolean
+    thursdayHours?: boolean
+    fridayTask?: boolean
+    fridayHours?: boolean
+    totalHours?: boolean
+    generalStatement?: boolean
+    grade?: boolean
+    supervisorSignature?: boolean
+    dateSigned?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["weeklyLog"]>
+
+  export type WeeklyLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    studentId?: boolean
+    weekNumber?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    mondayTask?: boolean
+    mondayHours?: boolean
+    tuesdayTask?: boolean
+    tuesdayHours?: boolean
+    wednesdayTask?: boolean
+    wednesdayHours?: boolean
+    thursdayTask?: boolean
+    thursdayHours?: boolean
+    fridayTask?: boolean
+    fridayHours?: boolean
+    totalHours?: boolean
+    generalStatement?: boolean
+    grade?: boolean
+    supervisorSignature?: boolean
+    dateSigned?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["weeklyLog"]>
+
+  export type WeeklyLogSelectScalar = {
+    id?: boolean
+    studentId?: boolean
+    weekNumber?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    mondayTask?: boolean
+    mondayHours?: boolean
+    tuesdayTask?: boolean
+    tuesdayHours?: boolean
+    wednesdayTask?: boolean
+    wednesdayHours?: boolean
+    thursdayTask?: boolean
+    thursdayHours?: boolean
+    fridayTask?: boolean
+    fridayHours?: boolean
+    totalHours?: boolean
+    generalStatement?: boolean
+    grade?: boolean
+    supervisorSignature?: boolean
+    dateSigned?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type WeeklyLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "studentId" | "weekNumber" | "startDate" | "endDate" | "mondayTask" | "mondayHours" | "tuesdayTask" | "tuesdayHours" | "wednesdayTask" | "wednesdayHours" | "thursdayTask" | "thursdayHours" | "fridayTask" | "fridayHours" | "totalHours" | "generalStatement" | "grade" | "supervisorSignature" | "dateSigned" | "createdAt" | "updatedAt", ExtArgs["result"]["weeklyLog"]>
+  export type WeeklyLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }
+  export type WeeklyLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }
+  export type WeeklyLogIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }
+
+  export type $WeeklyLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "WeeklyLog"
+    objects: {
+      student: Prisma.$StudentPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      studentId: number
+      weekNumber: number
+      startDate: Date
+      endDate: Date
+      mondayTask: string | null
+      mondayHours: number | null
+      tuesdayTask: string | null
+      tuesdayHours: number | null
+      wednesdayTask: string | null
+      wednesdayHours: number | null
+      thursdayTask: string | null
+      thursdayHours: number | null
+      fridayTask: string | null
+      fridayHours: number | null
+      totalHours: number | null
+      generalStatement: string | null
+      grade: string | null
+      supervisorSignature: string | null
+      dateSigned: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["weeklyLog"]>
+    composites: {}
+  }
+
+  type WeeklyLogGetPayload<S extends boolean | null | undefined | WeeklyLogDefaultArgs> = $Result.GetResult<Prisma.$WeeklyLogPayload, S>
+
+  type WeeklyLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<WeeklyLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: WeeklyLogCountAggregateInputType | true
+    }
+
+  export interface WeeklyLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['WeeklyLog'], meta: { name: 'WeeklyLog' } }
+    /**
+     * Find zero or one WeeklyLog that matches the filter.
+     * @param {WeeklyLogFindUniqueArgs} args - Arguments to find a WeeklyLog
+     * @example
+     * // Get one WeeklyLog
+     * const weeklyLog = await prisma.weeklyLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends WeeklyLogFindUniqueArgs>(args: SelectSubset<T, WeeklyLogFindUniqueArgs<ExtArgs>>): Prisma__WeeklyLogClient<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one WeeklyLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {WeeklyLogFindUniqueOrThrowArgs} args - Arguments to find a WeeklyLog
+     * @example
+     * // Get one WeeklyLog
+     * const weeklyLog = await prisma.weeklyLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends WeeklyLogFindUniqueOrThrowArgs>(args: SelectSubset<T, WeeklyLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__WeeklyLogClient<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WeeklyLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WeeklyLogFindFirstArgs} args - Arguments to find a WeeklyLog
+     * @example
+     * // Get one WeeklyLog
+     * const weeklyLog = await prisma.weeklyLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends WeeklyLogFindFirstArgs>(args?: SelectSubset<T, WeeklyLogFindFirstArgs<ExtArgs>>): Prisma__WeeklyLogClient<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WeeklyLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WeeklyLogFindFirstOrThrowArgs} args - Arguments to find a WeeklyLog
+     * @example
+     * // Get one WeeklyLog
+     * const weeklyLog = await prisma.weeklyLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends WeeklyLogFindFirstOrThrowArgs>(args?: SelectSubset<T, WeeklyLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__WeeklyLogClient<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more WeeklyLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WeeklyLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all WeeklyLogs
+     * const weeklyLogs = await prisma.weeklyLog.findMany()
+     * 
+     * // Get first 10 WeeklyLogs
+     * const weeklyLogs = await prisma.weeklyLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const weeklyLogWithIdOnly = await prisma.weeklyLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends WeeklyLogFindManyArgs>(args?: SelectSubset<T, WeeklyLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a WeeklyLog.
+     * @param {WeeklyLogCreateArgs} args - Arguments to create a WeeklyLog.
+     * @example
+     * // Create one WeeklyLog
+     * const WeeklyLog = await prisma.weeklyLog.create({
+     *   data: {
+     *     // ... data to create a WeeklyLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends WeeklyLogCreateArgs>(args: SelectSubset<T, WeeklyLogCreateArgs<ExtArgs>>): Prisma__WeeklyLogClient<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many WeeklyLogs.
+     * @param {WeeklyLogCreateManyArgs} args - Arguments to create many WeeklyLogs.
+     * @example
+     * // Create many WeeklyLogs
+     * const weeklyLog = await prisma.weeklyLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends WeeklyLogCreateManyArgs>(args?: SelectSubset<T, WeeklyLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many WeeklyLogs and returns the data saved in the database.
+     * @param {WeeklyLogCreateManyAndReturnArgs} args - Arguments to create many WeeklyLogs.
+     * @example
+     * // Create many WeeklyLogs
+     * const weeklyLog = await prisma.weeklyLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many WeeklyLogs and only return the `id`
+     * const weeklyLogWithIdOnly = await prisma.weeklyLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends WeeklyLogCreateManyAndReturnArgs>(args?: SelectSubset<T, WeeklyLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a WeeklyLog.
+     * @param {WeeklyLogDeleteArgs} args - Arguments to delete one WeeklyLog.
+     * @example
+     * // Delete one WeeklyLog
+     * const WeeklyLog = await prisma.weeklyLog.delete({
+     *   where: {
+     *     // ... filter to delete one WeeklyLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends WeeklyLogDeleteArgs>(args: SelectSubset<T, WeeklyLogDeleteArgs<ExtArgs>>): Prisma__WeeklyLogClient<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one WeeklyLog.
+     * @param {WeeklyLogUpdateArgs} args - Arguments to update one WeeklyLog.
+     * @example
+     * // Update one WeeklyLog
+     * const weeklyLog = await prisma.weeklyLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends WeeklyLogUpdateArgs>(args: SelectSubset<T, WeeklyLogUpdateArgs<ExtArgs>>): Prisma__WeeklyLogClient<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more WeeklyLogs.
+     * @param {WeeklyLogDeleteManyArgs} args - Arguments to filter WeeklyLogs to delete.
+     * @example
+     * // Delete a few WeeklyLogs
+     * const { count } = await prisma.weeklyLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends WeeklyLogDeleteManyArgs>(args?: SelectSubset<T, WeeklyLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WeeklyLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WeeklyLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many WeeklyLogs
+     * const weeklyLog = await prisma.weeklyLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends WeeklyLogUpdateManyArgs>(args: SelectSubset<T, WeeklyLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WeeklyLogs and returns the data updated in the database.
+     * @param {WeeklyLogUpdateManyAndReturnArgs} args - Arguments to update many WeeklyLogs.
+     * @example
+     * // Update many WeeklyLogs
+     * const weeklyLog = await prisma.weeklyLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WeeklyLogs and only return the `id`
+     * const weeklyLogWithIdOnly = await prisma.weeklyLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WeeklyLogUpdateManyAndReturnArgs>(args: SelectSubset<T, WeeklyLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one WeeklyLog.
+     * @param {WeeklyLogUpsertArgs} args - Arguments to update or create a WeeklyLog.
+     * @example
+     * // Update or create a WeeklyLog
+     * const weeklyLog = await prisma.weeklyLog.upsert({
+     *   create: {
+     *     // ... data to create a WeeklyLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the WeeklyLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends WeeklyLogUpsertArgs>(args: SelectSubset<T, WeeklyLogUpsertArgs<ExtArgs>>): Prisma__WeeklyLogClient<$Result.GetResult<Prisma.$WeeklyLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of WeeklyLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WeeklyLogCountArgs} args - Arguments to filter WeeklyLogs to count.
+     * @example
+     * // Count the number of WeeklyLogs
+     * const count = await prisma.weeklyLog.count({
+     *   where: {
+     *     // ... the filter for the WeeklyLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends WeeklyLogCountArgs>(
+      args?: Subset<T, WeeklyLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], WeeklyLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a WeeklyLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WeeklyLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends WeeklyLogAggregateArgs>(args: Subset<T, WeeklyLogAggregateArgs>): Prisma.PrismaPromise<GetWeeklyLogAggregateType<T>>
+
+    /**
+     * Group by WeeklyLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WeeklyLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends WeeklyLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: WeeklyLogGroupByArgs['orderBy'] }
+        : { orderBy?: WeeklyLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, WeeklyLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetWeeklyLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the WeeklyLog model
+   */
+  readonly fields: WeeklyLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for WeeklyLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__WeeklyLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    student<T extends StudentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StudentDefaultArgs<ExtArgs>>): Prisma__StudentClient<$Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the WeeklyLog model
+   */
+  interface WeeklyLogFieldRefs {
+    readonly id: FieldRef<"WeeklyLog", 'Int'>
+    readonly studentId: FieldRef<"WeeklyLog", 'Int'>
+    readonly weekNumber: FieldRef<"WeeklyLog", 'Int'>
+    readonly startDate: FieldRef<"WeeklyLog", 'DateTime'>
+    readonly endDate: FieldRef<"WeeklyLog", 'DateTime'>
+    readonly mondayTask: FieldRef<"WeeklyLog", 'String'>
+    readonly mondayHours: FieldRef<"WeeklyLog", 'Float'>
+    readonly tuesdayTask: FieldRef<"WeeklyLog", 'String'>
+    readonly tuesdayHours: FieldRef<"WeeklyLog", 'Float'>
+    readonly wednesdayTask: FieldRef<"WeeklyLog", 'String'>
+    readonly wednesdayHours: FieldRef<"WeeklyLog", 'Float'>
+    readonly thursdayTask: FieldRef<"WeeklyLog", 'String'>
+    readonly thursdayHours: FieldRef<"WeeklyLog", 'Float'>
+    readonly fridayTask: FieldRef<"WeeklyLog", 'String'>
+    readonly fridayHours: FieldRef<"WeeklyLog", 'Float'>
+    readonly totalHours: FieldRef<"WeeklyLog", 'Float'>
+    readonly generalStatement: FieldRef<"WeeklyLog", 'String'>
+    readonly grade: FieldRef<"WeeklyLog", 'String'>
+    readonly supervisorSignature: FieldRef<"WeeklyLog", 'String'>
+    readonly dateSigned: FieldRef<"WeeklyLog", 'DateTime'>
+    readonly createdAt: FieldRef<"WeeklyLog", 'DateTime'>
+    readonly updatedAt: FieldRef<"WeeklyLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * WeeklyLog findUnique
+   */
+  export type WeeklyLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
+    /**
+     * Filter, which WeeklyLog to fetch.
+     */
+    where: WeeklyLogWhereUniqueInput
+  }
+
+  /**
+   * WeeklyLog findUniqueOrThrow
+   */
+  export type WeeklyLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
+    /**
+     * Filter, which WeeklyLog to fetch.
+     */
+    where: WeeklyLogWhereUniqueInput
+  }
+
+  /**
+   * WeeklyLog findFirst
+   */
+  export type WeeklyLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
+    /**
+     * Filter, which WeeklyLog to fetch.
+     */
+    where?: WeeklyLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WeeklyLogs to fetch.
+     */
+    orderBy?: WeeklyLogOrderByWithRelationInput | WeeklyLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WeeklyLogs.
+     */
+    cursor?: WeeklyLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WeeklyLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WeeklyLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WeeklyLogs.
+     */
+    distinct?: WeeklyLogScalarFieldEnum | WeeklyLogScalarFieldEnum[]
+  }
+
+  /**
+   * WeeklyLog findFirstOrThrow
+   */
+  export type WeeklyLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
+    /**
+     * Filter, which WeeklyLog to fetch.
+     */
+    where?: WeeklyLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WeeklyLogs to fetch.
+     */
+    orderBy?: WeeklyLogOrderByWithRelationInput | WeeklyLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WeeklyLogs.
+     */
+    cursor?: WeeklyLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WeeklyLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WeeklyLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WeeklyLogs.
+     */
+    distinct?: WeeklyLogScalarFieldEnum | WeeklyLogScalarFieldEnum[]
+  }
+
+  /**
+   * WeeklyLog findMany
+   */
+  export type WeeklyLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
+    /**
+     * Filter, which WeeklyLogs to fetch.
+     */
+    where?: WeeklyLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WeeklyLogs to fetch.
+     */
+    orderBy?: WeeklyLogOrderByWithRelationInput | WeeklyLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing WeeklyLogs.
+     */
+    cursor?: WeeklyLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WeeklyLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WeeklyLogs.
+     */
+    skip?: number
+    distinct?: WeeklyLogScalarFieldEnum | WeeklyLogScalarFieldEnum[]
+  }
+
+  /**
+   * WeeklyLog create
+   */
+  export type WeeklyLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a WeeklyLog.
+     */
+    data: XOR<WeeklyLogCreateInput, WeeklyLogUncheckedCreateInput>
+  }
+
+  /**
+   * WeeklyLog createMany
+   */
+  export type WeeklyLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many WeeklyLogs.
+     */
+    data: WeeklyLogCreateManyInput | WeeklyLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * WeeklyLog createManyAndReturn
+   */
+  export type WeeklyLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many WeeklyLogs.
+     */
+    data: WeeklyLogCreateManyInput | WeeklyLogCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * WeeklyLog update
+   */
+  export type WeeklyLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a WeeklyLog.
+     */
+    data: XOR<WeeklyLogUpdateInput, WeeklyLogUncheckedUpdateInput>
+    /**
+     * Choose, which WeeklyLog to update.
+     */
+    where: WeeklyLogWhereUniqueInput
+  }
+
+  /**
+   * WeeklyLog updateMany
+   */
+  export type WeeklyLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update WeeklyLogs.
+     */
+    data: XOR<WeeklyLogUpdateManyMutationInput, WeeklyLogUncheckedUpdateManyInput>
+    /**
+     * Filter which WeeklyLogs to update
+     */
+    where?: WeeklyLogWhereInput
+    /**
+     * Limit how many WeeklyLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WeeklyLog updateManyAndReturn
+   */
+  export type WeeklyLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * The data used to update WeeklyLogs.
+     */
+    data: XOR<WeeklyLogUpdateManyMutationInput, WeeklyLogUncheckedUpdateManyInput>
+    /**
+     * Filter which WeeklyLogs to update
+     */
+    where?: WeeklyLogWhereInput
+    /**
+     * Limit how many WeeklyLogs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * WeeklyLog upsert
+   */
+  export type WeeklyLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the WeeklyLog to update in case it exists.
+     */
+    where: WeeklyLogWhereUniqueInput
+    /**
+     * In case the WeeklyLog found by the `where` argument doesn't exist, create a new WeeklyLog with this data.
+     */
+    create: XOR<WeeklyLogCreateInput, WeeklyLogUncheckedCreateInput>
+    /**
+     * In case the WeeklyLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<WeeklyLogUpdateInput, WeeklyLogUncheckedUpdateInput>
+  }
+
+  /**
+   * WeeklyLog delete
+   */
+  export type WeeklyLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
+    /**
+     * Filter which WeeklyLog to delete.
+     */
+    where: WeeklyLogWhereUniqueInput
+  }
+
+  /**
+   * WeeklyLog deleteMany
+   */
+  export type WeeklyLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WeeklyLogs to delete
+     */
+    where?: WeeklyLogWhereInput
+    /**
+     * Limit how many WeeklyLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * WeeklyLog without action
+   */
+  export type WeeklyLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WeeklyLog
+     */
+    select?: WeeklyLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WeeklyLog
+     */
+    omit?: WeeklyLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WeeklyLogInclude<ExtArgs> | null
   }
 
 
@@ -12574,6 +14187,1167 @@ export namespace Prisma {
 
 
   /**
+   * Model IapReport
+   */
+
+  export type AggregateIapReport = {
+    _count: IapReportCountAggregateOutputType | null
+    _avg: IapReportAvgAggregateOutputType | null
+    _sum: IapReportSumAggregateOutputType | null
+    _min: IapReportMinAggregateOutputType | null
+    _max: IapReportMaxAggregateOutputType | null
+  }
+
+  export type IapReportAvgAggregateOutputType = {
+    id: number | null
+    studentId: number | null
+    loVisitCount: number | null
+  }
+
+  export type IapReportSumAggregateOutputType = {
+    id: number | null
+    studentId: number | null
+    loVisitCount: number | null
+  }
+
+  export type IapReportMinAggregateOutputType = {
+    id: number | null
+    studentId: number | null
+    loVisitCount: number | null
+    isUseful: boolean | null
+    improvedUnderstanding: boolean | null
+    providedExperiences: boolean | null
+    otherProgrammeDetails: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type IapReportMaxAggregateOutputType = {
+    id: number | null
+    studentId: number | null
+    loVisitCount: number | null
+    isUseful: boolean | null
+    improvedUnderstanding: boolean | null
+    providedExperiences: boolean | null
+    otherProgrammeDetails: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type IapReportCountAggregateOutputType = {
+    id: number
+    studentId: number
+    loVisitCount: number
+    isUseful: number
+    improvedUnderstanding: number
+    providedExperiences: number
+    programmeTypes: number
+    otherProgrammeDetails: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type IapReportAvgAggregateInputType = {
+    id?: true
+    studentId?: true
+    loVisitCount?: true
+  }
+
+  export type IapReportSumAggregateInputType = {
+    id?: true
+    studentId?: true
+    loVisitCount?: true
+  }
+
+  export type IapReportMinAggregateInputType = {
+    id?: true
+    studentId?: true
+    loVisitCount?: true
+    isUseful?: true
+    improvedUnderstanding?: true
+    providedExperiences?: true
+    otherProgrammeDetails?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type IapReportMaxAggregateInputType = {
+    id?: true
+    studentId?: true
+    loVisitCount?: true
+    isUseful?: true
+    improvedUnderstanding?: true
+    providedExperiences?: true
+    otherProgrammeDetails?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type IapReportCountAggregateInputType = {
+    id?: true
+    studentId?: true
+    loVisitCount?: true
+    isUseful?: true
+    improvedUnderstanding?: true
+    providedExperiences?: true
+    programmeTypes?: true
+    otherProgrammeDetails?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type IapReportAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which IapReport to aggregate.
+     */
+    where?: IapReportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of IapReports to fetch.
+     */
+    orderBy?: IapReportOrderByWithRelationInput | IapReportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: IapReportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` IapReports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` IapReports.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned IapReports
+    **/
+    _count?: true | IapReportCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: IapReportAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: IapReportSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: IapReportMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: IapReportMaxAggregateInputType
+  }
+
+  export type GetIapReportAggregateType<T extends IapReportAggregateArgs> = {
+        [P in keyof T & keyof AggregateIapReport]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateIapReport[P]>
+      : GetScalarType<T[P], AggregateIapReport[P]>
+  }
+
+
+
+
+  export type IapReportGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: IapReportWhereInput
+    orderBy?: IapReportOrderByWithAggregationInput | IapReportOrderByWithAggregationInput[]
+    by: IapReportScalarFieldEnum[] | IapReportScalarFieldEnum
+    having?: IapReportScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: IapReportCountAggregateInputType | true
+    _avg?: IapReportAvgAggregateInputType
+    _sum?: IapReportSumAggregateInputType
+    _min?: IapReportMinAggregateInputType
+    _max?: IapReportMaxAggregateInputType
+  }
+
+  export type IapReportGroupByOutputType = {
+    id: number
+    studentId: number
+    loVisitCount: number | null
+    isUseful: boolean | null
+    improvedUnderstanding: boolean | null
+    providedExperiences: boolean | null
+    programmeTypes: string[]
+    otherProgrammeDetails: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: IapReportCountAggregateOutputType | null
+    _avg: IapReportAvgAggregateOutputType | null
+    _sum: IapReportSumAggregateOutputType | null
+    _min: IapReportMinAggregateOutputType | null
+    _max: IapReportMaxAggregateOutputType | null
+  }
+
+  type GetIapReportGroupByPayload<T extends IapReportGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<IapReportGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof IapReportGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], IapReportGroupByOutputType[P]>
+            : GetScalarType<T[P], IapReportGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type IapReportSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    studentId?: boolean
+    loVisitCount?: boolean
+    isUseful?: boolean
+    improvedUnderstanding?: boolean
+    providedExperiences?: boolean
+    programmeTypes?: boolean
+    otherProgrammeDetails?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["iapReport"]>
+
+  export type IapReportSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    studentId?: boolean
+    loVisitCount?: boolean
+    isUseful?: boolean
+    improvedUnderstanding?: boolean
+    providedExperiences?: boolean
+    programmeTypes?: boolean
+    otherProgrammeDetails?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["iapReport"]>
+
+  export type IapReportSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    studentId?: boolean
+    loVisitCount?: boolean
+    isUseful?: boolean
+    improvedUnderstanding?: boolean
+    providedExperiences?: boolean
+    programmeTypes?: boolean
+    otherProgrammeDetails?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["iapReport"]>
+
+  export type IapReportSelectScalar = {
+    id?: boolean
+    studentId?: boolean
+    loVisitCount?: boolean
+    isUseful?: boolean
+    improvedUnderstanding?: boolean
+    providedExperiences?: boolean
+    programmeTypes?: boolean
+    otherProgrammeDetails?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type IapReportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "studentId" | "loVisitCount" | "isUseful" | "improvedUnderstanding" | "providedExperiences" | "programmeTypes" | "otherProgrammeDetails" | "createdAt" | "updatedAt", ExtArgs["result"]["iapReport"]>
+  export type IapReportInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }
+  export type IapReportIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }
+  export type IapReportIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    student?: boolean | StudentDefaultArgs<ExtArgs>
+  }
+
+  export type $IapReportPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "IapReport"
+    objects: {
+      student: Prisma.$StudentPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      studentId: number
+      loVisitCount: number | null
+      isUseful: boolean | null
+      improvedUnderstanding: boolean | null
+      providedExperiences: boolean | null
+      programmeTypes: string[]
+      otherProgrammeDetails: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["iapReport"]>
+    composites: {}
+  }
+
+  type IapReportGetPayload<S extends boolean | null | undefined | IapReportDefaultArgs> = $Result.GetResult<Prisma.$IapReportPayload, S>
+
+  type IapReportCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<IapReportFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: IapReportCountAggregateInputType | true
+    }
+
+  export interface IapReportDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['IapReport'], meta: { name: 'IapReport' } }
+    /**
+     * Find zero or one IapReport that matches the filter.
+     * @param {IapReportFindUniqueArgs} args - Arguments to find a IapReport
+     * @example
+     * // Get one IapReport
+     * const iapReport = await prisma.iapReport.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends IapReportFindUniqueArgs>(args: SelectSubset<T, IapReportFindUniqueArgs<ExtArgs>>): Prisma__IapReportClient<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one IapReport that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {IapReportFindUniqueOrThrowArgs} args - Arguments to find a IapReport
+     * @example
+     * // Get one IapReport
+     * const iapReport = await prisma.iapReport.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends IapReportFindUniqueOrThrowArgs>(args: SelectSubset<T, IapReportFindUniqueOrThrowArgs<ExtArgs>>): Prisma__IapReportClient<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first IapReport that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {IapReportFindFirstArgs} args - Arguments to find a IapReport
+     * @example
+     * // Get one IapReport
+     * const iapReport = await prisma.iapReport.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends IapReportFindFirstArgs>(args?: SelectSubset<T, IapReportFindFirstArgs<ExtArgs>>): Prisma__IapReportClient<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first IapReport that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {IapReportFindFirstOrThrowArgs} args - Arguments to find a IapReport
+     * @example
+     * // Get one IapReport
+     * const iapReport = await prisma.iapReport.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends IapReportFindFirstOrThrowArgs>(args?: SelectSubset<T, IapReportFindFirstOrThrowArgs<ExtArgs>>): Prisma__IapReportClient<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more IapReports that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {IapReportFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all IapReports
+     * const iapReports = await prisma.iapReport.findMany()
+     * 
+     * // Get first 10 IapReports
+     * const iapReports = await prisma.iapReport.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const iapReportWithIdOnly = await prisma.iapReport.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends IapReportFindManyArgs>(args?: SelectSubset<T, IapReportFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a IapReport.
+     * @param {IapReportCreateArgs} args - Arguments to create a IapReport.
+     * @example
+     * // Create one IapReport
+     * const IapReport = await prisma.iapReport.create({
+     *   data: {
+     *     // ... data to create a IapReport
+     *   }
+     * })
+     * 
+     */
+    create<T extends IapReportCreateArgs>(args: SelectSubset<T, IapReportCreateArgs<ExtArgs>>): Prisma__IapReportClient<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many IapReports.
+     * @param {IapReportCreateManyArgs} args - Arguments to create many IapReports.
+     * @example
+     * // Create many IapReports
+     * const iapReport = await prisma.iapReport.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends IapReportCreateManyArgs>(args?: SelectSubset<T, IapReportCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many IapReports and returns the data saved in the database.
+     * @param {IapReportCreateManyAndReturnArgs} args - Arguments to create many IapReports.
+     * @example
+     * // Create many IapReports
+     * const iapReport = await prisma.iapReport.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many IapReports and only return the `id`
+     * const iapReportWithIdOnly = await prisma.iapReport.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends IapReportCreateManyAndReturnArgs>(args?: SelectSubset<T, IapReportCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a IapReport.
+     * @param {IapReportDeleteArgs} args - Arguments to delete one IapReport.
+     * @example
+     * // Delete one IapReport
+     * const IapReport = await prisma.iapReport.delete({
+     *   where: {
+     *     // ... filter to delete one IapReport
+     *   }
+     * })
+     * 
+     */
+    delete<T extends IapReportDeleteArgs>(args: SelectSubset<T, IapReportDeleteArgs<ExtArgs>>): Prisma__IapReportClient<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one IapReport.
+     * @param {IapReportUpdateArgs} args - Arguments to update one IapReport.
+     * @example
+     * // Update one IapReport
+     * const iapReport = await prisma.iapReport.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends IapReportUpdateArgs>(args: SelectSubset<T, IapReportUpdateArgs<ExtArgs>>): Prisma__IapReportClient<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more IapReports.
+     * @param {IapReportDeleteManyArgs} args - Arguments to filter IapReports to delete.
+     * @example
+     * // Delete a few IapReports
+     * const { count } = await prisma.iapReport.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends IapReportDeleteManyArgs>(args?: SelectSubset<T, IapReportDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more IapReports.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {IapReportUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many IapReports
+     * const iapReport = await prisma.iapReport.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends IapReportUpdateManyArgs>(args: SelectSubset<T, IapReportUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more IapReports and returns the data updated in the database.
+     * @param {IapReportUpdateManyAndReturnArgs} args - Arguments to update many IapReports.
+     * @example
+     * // Update many IapReports
+     * const iapReport = await prisma.iapReport.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more IapReports and only return the `id`
+     * const iapReportWithIdOnly = await prisma.iapReport.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends IapReportUpdateManyAndReturnArgs>(args: SelectSubset<T, IapReportUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one IapReport.
+     * @param {IapReportUpsertArgs} args - Arguments to update or create a IapReport.
+     * @example
+     * // Update or create a IapReport
+     * const iapReport = await prisma.iapReport.upsert({
+     *   create: {
+     *     // ... data to create a IapReport
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the IapReport we want to update
+     *   }
+     * })
+     */
+    upsert<T extends IapReportUpsertArgs>(args: SelectSubset<T, IapReportUpsertArgs<ExtArgs>>): Prisma__IapReportClient<$Result.GetResult<Prisma.$IapReportPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of IapReports.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {IapReportCountArgs} args - Arguments to filter IapReports to count.
+     * @example
+     * // Count the number of IapReports
+     * const count = await prisma.iapReport.count({
+     *   where: {
+     *     // ... the filter for the IapReports we want to count
+     *   }
+     * })
+    **/
+    count<T extends IapReportCountArgs>(
+      args?: Subset<T, IapReportCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], IapReportCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a IapReport.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {IapReportAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends IapReportAggregateArgs>(args: Subset<T, IapReportAggregateArgs>): Prisma.PrismaPromise<GetIapReportAggregateType<T>>
+
+    /**
+     * Group by IapReport.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {IapReportGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends IapReportGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: IapReportGroupByArgs['orderBy'] }
+        : { orderBy?: IapReportGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, IapReportGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetIapReportGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the IapReport model
+   */
+  readonly fields: IapReportFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for IapReport.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__IapReportClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    student<T extends StudentDefaultArgs<ExtArgs> = {}>(args?: Subset<T, StudentDefaultArgs<ExtArgs>>): Prisma__StudentClient<$Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the IapReport model
+   */
+  interface IapReportFieldRefs {
+    readonly id: FieldRef<"IapReport", 'Int'>
+    readonly studentId: FieldRef<"IapReport", 'Int'>
+    readonly loVisitCount: FieldRef<"IapReport", 'Int'>
+    readonly isUseful: FieldRef<"IapReport", 'Boolean'>
+    readonly improvedUnderstanding: FieldRef<"IapReport", 'Boolean'>
+    readonly providedExperiences: FieldRef<"IapReport", 'Boolean'>
+    readonly programmeTypes: FieldRef<"IapReport", 'String[]'>
+    readonly otherProgrammeDetails: FieldRef<"IapReport", 'String'>
+    readonly createdAt: FieldRef<"IapReport", 'DateTime'>
+    readonly updatedAt: FieldRef<"IapReport", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * IapReport findUnique
+   */
+  export type IapReportFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+    /**
+     * Filter, which IapReport to fetch.
+     */
+    where: IapReportWhereUniqueInput
+  }
+
+  /**
+   * IapReport findUniqueOrThrow
+   */
+  export type IapReportFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+    /**
+     * Filter, which IapReport to fetch.
+     */
+    where: IapReportWhereUniqueInput
+  }
+
+  /**
+   * IapReport findFirst
+   */
+  export type IapReportFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+    /**
+     * Filter, which IapReport to fetch.
+     */
+    where?: IapReportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of IapReports to fetch.
+     */
+    orderBy?: IapReportOrderByWithRelationInput | IapReportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for IapReports.
+     */
+    cursor?: IapReportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` IapReports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` IapReports.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of IapReports.
+     */
+    distinct?: IapReportScalarFieldEnum | IapReportScalarFieldEnum[]
+  }
+
+  /**
+   * IapReport findFirstOrThrow
+   */
+  export type IapReportFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+    /**
+     * Filter, which IapReport to fetch.
+     */
+    where?: IapReportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of IapReports to fetch.
+     */
+    orderBy?: IapReportOrderByWithRelationInput | IapReportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for IapReports.
+     */
+    cursor?: IapReportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` IapReports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` IapReports.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of IapReports.
+     */
+    distinct?: IapReportScalarFieldEnum | IapReportScalarFieldEnum[]
+  }
+
+  /**
+   * IapReport findMany
+   */
+  export type IapReportFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+    /**
+     * Filter, which IapReports to fetch.
+     */
+    where?: IapReportWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of IapReports to fetch.
+     */
+    orderBy?: IapReportOrderByWithRelationInput | IapReportOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing IapReports.
+     */
+    cursor?: IapReportWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` IapReports from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` IapReports.
+     */
+    skip?: number
+    distinct?: IapReportScalarFieldEnum | IapReportScalarFieldEnum[]
+  }
+
+  /**
+   * IapReport create
+   */
+  export type IapReportCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+    /**
+     * The data needed to create a IapReport.
+     */
+    data: XOR<IapReportCreateInput, IapReportUncheckedCreateInput>
+  }
+
+  /**
+   * IapReport createMany
+   */
+  export type IapReportCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many IapReports.
+     */
+    data: IapReportCreateManyInput | IapReportCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * IapReport createManyAndReturn
+   */
+  export type IapReportCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * The data used to create many IapReports.
+     */
+    data: IapReportCreateManyInput | IapReportCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * IapReport update
+   */
+  export type IapReportUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+    /**
+     * The data needed to update a IapReport.
+     */
+    data: XOR<IapReportUpdateInput, IapReportUncheckedUpdateInput>
+    /**
+     * Choose, which IapReport to update.
+     */
+    where: IapReportWhereUniqueInput
+  }
+
+  /**
+   * IapReport updateMany
+   */
+  export type IapReportUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update IapReports.
+     */
+    data: XOR<IapReportUpdateManyMutationInput, IapReportUncheckedUpdateManyInput>
+    /**
+     * Filter which IapReports to update
+     */
+    where?: IapReportWhereInput
+    /**
+     * Limit how many IapReports to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * IapReport updateManyAndReturn
+   */
+  export type IapReportUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * The data used to update IapReports.
+     */
+    data: XOR<IapReportUpdateManyMutationInput, IapReportUncheckedUpdateManyInput>
+    /**
+     * Filter which IapReports to update
+     */
+    where?: IapReportWhereInput
+    /**
+     * Limit how many IapReports to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * IapReport upsert
+   */
+  export type IapReportUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+    /**
+     * The filter to search for the IapReport to update in case it exists.
+     */
+    where: IapReportWhereUniqueInput
+    /**
+     * In case the IapReport found by the `where` argument doesn't exist, create a new IapReport with this data.
+     */
+    create: XOR<IapReportCreateInput, IapReportUncheckedCreateInput>
+    /**
+     * In case the IapReport was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<IapReportUpdateInput, IapReportUncheckedUpdateInput>
+  }
+
+  /**
+   * IapReport delete
+   */
+  export type IapReportDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+    /**
+     * Filter which IapReport to delete.
+     */
+    where: IapReportWhereUniqueInput
+  }
+
+  /**
+   * IapReport deleteMany
+   */
+  export type IapReportDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which IapReports to delete
+     */
+    where?: IapReportWhereInput
+    /**
+     * Limit how many IapReports to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * IapReport without action
+   */
+  export type IapReportDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IapReport
+     */
+    select?: IapReportSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the IapReport
+     */
+    omit?: IapReportOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: IapReportInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -12606,7 +15380,9 @@ export namespace Prisma {
     companyAddress: 'companyAddress',
     companyPhone: 'companyPhone',
     companyEmail: 'companyEmail',
+    companyPOBox: 'companyPOBox',
     supervisorName: 'supervisorName',
+    supervisorDesignation: 'supervisorDesignation',
     supervisorEmail: 'supervisorEmail',
     internshipStart: 'internshipStart',
     internshipEnd: 'internshipEnd',
@@ -12614,6 +15390,34 @@ export namespace Prisma {
   };
 
   export type StudentScalarFieldEnum = (typeof StudentScalarFieldEnum)[keyof typeof StudentScalarFieldEnum]
+
+
+  export const WeeklyLogScalarFieldEnum: {
+    id: 'id',
+    studentId: 'studentId',
+    weekNumber: 'weekNumber',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    mondayTask: 'mondayTask',
+    mondayHours: 'mondayHours',
+    tuesdayTask: 'tuesdayTask',
+    tuesdayHours: 'tuesdayHours',
+    wednesdayTask: 'wednesdayTask',
+    wednesdayHours: 'wednesdayHours',
+    thursdayTask: 'thursdayTask',
+    thursdayHours: 'thursdayHours',
+    fridayTask: 'fridayTask',
+    fridayHours: 'fridayHours',
+    totalHours: 'totalHours',
+    generalStatement: 'generalStatement',
+    grade: 'grade',
+    supervisorSignature: 'supervisorSignature',
+    dateSigned: 'dateSigned',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type WeeklyLogScalarFieldEnum = (typeof WeeklyLogScalarFieldEnum)[keyof typeof WeeklyLogScalarFieldEnum]
 
 
   export const UserScalarFieldEnum: {
@@ -12729,6 +15533,22 @@ export namespace Prisma {
   export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
 
 
+  export const IapReportScalarFieldEnum: {
+    id: 'id',
+    studentId: 'studentId',
+    loVisitCount: 'loVisitCount',
+    isUseful: 'isUseful',
+    improvedUnderstanding: 'improvedUnderstanding',
+    providedExperiences: 'providedExperiences',
+    programmeTypes: 'programmeTypes',
+    otherProgrammeDetails: 'otherProgrammeDetails',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type IapReportScalarFieldEnum = (typeof IapReportScalarFieldEnum)[keyof typeof IapReportScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -12808,6 +15628,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
    * Reference to a field of type 'UserRole'
    */
   export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole'>
@@ -12832,20 +15666,6 @@ export namespace Prisma {
    * Reference to a field of type 'TaskStatus[]'
    */
   export type ListEnumTaskStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskStatus[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
   /**
    * Deep Input Types
@@ -12874,7 +15694,9 @@ export namespace Prisma {
     companyAddress?: StringNullableFilter<"Student"> | string | null
     companyPhone?: StringNullableFilter<"Student"> | string | null
     companyEmail?: StringNullableFilter<"Student"> | string | null
+    companyPOBox?: StringNullableFilter<"Student"> | string | null
     supervisorName?: StringNullableFilter<"Student"> | string | null
+    supervisorDesignation?: StringNullableFilter<"Student"> | string | null
     supervisorEmail?: StringNullableFilter<"Student"> | string | null
     internshipStart?: DateTimeNullableFilter<"Student"> | Date | string | null
     internshipEnd?: DateTimeNullableFilter<"Student"> | Date | string | null
@@ -12883,6 +15705,8 @@ export namespace Prisma {
     supervisor?: XOR<SupervisorScalarRelationFilter, SupervisorWhereInput>
     tasks?: TaskListRelationFilter
     logEntries?: LogEntryListRelationFilter
+    weeklyLogs?: WeeklyLogListRelationFilter
+    iapReport?: XOR<IapReportNullableScalarRelationFilter, IapReportWhereInput> | null
     ratings?: RatingListRelationFilter
   }
 
@@ -12905,7 +15729,9 @@ export namespace Prisma {
     companyAddress?: SortOrderInput | SortOrder
     companyPhone?: SortOrderInput | SortOrder
     companyEmail?: SortOrderInput | SortOrder
+    companyPOBox?: SortOrderInput | SortOrder
     supervisorName?: SortOrderInput | SortOrder
+    supervisorDesignation?: SortOrderInput | SortOrder
     supervisorEmail?: SortOrderInput | SortOrder
     internshipStart?: SortOrderInput | SortOrder
     internshipEnd?: SortOrderInput | SortOrder
@@ -12914,6 +15740,8 @@ export namespace Prisma {
     supervisor?: SupervisorOrderByWithRelationInput
     tasks?: TaskOrderByRelationAggregateInput
     logEntries?: LogEntryOrderByRelationAggregateInput
+    weeklyLogs?: WeeklyLogOrderByRelationAggregateInput
+    iapReport?: IapReportOrderByWithRelationInput
     ratings?: RatingOrderByRelationAggregateInput
   }
 
@@ -12939,7 +15767,9 @@ export namespace Prisma {
     companyAddress?: StringNullableFilter<"Student"> | string | null
     companyPhone?: StringNullableFilter<"Student"> | string | null
     companyEmail?: StringNullableFilter<"Student"> | string | null
+    companyPOBox?: StringNullableFilter<"Student"> | string | null
     supervisorName?: StringNullableFilter<"Student"> | string | null
+    supervisorDesignation?: StringNullableFilter<"Student"> | string | null
     supervisorEmail?: StringNullableFilter<"Student"> | string | null
     internshipStart?: DateTimeNullableFilter<"Student"> | Date | string | null
     internshipEnd?: DateTimeNullableFilter<"Student"> | Date | string | null
@@ -12948,6 +15778,8 @@ export namespace Prisma {
     supervisor?: XOR<SupervisorScalarRelationFilter, SupervisorWhereInput>
     tasks?: TaskListRelationFilter
     logEntries?: LogEntryListRelationFilter
+    weeklyLogs?: WeeklyLogListRelationFilter
+    iapReport?: XOR<IapReportNullableScalarRelationFilter, IapReportWhereInput> | null
     ratings?: RatingListRelationFilter
   }, "id" | "userId" | "studentNumber" | "profileToken">
 
@@ -12970,7 +15802,9 @@ export namespace Prisma {
     companyAddress?: SortOrderInput | SortOrder
     companyPhone?: SortOrderInput | SortOrder
     companyEmail?: SortOrderInput | SortOrder
+    companyPOBox?: SortOrderInput | SortOrder
     supervisorName?: SortOrderInput | SortOrder
+    supervisorDesignation?: SortOrderInput | SortOrder
     supervisorEmail?: SortOrderInput | SortOrder
     internshipStart?: SortOrderInput | SortOrder
     internshipEnd?: SortOrderInput | SortOrder
@@ -13004,11 +15838,155 @@ export namespace Prisma {
     companyAddress?: StringNullableWithAggregatesFilter<"Student"> | string | null
     companyPhone?: StringNullableWithAggregatesFilter<"Student"> | string | null
     companyEmail?: StringNullableWithAggregatesFilter<"Student"> | string | null
+    companyPOBox?: StringNullableWithAggregatesFilter<"Student"> | string | null
     supervisorName?: StringNullableWithAggregatesFilter<"Student"> | string | null
+    supervisorDesignation?: StringNullableWithAggregatesFilter<"Student"> | string | null
     supervisorEmail?: StringNullableWithAggregatesFilter<"Student"> | string | null
     internshipStart?: DateTimeNullableWithAggregatesFilter<"Student"> | Date | string | null
     internshipEnd?: DateTimeNullableWithAggregatesFilter<"Student"> | Date | string | null
     supervisorId?: IntWithAggregatesFilter<"Student"> | number
+  }
+
+  export type WeeklyLogWhereInput = {
+    AND?: WeeklyLogWhereInput | WeeklyLogWhereInput[]
+    OR?: WeeklyLogWhereInput[]
+    NOT?: WeeklyLogWhereInput | WeeklyLogWhereInput[]
+    id?: IntFilter<"WeeklyLog"> | number
+    studentId?: IntFilter<"WeeklyLog"> | number
+    weekNumber?: IntFilter<"WeeklyLog"> | number
+    startDate?: DateTimeFilter<"WeeklyLog"> | Date | string
+    endDate?: DateTimeFilter<"WeeklyLog"> | Date | string
+    mondayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    mondayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    tuesdayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    tuesdayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    wednesdayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    wednesdayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    thursdayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    thursdayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    fridayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    fridayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    totalHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    generalStatement?: StringNullableFilter<"WeeklyLog"> | string | null
+    grade?: StringNullableFilter<"WeeklyLog"> | string | null
+    supervisorSignature?: StringNullableFilter<"WeeklyLog"> | string | null
+    dateSigned?: DateTimeNullableFilter<"WeeklyLog"> | Date | string | null
+    createdAt?: DateTimeFilter<"WeeklyLog"> | Date | string
+    updatedAt?: DateTimeFilter<"WeeklyLog"> | Date | string
+    student?: XOR<StudentScalarRelationFilter, StudentWhereInput>
+  }
+
+  export type WeeklyLogOrderByWithRelationInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    weekNumber?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    mondayTask?: SortOrderInput | SortOrder
+    mondayHours?: SortOrderInput | SortOrder
+    tuesdayTask?: SortOrderInput | SortOrder
+    tuesdayHours?: SortOrderInput | SortOrder
+    wednesdayTask?: SortOrderInput | SortOrder
+    wednesdayHours?: SortOrderInput | SortOrder
+    thursdayTask?: SortOrderInput | SortOrder
+    thursdayHours?: SortOrderInput | SortOrder
+    fridayTask?: SortOrderInput | SortOrder
+    fridayHours?: SortOrderInput | SortOrder
+    totalHours?: SortOrderInput | SortOrder
+    generalStatement?: SortOrderInput | SortOrder
+    grade?: SortOrderInput | SortOrder
+    supervisorSignature?: SortOrderInput | SortOrder
+    dateSigned?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    student?: StudentOrderByWithRelationInput
+  }
+
+  export type WeeklyLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: WeeklyLogWhereInput | WeeklyLogWhereInput[]
+    OR?: WeeklyLogWhereInput[]
+    NOT?: WeeklyLogWhereInput | WeeklyLogWhereInput[]
+    studentId?: IntFilter<"WeeklyLog"> | number
+    weekNumber?: IntFilter<"WeeklyLog"> | number
+    startDate?: DateTimeFilter<"WeeklyLog"> | Date | string
+    endDate?: DateTimeFilter<"WeeklyLog"> | Date | string
+    mondayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    mondayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    tuesdayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    tuesdayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    wednesdayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    wednesdayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    thursdayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    thursdayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    fridayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    fridayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    totalHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    generalStatement?: StringNullableFilter<"WeeklyLog"> | string | null
+    grade?: StringNullableFilter<"WeeklyLog"> | string | null
+    supervisorSignature?: StringNullableFilter<"WeeklyLog"> | string | null
+    dateSigned?: DateTimeNullableFilter<"WeeklyLog"> | Date | string | null
+    createdAt?: DateTimeFilter<"WeeklyLog"> | Date | string
+    updatedAt?: DateTimeFilter<"WeeklyLog"> | Date | string
+    student?: XOR<StudentScalarRelationFilter, StudentWhereInput>
+  }, "id">
+
+  export type WeeklyLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    weekNumber?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    mondayTask?: SortOrderInput | SortOrder
+    mondayHours?: SortOrderInput | SortOrder
+    tuesdayTask?: SortOrderInput | SortOrder
+    tuesdayHours?: SortOrderInput | SortOrder
+    wednesdayTask?: SortOrderInput | SortOrder
+    wednesdayHours?: SortOrderInput | SortOrder
+    thursdayTask?: SortOrderInput | SortOrder
+    thursdayHours?: SortOrderInput | SortOrder
+    fridayTask?: SortOrderInput | SortOrder
+    fridayHours?: SortOrderInput | SortOrder
+    totalHours?: SortOrderInput | SortOrder
+    generalStatement?: SortOrderInput | SortOrder
+    grade?: SortOrderInput | SortOrder
+    supervisorSignature?: SortOrderInput | SortOrder
+    dateSigned?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: WeeklyLogCountOrderByAggregateInput
+    _avg?: WeeklyLogAvgOrderByAggregateInput
+    _max?: WeeklyLogMaxOrderByAggregateInput
+    _min?: WeeklyLogMinOrderByAggregateInput
+    _sum?: WeeklyLogSumOrderByAggregateInput
+  }
+
+  export type WeeklyLogScalarWhereWithAggregatesInput = {
+    AND?: WeeklyLogScalarWhereWithAggregatesInput | WeeklyLogScalarWhereWithAggregatesInput[]
+    OR?: WeeklyLogScalarWhereWithAggregatesInput[]
+    NOT?: WeeklyLogScalarWhereWithAggregatesInput | WeeklyLogScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"WeeklyLog"> | number
+    studentId?: IntWithAggregatesFilter<"WeeklyLog"> | number
+    weekNumber?: IntWithAggregatesFilter<"WeeklyLog"> | number
+    startDate?: DateTimeWithAggregatesFilter<"WeeklyLog"> | Date | string
+    endDate?: DateTimeWithAggregatesFilter<"WeeklyLog"> | Date | string
+    mondayTask?: StringNullableWithAggregatesFilter<"WeeklyLog"> | string | null
+    mondayHours?: FloatNullableWithAggregatesFilter<"WeeklyLog"> | number | null
+    tuesdayTask?: StringNullableWithAggregatesFilter<"WeeklyLog"> | string | null
+    tuesdayHours?: FloatNullableWithAggregatesFilter<"WeeklyLog"> | number | null
+    wednesdayTask?: StringNullableWithAggregatesFilter<"WeeklyLog"> | string | null
+    wednesdayHours?: FloatNullableWithAggregatesFilter<"WeeklyLog"> | number | null
+    thursdayTask?: StringNullableWithAggregatesFilter<"WeeklyLog"> | string | null
+    thursdayHours?: FloatNullableWithAggregatesFilter<"WeeklyLog"> | number | null
+    fridayTask?: StringNullableWithAggregatesFilter<"WeeklyLog"> | string | null
+    fridayHours?: FloatNullableWithAggregatesFilter<"WeeklyLog"> | number | null
+    totalHours?: FloatNullableWithAggregatesFilter<"WeeklyLog"> | number | null
+    generalStatement?: StringNullableWithAggregatesFilter<"WeeklyLog"> | string | null
+    grade?: StringNullableWithAggregatesFilter<"WeeklyLog"> | string | null
+    supervisorSignature?: StringNullableWithAggregatesFilter<"WeeklyLog"> | string | null
+    dateSigned?: DateTimeNullableWithAggregatesFilter<"WeeklyLog"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"WeeklyLog"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"WeeklyLog"> | Date | string
   }
 
   export type UserWhereInput = {
@@ -13619,6 +16597,88 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Message"> | Date | string
   }
 
+  export type IapReportWhereInput = {
+    AND?: IapReportWhereInput | IapReportWhereInput[]
+    OR?: IapReportWhereInput[]
+    NOT?: IapReportWhereInput | IapReportWhereInput[]
+    id?: IntFilter<"IapReport"> | number
+    studentId?: IntFilter<"IapReport"> | number
+    loVisitCount?: IntNullableFilter<"IapReport"> | number | null
+    isUseful?: BoolNullableFilter<"IapReport"> | boolean | null
+    improvedUnderstanding?: BoolNullableFilter<"IapReport"> | boolean | null
+    providedExperiences?: BoolNullableFilter<"IapReport"> | boolean | null
+    programmeTypes?: StringNullableListFilter<"IapReport">
+    otherProgrammeDetails?: StringNullableFilter<"IapReport"> | string | null
+    createdAt?: DateTimeFilter<"IapReport"> | Date | string
+    updatedAt?: DateTimeFilter<"IapReport"> | Date | string
+    student?: XOR<StudentScalarRelationFilter, StudentWhereInput>
+  }
+
+  export type IapReportOrderByWithRelationInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    loVisitCount?: SortOrderInput | SortOrder
+    isUseful?: SortOrderInput | SortOrder
+    improvedUnderstanding?: SortOrderInput | SortOrder
+    providedExperiences?: SortOrderInput | SortOrder
+    programmeTypes?: SortOrder
+    otherProgrammeDetails?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    student?: StudentOrderByWithRelationInput
+  }
+
+  export type IapReportWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    studentId?: number
+    AND?: IapReportWhereInput | IapReportWhereInput[]
+    OR?: IapReportWhereInput[]
+    NOT?: IapReportWhereInput | IapReportWhereInput[]
+    loVisitCount?: IntNullableFilter<"IapReport"> | number | null
+    isUseful?: BoolNullableFilter<"IapReport"> | boolean | null
+    improvedUnderstanding?: BoolNullableFilter<"IapReport"> | boolean | null
+    providedExperiences?: BoolNullableFilter<"IapReport"> | boolean | null
+    programmeTypes?: StringNullableListFilter<"IapReport">
+    otherProgrammeDetails?: StringNullableFilter<"IapReport"> | string | null
+    createdAt?: DateTimeFilter<"IapReport"> | Date | string
+    updatedAt?: DateTimeFilter<"IapReport"> | Date | string
+    student?: XOR<StudentScalarRelationFilter, StudentWhereInput>
+  }, "id" | "studentId">
+
+  export type IapReportOrderByWithAggregationInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    loVisitCount?: SortOrderInput | SortOrder
+    isUseful?: SortOrderInput | SortOrder
+    improvedUnderstanding?: SortOrderInput | SortOrder
+    providedExperiences?: SortOrderInput | SortOrder
+    programmeTypes?: SortOrder
+    otherProgrammeDetails?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: IapReportCountOrderByAggregateInput
+    _avg?: IapReportAvgOrderByAggregateInput
+    _max?: IapReportMaxOrderByAggregateInput
+    _min?: IapReportMinOrderByAggregateInput
+    _sum?: IapReportSumOrderByAggregateInput
+  }
+
+  export type IapReportScalarWhereWithAggregatesInput = {
+    AND?: IapReportScalarWhereWithAggregatesInput | IapReportScalarWhereWithAggregatesInput[]
+    OR?: IapReportScalarWhereWithAggregatesInput[]
+    NOT?: IapReportScalarWhereWithAggregatesInput | IapReportScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"IapReport"> | number
+    studentId?: IntWithAggregatesFilter<"IapReport"> | number
+    loVisitCount?: IntNullableWithAggregatesFilter<"IapReport"> | number | null
+    isUseful?: BoolNullableWithAggregatesFilter<"IapReport"> | boolean | null
+    improvedUnderstanding?: BoolNullableWithAggregatesFilter<"IapReport"> | boolean | null
+    providedExperiences?: BoolNullableWithAggregatesFilter<"IapReport"> | boolean | null
+    programmeTypes?: StringNullableListFilter<"IapReport">
+    otherProgrammeDetails?: StringNullableWithAggregatesFilter<"IapReport"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"IapReport"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"IapReport"> | Date | string
+  }
+
   export type StudentCreateInput = {
     studentNumber: string
     fullName: string
@@ -13636,7 +16696,9 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
@@ -13644,6 +16706,8 @@ export namespace Prisma {
     supervisor: SupervisorCreateNestedOneWithoutStudentsInput
     tasks?: TaskCreateNestedManyWithoutStudentInput
     logEntries?: LogEntryCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportCreateNestedOneWithoutStudentInput
     ratings?: RatingCreateNestedManyWithoutStudentInput
   }
 
@@ -13666,13 +16730,17 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
     supervisorId: number
     tasks?: TaskUncheckedCreateNestedManyWithoutStudentInput
     logEntries?: LogEntryUncheckedCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogUncheckedCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportUncheckedCreateNestedOneWithoutStudentInput
     ratings?: RatingUncheckedCreateNestedManyWithoutStudentInput
   }
 
@@ -13693,7 +16761,9 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13701,6 +16771,8 @@ export namespace Prisma {
     supervisor?: SupervisorUpdateOneRequiredWithoutStudentsNestedInput
     tasks?: TaskUpdateManyWithoutStudentNestedInput
     logEntries?: LogEntryUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUpdateOneWithoutStudentNestedInput
     ratings?: RatingUpdateManyWithoutStudentNestedInput
   }
 
@@ -13723,13 +16795,17 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     supervisorId?: IntFieldUpdateOperationsInput | number
     tasks?: TaskUncheckedUpdateManyWithoutStudentNestedInput
     logEntries?: LogEntryUncheckedUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUncheckedUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUncheckedUpdateOneWithoutStudentNestedInput
     ratings?: RatingUncheckedUpdateManyWithoutStudentNestedInput
   }
 
@@ -13752,7 +16828,9 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
@@ -13776,7 +16854,9 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13801,11 +16881,184 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     supervisorId?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type WeeklyLogCreateInput = {
+    weekNumber: number
+    startDate: Date | string
+    endDate: Date | string
+    mondayTask?: string | null
+    mondayHours?: number | null
+    tuesdayTask?: string | null
+    tuesdayHours?: number | null
+    wednesdayTask?: string | null
+    wednesdayHours?: number | null
+    thursdayTask?: string | null
+    thursdayHours?: number | null
+    fridayTask?: string | null
+    fridayHours?: number | null
+    totalHours?: number | null
+    generalStatement?: string | null
+    grade?: string | null
+    supervisorSignature?: string | null
+    dateSigned?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    student: StudentCreateNestedOneWithoutWeeklyLogsInput
+  }
+
+  export type WeeklyLogUncheckedCreateInput = {
+    id?: number
+    studentId: number
+    weekNumber: number
+    startDate: Date | string
+    endDate: Date | string
+    mondayTask?: string | null
+    mondayHours?: number | null
+    tuesdayTask?: string | null
+    tuesdayHours?: number | null
+    wednesdayTask?: string | null
+    wednesdayHours?: number | null
+    thursdayTask?: string | null
+    thursdayHours?: number | null
+    fridayTask?: string | null
+    fridayHours?: number | null
+    totalHours?: number | null
+    generalStatement?: string | null
+    grade?: string | null
+    supervisorSignature?: string | null
+    dateSigned?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WeeklyLogUpdateInput = {
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    mondayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    mondayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    tuesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    tuesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    wednesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    wednesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    thursdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    thursdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    fridayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    fridayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    generalStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorSignature?: NullableStringFieldUpdateOperationsInput | string | null
+    dateSigned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    student?: StudentUpdateOneRequiredWithoutWeeklyLogsNestedInput
+  }
+
+  export type WeeklyLogUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    studentId?: IntFieldUpdateOperationsInput | number
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    mondayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    mondayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    tuesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    tuesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    wednesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    wednesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    thursdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    thursdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    fridayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    fridayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    generalStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorSignature?: NullableStringFieldUpdateOperationsInput | string | null
+    dateSigned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WeeklyLogCreateManyInput = {
+    id?: number
+    studentId: number
+    weekNumber: number
+    startDate: Date | string
+    endDate: Date | string
+    mondayTask?: string | null
+    mondayHours?: number | null
+    tuesdayTask?: string | null
+    tuesdayHours?: number | null
+    wednesdayTask?: string | null
+    wednesdayHours?: number | null
+    thursdayTask?: string | null
+    thursdayHours?: number | null
+    fridayTask?: string | null
+    fridayHours?: number | null
+    totalHours?: number | null
+    generalStatement?: string | null
+    grade?: string | null
+    supervisorSignature?: string | null
+    dateSigned?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WeeklyLogUpdateManyMutationInput = {
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    mondayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    mondayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    tuesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    tuesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    wednesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    wednesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    thursdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    thursdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    fridayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    fridayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    generalStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorSignature?: NullableStringFieldUpdateOperationsInput | string | null
+    dateSigned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WeeklyLogUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    studentId?: IntFieldUpdateOperationsInput | number
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    mondayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    mondayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    tuesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    tuesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    wednesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    wednesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    thursdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    thursdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    fridayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    fridayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    generalStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorSignature?: NullableStringFieldUpdateOperationsInput | string | null
+    dateSigned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserCreateInput = {
@@ -14430,6 +17683,93 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type IapReportCreateInput = {
+    loVisitCount?: number | null
+    isUseful?: boolean | null
+    improvedUnderstanding?: boolean | null
+    providedExperiences?: boolean | null
+    programmeTypes?: IapReportCreateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    student: StudentCreateNestedOneWithoutIapReportInput
+  }
+
+  export type IapReportUncheckedCreateInput = {
+    id?: number
+    studentId: number
+    loVisitCount?: number | null
+    isUseful?: boolean | null
+    improvedUnderstanding?: boolean | null
+    providedExperiences?: boolean | null
+    programmeTypes?: IapReportCreateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type IapReportUpdateInput = {
+    loVisitCount?: NullableIntFieldUpdateOperationsInput | number | null
+    isUseful?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    improvedUnderstanding?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    providedExperiences?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    programmeTypes?: IapReportUpdateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    student?: StudentUpdateOneRequiredWithoutIapReportNestedInput
+  }
+
+  export type IapReportUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    studentId?: IntFieldUpdateOperationsInput | number
+    loVisitCount?: NullableIntFieldUpdateOperationsInput | number | null
+    isUseful?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    improvedUnderstanding?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    providedExperiences?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    programmeTypes?: IapReportUpdateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type IapReportCreateManyInput = {
+    id?: number
+    studentId: number
+    loVisitCount?: number | null
+    isUseful?: boolean | null
+    improvedUnderstanding?: boolean | null
+    providedExperiences?: boolean | null
+    programmeTypes?: IapReportCreateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type IapReportUpdateManyMutationInput = {
+    loVisitCount?: NullableIntFieldUpdateOperationsInput | number | null
+    isUseful?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    improvedUnderstanding?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    providedExperiences?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    programmeTypes?: IapReportUpdateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type IapReportUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    studentId?: IntFieldUpdateOperationsInput | number
+    loVisitCount?: NullableIntFieldUpdateOperationsInput | number | null
+    isUseful?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    improvedUnderstanding?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    providedExperiences?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    programmeTypes?: IapReportUpdateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -14520,6 +17860,17 @@ export namespace Prisma {
     none?: LogEntryWhereInput
   }
 
+  export type WeeklyLogListRelationFilter = {
+    every?: WeeklyLogWhereInput
+    some?: WeeklyLogWhereInput
+    none?: WeeklyLogWhereInput
+  }
+
+  export type IapReportNullableScalarRelationFilter = {
+    is?: IapReportWhereInput | null
+    isNot?: IapReportWhereInput | null
+  }
+
   export type RatingListRelationFilter = {
     every?: RatingWhereInput
     some?: RatingWhereInput
@@ -14536,6 +17887,10 @@ export namespace Prisma {
   }
 
   export type LogEntryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type WeeklyLogOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -14562,7 +17917,9 @@ export namespace Prisma {
     companyAddress?: SortOrder
     companyPhone?: SortOrder
     companyEmail?: SortOrder
+    companyPOBox?: SortOrder
     supervisorName?: SortOrder
+    supervisorDesignation?: SortOrder
     supervisorEmail?: SortOrder
     internshipStart?: SortOrder
     internshipEnd?: SortOrder
@@ -14594,7 +17951,9 @@ export namespace Prisma {
     companyAddress?: SortOrder
     companyPhone?: SortOrder
     companyEmail?: SortOrder
+    companyPOBox?: SortOrder
     supervisorName?: SortOrder
+    supervisorDesignation?: SortOrder
     supervisorEmail?: SortOrder
     internshipStart?: SortOrder
     internshipEnd?: SortOrder
@@ -14620,7 +17979,9 @@ export namespace Prisma {
     companyAddress?: SortOrder
     companyPhone?: SortOrder
     companyEmail?: SortOrder
+    companyPOBox?: SortOrder
     supervisorName?: SortOrder
+    supervisorDesignation?: SortOrder
     supervisorEmail?: SortOrder
     internshipStart?: SortOrder
     internshipEnd?: SortOrder
@@ -14719,6 +18080,137 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type StudentScalarRelationFilter = {
+    is?: StudentWhereInput
+    isNot?: StudentWhereInput
+  }
+
+  export type WeeklyLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    weekNumber?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    mondayTask?: SortOrder
+    mondayHours?: SortOrder
+    tuesdayTask?: SortOrder
+    tuesdayHours?: SortOrder
+    wednesdayTask?: SortOrder
+    wednesdayHours?: SortOrder
+    thursdayTask?: SortOrder
+    thursdayHours?: SortOrder
+    fridayTask?: SortOrder
+    fridayHours?: SortOrder
+    totalHours?: SortOrder
+    generalStatement?: SortOrder
+    grade?: SortOrder
+    supervisorSignature?: SortOrder
+    dateSigned?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WeeklyLogAvgOrderByAggregateInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    weekNumber?: SortOrder
+    mondayHours?: SortOrder
+    tuesdayHours?: SortOrder
+    wednesdayHours?: SortOrder
+    thursdayHours?: SortOrder
+    fridayHours?: SortOrder
+    totalHours?: SortOrder
+  }
+
+  export type WeeklyLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    weekNumber?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    mondayTask?: SortOrder
+    mondayHours?: SortOrder
+    tuesdayTask?: SortOrder
+    tuesdayHours?: SortOrder
+    wednesdayTask?: SortOrder
+    wednesdayHours?: SortOrder
+    thursdayTask?: SortOrder
+    thursdayHours?: SortOrder
+    fridayTask?: SortOrder
+    fridayHours?: SortOrder
+    totalHours?: SortOrder
+    generalStatement?: SortOrder
+    grade?: SortOrder
+    supervisorSignature?: SortOrder
+    dateSigned?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WeeklyLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    weekNumber?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    mondayTask?: SortOrder
+    mondayHours?: SortOrder
+    tuesdayTask?: SortOrder
+    tuesdayHours?: SortOrder
+    wednesdayTask?: SortOrder
+    wednesdayHours?: SortOrder
+    thursdayTask?: SortOrder
+    thursdayHours?: SortOrder
+    fridayTask?: SortOrder
+    fridayHours?: SortOrder
+    totalHours?: SortOrder
+    generalStatement?: SortOrder
+    grade?: SortOrder
+    supervisorSignature?: SortOrder
+    dateSigned?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type WeeklyLogSumOrderByAggregateInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    weekNumber?: SortOrder
+    mondayHours?: SortOrder
+    tuesdayHours?: SortOrder
+    wednesdayHours?: SortOrder
+    thursdayHours?: SortOrder
+    fridayHours?: SortOrder
+    totalHours?: SortOrder
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type EnumUserRoleFilter<$PrismaModel = never> = {
@@ -14980,11 +18472,6 @@ export namespace Prisma {
     not?: NestedEnumTaskStatusFilter<$PrismaModel> | $Enums.TaskStatus
   }
 
-  export type StudentScalarRelationFilter = {
-    is?: StudentWhereInput
-    isNot?: StudentWhereInput
-  }
-
   export type CommentListRelationFilter = {
     every?: CommentWhereInput
     some?: CommentWhereInput
@@ -15223,6 +18710,76 @@ export namespace Prisma {
     receiverId?: SortOrder
   }
 
+  export type BoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
+  export type IapReportCountOrderByAggregateInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    loVisitCount?: SortOrder
+    isUseful?: SortOrder
+    improvedUnderstanding?: SortOrder
+    providedExperiences?: SortOrder
+    programmeTypes?: SortOrder
+    otherProgrammeDetails?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type IapReportAvgOrderByAggregateInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    loVisitCount?: SortOrder
+  }
+
+  export type IapReportMaxOrderByAggregateInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    loVisitCount?: SortOrder
+    isUseful?: SortOrder
+    improvedUnderstanding?: SortOrder
+    providedExperiences?: SortOrder
+    otherProgrammeDetails?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type IapReportMinOrderByAggregateInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    loVisitCount?: SortOrder
+    isUseful?: SortOrder
+    improvedUnderstanding?: SortOrder
+    providedExperiences?: SortOrder
+    otherProgrammeDetails?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type IapReportSumOrderByAggregateInput = {
+    id?: SortOrder
+    studentId?: SortOrder
+    loVisitCount?: SortOrder
+  }
+
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
+  }
+
   export type UserCreateNestedOneWithoutStudentProfileInput = {
     create?: XOR<UserCreateWithoutStudentProfileInput, UserUncheckedCreateWithoutStudentProfileInput>
     connectOrCreate?: UserCreateOrConnectWithoutStudentProfileInput
@@ -15249,6 +18806,19 @@ export namespace Prisma {
     connect?: LogEntryWhereUniqueInput | LogEntryWhereUniqueInput[]
   }
 
+  export type WeeklyLogCreateNestedManyWithoutStudentInput = {
+    create?: XOR<WeeklyLogCreateWithoutStudentInput, WeeklyLogUncheckedCreateWithoutStudentInput> | WeeklyLogCreateWithoutStudentInput[] | WeeklyLogUncheckedCreateWithoutStudentInput[]
+    connectOrCreate?: WeeklyLogCreateOrConnectWithoutStudentInput | WeeklyLogCreateOrConnectWithoutStudentInput[]
+    createMany?: WeeklyLogCreateManyStudentInputEnvelope
+    connect?: WeeklyLogWhereUniqueInput | WeeklyLogWhereUniqueInput[]
+  }
+
+  export type IapReportCreateNestedOneWithoutStudentInput = {
+    create?: XOR<IapReportCreateWithoutStudentInput, IapReportUncheckedCreateWithoutStudentInput>
+    connectOrCreate?: IapReportCreateOrConnectWithoutStudentInput
+    connect?: IapReportWhereUniqueInput
+  }
+
   export type RatingCreateNestedManyWithoutStudentInput = {
     create?: XOR<RatingCreateWithoutStudentInput, RatingUncheckedCreateWithoutStudentInput> | RatingCreateWithoutStudentInput[] | RatingUncheckedCreateWithoutStudentInput[]
     connectOrCreate?: RatingCreateOrConnectWithoutStudentInput | RatingCreateOrConnectWithoutStudentInput[]
@@ -15268,6 +18838,19 @@ export namespace Prisma {
     connectOrCreate?: LogEntryCreateOrConnectWithoutStudentInput | LogEntryCreateOrConnectWithoutStudentInput[]
     createMany?: LogEntryCreateManyStudentInputEnvelope
     connect?: LogEntryWhereUniqueInput | LogEntryWhereUniqueInput[]
+  }
+
+  export type WeeklyLogUncheckedCreateNestedManyWithoutStudentInput = {
+    create?: XOR<WeeklyLogCreateWithoutStudentInput, WeeklyLogUncheckedCreateWithoutStudentInput> | WeeklyLogCreateWithoutStudentInput[] | WeeklyLogUncheckedCreateWithoutStudentInput[]
+    connectOrCreate?: WeeklyLogCreateOrConnectWithoutStudentInput | WeeklyLogCreateOrConnectWithoutStudentInput[]
+    createMany?: WeeklyLogCreateManyStudentInputEnvelope
+    connect?: WeeklyLogWhereUniqueInput | WeeklyLogWhereUniqueInput[]
+  }
+
+  export type IapReportUncheckedCreateNestedOneWithoutStudentInput = {
+    create?: XOR<IapReportCreateWithoutStudentInput, IapReportUncheckedCreateWithoutStudentInput>
+    connectOrCreate?: IapReportCreateOrConnectWithoutStudentInput
+    connect?: IapReportWhereUniqueInput
   }
 
   export type RatingUncheckedCreateNestedManyWithoutStudentInput = {
@@ -15341,6 +18924,30 @@ export namespace Prisma {
     deleteMany?: LogEntryScalarWhereInput | LogEntryScalarWhereInput[]
   }
 
+  export type WeeklyLogUpdateManyWithoutStudentNestedInput = {
+    create?: XOR<WeeklyLogCreateWithoutStudentInput, WeeklyLogUncheckedCreateWithoutStudentInput> | WeeklyLogCreateWithoutStudentInput[] | WeeklyLogUncheckedCreateWithoutStudentInput[]
+    connectOrCreate?: WeeklyLogCreateOrConnectWithoutStudentInput | WeeklyLogCreateOrConnectWithoutStudentInput[]
+    upsert?: WeeklyLogUpsertWithWhereUniqueWithoutStudentInput | WeeklyLogUpsertWithWhereUniqueWithoutStudentInput[]
+    createMany?: WeeklyLogCreateManyStudentInputEnvelope
+    set?: WeeklyLogWhereUniqueInput | WeeklyLogWhereUniqueInput[]
+    disconnect?: WeeklyLogWhereUniqueInput | WeeklyLogWhereUniqueInput[]
+    delete?: WeeklyLogWhereUniqueInput | WeeklyLogWhereUniqueInput[]
+    connect?: WeeklyLogWhereUniqueInput | WeeklyLogWhereUniqueInput[]
+    update?: WeeklyLogUpdateWithWhereUniqueWithoutStudentInput | WeeklyLogUpdateWithWhereUniqueWithoutStudentInput[]
+    updateMany?: WeeklyLogUpdateManyWithWhereWithoutStudentInput | WeeklyLogUpdateManyWithWhereWithoutStudentInput[]
+    deleteMany?: WeeklyLogScalarWhereInput | WeeklyLogScalarWhereInput[]
+  }
+
+  export type IapReportUpdateOneWithoutStudentNestedInput = {
+    create?: XOR<IapReportCreateWithoutStudentInput, IapReportUncheckedCreateWithoutStudentInput>
+    connectOrCreate?: IapReportCreateOrConnectWithoutStudentInput
+    upsert?: IapReportUpsertWithoutStudentInput
+    disconnect?: IapReportWhereInput | boolean
+    delete?: IapReportWhereInput | boolean
+    connect?: IapReportWhereUniqueInput
+    update?: XOR<XOR<IapReportUpdateToOneWithWhereWithoutStudentInput, IapReportUpdateWithoutStudentInput>, IapReportUncheckedUpdateWithoutStudentInput>
+  }
+
   export type RatingUpdateManyWithoutStudentNestedInput = {
     create?: XOR<RatingCreateWithoutStudentInput, RatingUncheckedCreateWithoutStudentInput> | RatingCreateWithoutStudentInput[] | RatingUncheckedCreateWithoutStudentInput[]
     connectOrCreate?: RatingCreateOrConnectWithoutStudentInput | RatingCreateOrConnectWithoutStudentInput[]
@@ -15391,6 +18998,30 @@ export namespace Prisma {
     deleteMany?: LogEntryScalarWhereInput | LogEntryScalarWhereInput[]
   }
 
+  export type WeeklyLogUncheckedUpdateManyWithoutStudentNestedInput = {
+    create?: XOR<WeeklyLogCreateWithoutStudentInput, WeeklyLogUncheckedCreateWithoutStudentInput> | WeeklyLogCreateWithoutStudentInput[] | WeeklyLogUncheckedCreateWithoutStudentInput[]
+    connectOrCreate?: WeeklyLogCreateOrConnectWithoutStudentInput | WeeklyLogCreateOrConnectWithoutStudentInput[]
+    upsert?: WeeklyLogUpsertWithWhereUniqueWithoutStudentInput | WeeklyLogUpsertWithWhereUniqueWithoutStudentInput[]
+    createMany?: WeeklyLogCreateManyStudentInputEnvelope
+    set?: WeeklyLogWhereUniqueInput | WeeklyLogWhereUniqueInput[]
+    disconnect?: WeeklyLogWhereUniqueInput | WeeklyLogWhereUniqueInput[]
+    delete?: WeeklyLogWhereUniqueInput | WeeklyLogWhereUniqueInput[]
+    connect?: WeeklyLogWhereUniqueInput | WeeklyLogWhereUniqueInput[]
+    update?: WeeklyLogUpdateWithWhereUniqueWithoutStudentInput | WeeklyLogUpdateWithWhereUniqueWithoutStudentInput[]
+    updateMany?: WeeklyLogUpdateManyWithWhereWithoutStudentInput | WeeklyLogUpdateManyWithWhereWithoutStudentInput[]
+    deleteMany?: WeeklyLogScalarWhereInput | WeeklyLogScalarWhereInput[]
+  }
+
+  export type IapReportUncheckedUpdateOneWithoutStudentNestedInput = {
+    create?: XOR<IapReportCreateWithoutStudentInput, IapReportUncheckedCreateWithoutStudentInput>
+    connectOrCreate?: IapReportCreateOrConnectWithoutStudentInput
+    upsert?: IapReportUpsertWithoutStudentInput
+    disconnect?: IapReportWhereInput | boolean
+    delete?: IapReportWhereInput | boolean
+    connect?: IapReportWhereUniqueInput
+    update?: XOR<XOR<IapReportUpdateToOneWithWhereWithoutStudentInput, IapReportUpdateWithoutStudentInput>, IapReportUncheckedUpdateWithoutStudentInput>
+  }
+
   export type RatingUncheckedUpdateManyWithoutStudentNestedInput = {
     create?: XOR<RatingCreateWithoutStudentInput, RatingUncheckedCreateWithoutStudentInput> | RatingCreateWithoutStudentInput[] | RatingUncheckedCreateWithoutStudentInput[]
     connectOrCreate?: RatingCreateOrConnectWithoutStudentInput | RatingCreateOrConnectWithoutStudentInput[]
@@ -15403,6 +19034,28 @@ export namespace Prisma {
     update?: RatingUpdateWithWhereUniqueWithoutStudentInput | RatingUpdateWithWhereUniqueWithoutStudentInput[]
     updateMany?: RatingUpdateManyWithWhereWithoutStudentInput | RatingUpdateManyWithWhereWithoutStudentInput[]
     deleteMany?: RatingScalarWhereInput | RatingScalarWhereInput[]
+  }
+
+  export type StudentCreateNestedOneWithoutWeeklyLogsInput = {
+    create?: XOR<StudentCreateWithoutWeeklyLogsInput, StudentUncheckedCreateWithoutWeeklyLogsInput>
+    connectOrCreate?: StudentCreateOrConnectWithoutWeeklyLogsInput
+    connect?: StudentWhereUniqueInput
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type StudentUpdateOneRequiredWithoutWeeklyLogsNestedInput = {
+    create?: XOR<StudentCreateWithoutWeeklyLogsInput, StudentUncheckedCreateWithoutWeeklyLogsInput>
+    connectOrCreate?: StudentCreateOrConnectWithoutWeeklyLogsInput
+    upsert?: StudentUpsertWithoutWeeklyLogsInput
+    connect?: StudentWhereUniqueInput
+    update?: XOR<XOR<StudentUpdateToOneWithWhereWithoutWeeklyLogsInput, StudentUpdateWithoutWeeklyLogsInput>, StudentUncheckedUpdateWithoutWeeklyLogsInput>
   }
 
   export type StudentCreateNestedOneWithoutUserInput = {
@@ -15869,6 +19522,33 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutReceivedMessagesInput, UserUpdateWithoutReceivedMessagesInput>, UserUncheckedUpdateWithoutReceivedMessagesInput>
   }
 
+  export type IapReportCreateprogrammeTypesInput = {
+    set: string[]
+  }
+
+  export type StudentCreateNestedOneWithoutIapReportInput = {
+    create?: XOR<StudentCreateWithoutIapReportInput, StudentUncheckedCreateWithoutIapReportInput>
+    connectOrCreate?: StudentCreateOrConnectWithoutIapReportInput
+    connect?: StudentWhereUniqueInput
+  }
+
+  export type NullableBoolFieldUpdateOperationsInput = {
+    set?: boolean | null
+  }
+
+  export type IapReportUpdateprogrammeTypesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type StudentUpdateOneRequiredWithoutIapReportNestedInput = {
+    create?: XOR<StudentCreateWithoutIapReportInput, StudentUncheckedCreateWithoutIapReportInput>
+    connectOrCreate?: StudentCreateOrConnectWithoutIapReportInput
+    upsert?: StudentUpsertWithoutIapReportInput
+    connect?: StudentWhereUniqueInput
+    update?: XOR<XOR<StudentUpdateToOneWithWhereWithoutIapReportInput, StudentUpdateWithoutIapReportInput>, StudentUncheckedUpdateWithoutIapReportInput>
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -16043,6 +19723,33 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
   export type NestedEnumUserRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel>
     in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
@@ -16083,17 +19790,6 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
   export type NestedEnumUserRoleNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel> | null
     in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel> | null
@@ -16119,6 +19815,19 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumTaskStatusFilter<$PrismaModel>
     _max?: NestedEnumTaskStatusFilter<$PrismaModel>
+  }
+
+  export type NestedBoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type UserCreateWithoutStudentProfileInput = {
@@ -16253,6 +19962,91 @@ export namespace Prisma {
   export type LogEntryCreateManyStudentInputEnvelope = {
     data: LogEntryCreateManyStudentInput | LogEntryCreateManyStudentInput[]
     skipDuplicates?: boolean
+  }
+
+  export type WeeklyLogCreateWithoutStudentInput = {
+    weekNumber: number
+    startDate: Date | string
+    endDate: Date | string
+    mondayTask?: string | null
+    mondayHours?: number | null
+    tuesdayTask?: string | null
+    tuesdayHours?: number | null
+    wednesdayTask?: string | null
+    wednesdayHours?: number | null
+    thursdayTask?: string | null
+    thursdayHours?: number | null
+    fridayTask?: string | null
+    fridayHours?: number | null
+    totalHours?: number | null
+    generalStatement?: string | null
+    grade?: string | null
+    supervisorSignature?: string | null
+    dateSigned?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WeeklyLogUncheckedCreateWithoutStudentInput = {
+    id?: number
+    weekNumber: number
+    startDate: Date | string
+    endDate: Date | string
+    mondayTask?: string | null
+    mondayHours?: number | null
+    tuesdayTask?: string | null
+    tuesdayHours?: number | null
+    wednesdayTask?: string | null
+    wednesdayHours?: number | null
+    thursdayTask?: string | null
+    thursdayHours?: number | null
+    fridayTask?: string | null
+    fridayHours?: number | null
+    totalHours?: number | null
+    generalStatement?: string | null
+    grade?: string | null
+    supervisorSignature?: string | null
+    dateSigned?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WeeklyLogCreateOrConnectWithoutStudentInput = {
+    where: WeeklyLogWhereUniqueInput
+    create: XOR<WeeklyLogCreateWithoutStudentInput, WeeklyLogUncheckedCreateWithoutStudentInput>
+  }
+
+  export type WeeklyLogCreateManyStudentInputEnvelope = {
+    data: WeeklyLogCreateManyStudentInput | WeeklyLogCreateManyStudentInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type IapReportCreateWithoutStudentInput = {
+    loVisitCount?: number | null
+    isUseful?: boolean | null
+    improvedUnderstanding?: boolean | null
+    providedExperiences?: boolean | null
+    programmeTypes?: IapReportCreateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type IapReportUncheckedCreateWithoutStudentInput = {
+    id?: number
+    loVisitCount?: number | null
+    isUseful?: boolean | null
+    improvedUnderstanding?: boolean | null
+    providedExperiences?: boolean | null
+    programmeTypes?: IapReportCreateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type IapReportCreateOrConnectWithoutStudentInput = {
+    where: IapReportWhereUniqueInput
+    create: XOR<IapReportCreateWithoutStudentInput, IapReportUncheckedCreateWithoutStudentInput>
   }
 
   export type RatingCreateWithoutStudentInput = {
@@ -16426,6 +20220,84 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"LogEntry"> | Date | string
   }
 
+  export type WeeklyLogUpsertWithWhereUniqueWithoutStudentInput = {
+    where: WeeklyLogWhereUniqueInput
+    update: XOR<WeeklyLogUpdateWithoutStudentInput, WeeklyLogUncheckedUpdateWithoutStudentInput>
+    create: XOR<WeeklyLogCreateWithoutStudentInput, WeeklyLogUncheckedCreateWithoutStudentInput>
+  }
+
+  export type WeeklyLogUpdateWithWhereUniqueWithoutStudentInput = {
+    where: WeeklyLogWhereUniqueInput
+    data: XOR<WeeklyLogUpdateWithoutStudentInput, WeeklyLogUncheckedUpdateWithoutStudentInput>
+  }
+
+  export type WeeklyLogUpdateManyWithWhereWithoutStudentInput = {
+    where: WeeklyLogScalarWhereInput
+    data: XOR<WeeklyLogUpdateManyMutationInput, WeeklyLogUncheckedUpdateManyWithoutStudentInput>
+  }
+
+  export type WeeklyLogScalarWhereInput = {
+    AND?: WeeklyLogScalarWhereInput | WeeklyLogScalarWhereInput[]
+    OR?: WeeklyLogScalarWhereInput[]
+    NOT?: WeeklyLogScalarWhereInput | WeeklyLogScalarWhereInput[]
+    id?: IntFilter<"WeeklyLog"> | number
+    studentId?: IntFilter<"WeeklyLog"> | number
+    weekNumber?: IntFilter<"WeeklyLog"> | number
+    startDate?: DateTimeFilter<"WeeklyLog"> | Date | string
+    endDate?: DateTimeFilter<"WeeklyLog"> | Date | string
+    mondayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    mondayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    tuesdayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    tuesdayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    wednesdayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    wednesdayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    thursdayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    thursdayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    fridayTask?: StringNullableFilter<"WeeklyLog"> | string | null
+    fridayHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    totalHours?: FloatNullableFilter<"WeeklyLog"> | number | null
+    generalStatement?: StringNullableFilter<"WeeklyLog"> | string | null
+    grade?: StringNullableFilter<"WeeklyLog"> | string | null
+    supervisorSignature?: StringNullableFilter<"WeeklyLog"> | string | null
+    dateSigned?: DateTimeNullableFilter<"WeeklyLog"> | Date | string | null
+    createdAt?: DateTimeFilter<"WeeklyLog"> | Date | string
+    updatedAt?: DateTimeFilter<"WeeklyLog"> | Date | string
+  }
+
+  export type IapReportUpsertWithoutStudentInput = {
+    update: XOR<IapReportUpdateWithoutStudentInput, IapReportUncheckedUpdateWithoutStudentInput>
+    create: XOR<IapReportCreateWithoutStudentInput, IapReportUncheckedCreateWithoutStudentInput>
+    where?: IapReportWhereInput
+  }
+
+  export type IapReportUpdateToOneWithWhereWithoutStudentInput = {
+    where?: IapReportWhereInput
+    data: XOR<IapReportUpdateWithoutStudentInput, IapReportUncheckedUpdateWithoutStudentInput>
+  }
+
+  export type IapReportUpdateWithoutStudentInput = {
+    loVisitCount?: NullableIntFieldUpdateOperationsInput | number | null
+    isUseful?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    improvedUnderstanding?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    providedExperiences?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    programmeTypes?: IapReportUpdateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type IapReportUncheckedUpdateWithoutStudentInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    loVisitCount?: NullableIntFieldUpdateOperationsInput | number | null
+    isUseful?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    improvedUnderstanding?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    providedExperiences?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    programmeTypes?: IapReportUpdateprogrammeTypesInput | string[]
+    otherProgrammeDetails?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type RatingUpsertWithWhereUniqueWithoutStudentInput = {
     where: RatingWhereUniqueInput
     update: XOR<RatingUpdateWithoutStudentInput, RatingUncheckedUpdateWithoutStudentInput>
@@ -16455,6 +20327,148 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Rating"> | Date | string
   }
 
+  export type StudentCreateWithoutWeeklyLogsInput = {
+    studentNumber: string
+    fullName: string
+    sex?: string | null
+    idOrPassport?: string | null
+    year?: string | null
+    phone?: string | null
+    email?: string | null
+    address?: string | null
+    profileCompleted?: boolean
+    profileToken?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    companyName?: string | null
+    companyAddress?: string | null
+    companyPhone?: string | null
+    companyEmail?: string | null
+    companyPOBox?: string | null
+    supervisorName?: string | null
+    supervisorDesignation?: string | null
+    supervisorEmail?: string | null
+    internshipStart?: Date | string | null
+    internshipEnd?: Date | string | null
+    user: UserCreateNestedOneWithoutStudentProfileInput
+    supervisor: SupervisorCreateNestedOneWithoutStudentsInput
+    tasks?: TaskCreateNestedManyWithoutStudentInput
+    logEntries?: LogEntryCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportCreateNestedOneWithoutStudentInput
+    ratings?: RatingCreateNestedManyWithoutStudentInput
+  }
+
+  export type StudentUncheckedCreateWithoutWeeklyLogsInput = {
+    id?: number
+    userId: number
+    studentNumber: string
+    fullName: string
+    sex?: string | null
+    idOrPassport?: string | null
+    year?: string | null
+    phone?: string | null
+    email?: string | null
+    address?: string | null
+    profileCompleted?: boolean
+    profileToken?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    companyName?: string | null
+    companyAddress?: string | null
+    companyPhone?: string | null
+    companyEmail?: string | null
+    companyPOBox?: string | null
+    supervisorName?: string | null
+    supervisorDesignation?: string | null
+    supervisorEmail?: string | null
+    internshipStart?: Date | string | null
+    internshipEnd?: Date | string | null
+    supervisorId: number
+    tasks?: TaskUncheckedCreateNestedManyWithoutStudentInput
+    logEntries?: LogEntryUncheckedCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportUncheckedCreateNestedOneWithoutStudentInput
+    ratings?: RatingUncheckedCreateNestedManyWithoutStudentInput
+  }
+
+  export type StudentCreateOrConnectWithoutWeeklyLogsInput = {
+    where: StudentWhereUniqueInput
+    create: XOR<StudentCreateWithoutWeeklyLogsInput, StudentUncheckedCreateWithoutWeeklyLogsInput>
+  }
+
+  export type StudentUpsertWithoutWeeklyLogsInput = {
+    update: XOR<StudentUpdateWithoutWeeklyLogsInput, StudentUncheckedUpdateWithoutWeeklyLogsInput>
+    create: XOR<StudentCreateWithoutWeeklyLogsInput, StudentUncheckedCreateWithoutWeeklyLogsInput>
+    where?: StudentWhereInput
+  }
+
+  export type StudentUpdateToOneWithWhereWithoutWeeklyLogsInput = {
+    where?: StudentWhereInput
+    data: XOR<StudentUpdateWithoutWeeklyLogsInput, StudentUncheckedUpdateWithoutWeeklyLogsInput>
+  }
+
+  export type StudentUpdateWithoutWeeklyLogsInput = {
+    studentNumber?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    sex?: NullableStringFieldUpdateOperationsInput | string | null
+    idOrPassport?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    profileCompleted?: BoolFieldUpdateOperationsInput | boolean
+    profileToken?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user?: UserUpdateOneRequiredWithoutStudentProfileNestedInput
+    supervisor?: SupervisorUpdateOneRequiredWithoutStudentsNestedInput
+    tasks?: TaskUpdateManyWithoutStudentNestedInput
+    logEntries?: LogEntryUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUpdateOneWithoutStudentNestedInput
+    ratings?: RatingUpdateManyWithoutStudentNestedInput
+  }
+
+  export type StudentUncheckedUpdateWithoutWeeklyLogsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    studentNumber?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    sex?: NullableStringFieldUpdateOperationsInput | string | null
+    idOrPassport?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    profileCompleted?: BoolFieldUpdateOperationsInput | boolean
+    profileToken?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    supervisorId?: IntFieldUpdateOperationsInput | number
+    tasks?: TaskUncheckedUpdateManyWithoutStudentNestedInput
+    logEntries?: LogEntryUncheckedUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUncheckedUpdateOneWithoutStudentNestedInput
+    ratings?: RatingUncheckedUpdateManyWithoutStudentNestedInput
+  }
+
   export type StudentCreateWithoutUserInput = {
     studentNumber: string
     fullName: string
@@ -16472,13 +20486,17 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
     supervisor: SupervisorCreateNestedOneWithoutStudentsInput
     tasks?: TaskCreateNestedManyWithoutStudentInput
     logEntries?: LogEntryCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportCreateNestedOneWithoutStudentInput
     ratings?: RatingCreateNestedManyWithoutStudentInput
   }
 
@@ -16500,13 +20518,17 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
     supervisorId: number
     tasks?: TaskUncheckedCreateNestedManyWithoutStudentInput
     logEntries?: LogEntryUncheckedCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogUncheckedCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportUncheckedCreateNestedOneWithoutStudentInput
     ratings?: RatingUncheckedCreateNestedManyWithoutStudentInput
   }
 
@@ -16648,13 +20670,17 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     supervisor?: SupervisorUpdateOneRequiredWithoutStudentsNestedInput
     tasks?: TaskUpdateManyWithoutStudentNestedInput
     logEntries?: LogEntryUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUpdateOneWithoutStudentNestedInput
     ratings?: RatingUpdateManyWithoutStudentNestedInput
   }
 
@@ -16676,13 +20702,17 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     supervisorId?: IntFieldUpdateOperationsInput | number
     tasks?: TaskUncheckedUpdateManyWithoutStudentNestedInput
     logEntries?: LogEntryUncheckedUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUncheckedUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUncheckedUpdateOneWithoutStudentNestedInput
     ratings?: RatingUncheckedUpdateManyWithoutStudentNestedInput
   }
 
@@ -16952,13 +20982,17 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
     user: UserCreateNestedOneWithoutStudentProfileInput
     tasks?: TaskCreateNestedManyWithoutStudentInput
     logEntries?: LogEntryCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportCreateNestedOneWithoutStudentInput
     ratings?: RatingCreateNestedManyWithoutStudentInput
   }
 
@@ -16981,12 +21015,16 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
     tasks?: TaskUncheckedCreateNestedManyWithoutStudentInput
     logEntries?: LogEntryUncheckedCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogUncheckedCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportUncheckedCreateNestedOneWithoutStudentInput
     ratings?: RatingUncheckedCreateNestedManyWithoutStudentInput
   }
 
@@ -17117,7 +21155,9 @@ export namespace Prisma {
     companyAddress?: StringNullableFilter<"Student"> | string | null
     companyPhone?: StringNullableFilter<"Student"> | string | null
     companyEmail?: StringNullableFilter<"Student"> | string | null
+    companyPOBox?: StringNullableFilter<"Student"> | string | null
     supervisorName?: StringNullableFilter<"Student"> | string | null
+    supervisorDesignation?: StringNullableFilter<"Student"> | string | null
     supervisorEmail?: StringNullableFilter<"Student"> | string | null
     internshipStart?: DateTimeNullableFilter<"Student"> | Date | string | null
     internshipEnd?: DateTimeNullableFilter<"Student"> | Date | string | null
@@ -17157,13 +21197,17 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
     user: UserCreateNestedOneWithoutStudentProfileInput
     supervisor: SupervisorCreateNestedOneWithoutStudentsInput
     logEntries?: LogEntryCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportCreateNestedOneWithoutStudentInput
     ratings?: RatingCreateNestedManyWithoutStudentInput
   }
 
@@ -17186,12 +21230,16 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
     supervisorId: number
     logEntries?: LogEntryUncheckedCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogUncheckedCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportUncheckedCreateNestedOneWithoutStudentInput
     ratings?: RatingUncheckedCreateNestedManyWithoutStudentInput
   }
 
@@ -17251,13 +21299,17 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutStudentProfileNestedInput
     supervisor?: SupervisorUpdateOneRequiredWithoutStudentsNestedInput
     logEntries?: LogEntryUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUpdateOneWithoutStudentNestedInput
     ratings?: RatingUpdateManyWithoutStudentNestedInput
   }
 
@@ -17280,12 +21332,16 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     supervisorId?: IntFieldUpdateOperationsInput | number
     logEntries?: LogEntryUncheckedUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUncheckedUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUncheckedUpdateOneWithoutStudentNestedInput
     ratings?: RatingUncheckedUpdateManyWithoutStudentNestedInput
   }
 
@@ -17333,13 +21389,17 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
     user: UserCreateNestedOneWithoutStudentProfileInput
     supervisor: SupervisorCreateNestedOneWithoutStudentsInput
     tasks?: TaskCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportCreateNestedOneWithoutStudentInput
     ratings?: RatingCreateNestedManyWithoutStudentInput
   }
 
@@ -17362,12 +21422,16 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
     supervisorId: number
     tasks?: TaskUncheckedCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogUncheckedCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportUncheckedCreateNestedOneWithoutStudentInput
     ratings?: RatingUncheckedCreateNestedManyWithoutStudentInput
   }
 
@@ -17404,13 +21468,17 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutStudentProfileNestedInput
     supervisor?: SupervisorUpdateOneRequiredWithoutStudentsNestedInput
     tasks?: TaskUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUpdateOneWithoutStudentNestedInput
     ratings?: RatingUpdateManyWithoutStudentNestedInput
   }
 
@@ -17433,12 +21501,16 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     supervisorId?: IntFieldUpdateOperationsInput | number
     tasks?: TaskUncheckedUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUncheckedUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUncheckedUpdateOneWithoutStudentNestedInput
     ratings?: RatingUncheckedUpdateManyWithoutStudentNestedInput
   }
 
@@ -17533,7 +21605,9 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
@@ -17541,6 +21615,8 @@ export namespace Prisma {
     supervisor: SupervisorCreateNestedOneWithoutStudentsInput
     tasks?: TaskCreateNestedManyWithoutStudentInput
     logEntries?: LogEntryCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportCreateNestedOneWithoutStudentInput
   }
 
   export type StudentUncheckedCreateWithoutRatingsInput = {
@@ -17562,13 +21638,17 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
     supervisorId: number
     tasks?: TaskUncheckedCreateNestedManyWithoutStudentInput
     logEntries?: LogEntryUncheckedCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogUncheckedCreateNestedManyWithoutStudentInput
+    iapReport?: IapReportUncheckedCreateNestedOneWithoutStudentInput
   }
 
   export type StudentCreateOrConnectWithoutRatingsInput = {
@@ -17628,7 +21708,9 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -17636,6 +21718,8 @@ export namespace Prisma {
     supervisor?: SupervisorUpdateOneRequiredWithoutStudentsNestedInput
     tasks?: TaskUpdateManyWithoutStudentNestedInput
     logEntries?: LogEntryUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUpdateOneWithoutStudentNestedInput
   }
 
   export type StudentUncheckedUpdateWithoutRatingsInput = {
@@ -17657,13 +21741,17 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     supervisorId?: IntFieldUpdateOperationsInput | number
     tasks?: TaskUncheckedUpdateManyWithoutStudentNestedInput
     logEntries?: LogEntryUncheckedUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUncheckedUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUncheckedUpdateOneWithoutStudentNestedInput
   }
 
   export type SupervisorUpsertWithoutRatingsInput = {
@@ -17892,6 +21980,148 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
   }
 
+  export type StudentCreateWithoutIapReportInput = {
+    studentNumber: string
+    fullName: string
+    sex?: string | null
+    idOrPassport?: string | null
+    year?: string | null
+    phone?: string | null
+    email?: string | null
+    address?: string | null
+    profileCompleted?: boolean
+    profileToken?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    companyName?: string | null
+    companyAddress?: string | null
+    companyPhone?: string | null
+    companyEmail?: string | null
+    companyPOBox?: string | null
+    supervisorName?: string | null
+    supervisorDesignation?: string | null
+    supervisorEmail?: string | null
+    internshipStart?: Date | string | null
+    internshipEnd?: Date | string | null
+    user: UserCreateNestedOneWithoutStudentProfileInput
+    supervisor: SupervisorCreateNestedOneWithoutStudentsInput
+    tasks?: TaskCreateNestedManyWithoutStudentInput
+    logEntries?: LogEntryCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogCreateNestedManyWithoutStudentInput
+    ratings?: RatingCreateNestedManyWithoutStudentInput
+  }
+
+  export type StudentUncheckedCreateWithoutIapReportInput = {
+    id?: number
+    userId: number
+    studentNumber: string
+    fullName: string
+    sex?: string | null
+    idOrPassport?: string | null
+    year?: string | null
+    phone?: string | null
+    email?: string | null
+    address?: string | null
+    profileCompleted?: boolean
+    profileToken?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    companyName?: string | null
+    companyAddress?: string | null
+    companyPhone?: string | null
+    companyEmail?: string | null
+    companyPOBox?: string | null
+    supervisorName?: string | null
+    supervisorDesignation?: string | null
+    supervisorEmail?: string | null
+    internshipStart?: Date | string | null
+    internshipEnd?: Date | string | null
+    supervisorId: number
+    tasks?: TaskUncheckedCreateNestedManyWithoutStudentInput
+    logEntries?: LogEntryUncheckedCreateNestedManyWithoutStudentInput
+    weeklyLogs?: WeeklyLogUncheckedCreateNestedManyWithoutStudentInput
+    ratings?: RatingUncheckedCreateNestedManyWithoutStudentInput
+  }
+
+  export type StudentCreateOrConnectWithoutIapReportInput = {
+    where: StudentWhereUniqueInput
+    create: XOR<StudentCreateWithoutIapReportInput, StudentUncheckedCreateWithoutIapReportInput>
+  }
+
+  export type StudentUpsertWithoutIapReportInput = {
+    update: XOR<StudentUpdateWithoutIapReportInput, StudentUncheckedUpdateWithoutIapReportInput>
+    create: XOR<StudentCreateWithoutIapReportInput, StudentUncheckedCreateWithoutIapReportInput>
+    where?: StudentWhereInput
+  }
+
+  export type StudentUpdateToOneWithWhereWithoutIapReportInput = {
+    where?: StudentWhereInput
+    data: XOR<StudentUpdateWithoutIapReportInput, StudentUncheckedUpdateWithoutIapReportInput>
+  }
+
+  export type StudentUpdateWithoutIapReportInput = {
+    studentNumber?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    sex?: NullableStringFieldUpdateOperationsInput | string | null
+    idOrPassport?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    profileCompleted?: BoolFieldUpdateOperationsInput | boolean
+    profileToken?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user?: UserUpdateOneRequiredWithoutStudentProfileNestedInput
+    supervisor?: SupervisorUpdateOneRequiredWithoutStudentsNestedInput
+    tasks?: TaskUpdateManyWithoutStudentNestedInput
+    logEntries?: LogEntryUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUpdateManyWithoutStudentNestedInput
+    ratings?: RatingUpdateManyWithoutStudentNestedInput
+  }
+
+  export type StudentUncheckedUpdateWithoutIapReportInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    studentNumber?: StringFieldUpdateOperationsInput | string
+    fullName?: StringFieldUpdateOperationsInput | string
+    sex?: NullableStringFieldUpdateOperationsInput | string | null
+    idOrPassport?: NullableStringFieldUpdateOperationsInput | string | null
+    year?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    profileCompleted?: BoolFieldUpdateOperationsInput | boolean
+    profileToken?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    companyName?: NullableStringFieldUpdateOperationsInput | string | null
+    companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
+    companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    supervisorId?: IntFieldUpdateOperationsInput | number
+    tasks?: TaskUncheckedUpdateManyWithoutStudentNestedInput
+    logEntries?: LogEntryUncheckedUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUncheckedUpdateManyWithoutStudentNestedInput
+    ratings?: RatingUncheckedUpdateManyWithoutStudentNestedInput
+  }
+
   export type TaskCreateManyStudentInput = {
     id?: number
     title: string
@@ -17910,6 +22140,30 @@ export namespace Prisma {
     id?: number
     content: string
     date?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type WeeklyLogCreateManyStudentInput = {
+    id?: number
+    weekNumber: number
+    startDate: Date | string
+    endDate: Date | string
+    mondayTask?: string | null
+    mondayHours?: number | null
+    tuesdayTask?: string | null
+    tuesdayHours?: number | null
+    wednesdayTask?: string | null
+    wednesdayHours?: number | null
+    thursdayTask?: string | null
+    thursdayHours?: number | null
+    fridayTask?: string | null
+    fridayHours?: number | null
+    totalHours?: number | null
+    generalStatement?: string | null
+    grade?: string | null
+    supervisorSignature?: string | null
+    dateSigned?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17985,6 +22239,77 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     content?: StringFieldUpdateOperationsInput | string
     date?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WeeklyLogUpdateWithoutStudentInput = {
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    mondayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    mondayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    tuesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    tuesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    wednesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    wednesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    thursdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    thursdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    fridayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    fridayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    generalStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorSignature?: NullableStringFieldUpdateOperationsInput | string | null
+    dateSigned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WeeklyLogUncheckedUpdateWithoutStudentInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    mondayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    mondayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    tuesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    tuesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    wednesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    wednesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    thursdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    thursdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    fridayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    fridayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    generalStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorSignature?: NullableStringFieldUpdateOperationsInput | string | null
+    dateSigned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WeeklyLogUncheckedUpdateManyWithoutStudentInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    weekNumber?: IntFieldUpdateOperationsInput | number
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    mondayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    mondayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    tuesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    tuesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    wednesdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    wednesdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    thursdayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    thursdayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    fridayTask?: NullableStringFieldUpdateOperationsInput | string | null
+    fridayHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    totalHours?: NullableFloatFieldUpdateOperationsInput | number | null
+    generalStatement?: NullableStringFieldUpdateOperationsInput | string | null
+    grade?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorSignature?: NullableStringFieldUpdateOperationsInput | string | null
+    dateSigned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18139,7 +22464,9 @@ export namespace Prisma {
     companyAddress?: string | null
     companyPhone?: string | null
     companyEmail?: string | null
+    companyPOBox?: string | null
     supervisorName?: string | null
+    supervisorDesignation?: string | null
     supervisorEmail?: string | null
     internshipStart?: Date | string | null
     internshipEnd?: Date | string | null
@@ -18171,13 +22498,17 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: UserUpdateOneRequiredWithoutStudentProfileNestedInput
     tasks?: TaskUpdateManyWithoutStudentNestedInput
     logEntries?: LogEntryUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUpdateOneWithoutStudentNestedInput
     ratings?: RatingUpdateManyWithoutStudentNestedInput
   }
 
@@ -18200,12 +22531,16 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tasks?: TaskUncheckedUpdateManyWithoutStudentNestedInput
     logEntries?: LogEntryUncheckedUpdateManyWithoutStudentNestedInput
+    weeklyLogs?: WeeklyLogUncheckedUpdateManyWithoutStudentNestedInput
+    iapReport?: IapReportUncheckedUpdateOneWithoutStudentNestedInput
     ratings?: RatingUncheckedUpdateManyWithoutStudentNestedInput
   }
 
@@ -18228,7 +22563,9 @@ export namespace Prisma {
     companyAddress?: NullableStringFieldUpdateOperationsInput | string | null
     companyPhone?: NullableStringFieldUpdateOperationsInput | string | null
     companyEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    companyPOBox?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorName?: NullableStringFieldUpdateOperationsInput | string | null
+    supervisorDesignation?: NullableStringFieldUpdateOperationsInput | string | null
     supervisorEmail?: NullableStringFieldUpdateOperationsInput | string | null
     internshipStart?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     internshipEnd?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

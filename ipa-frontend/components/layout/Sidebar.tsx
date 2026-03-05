@@ -33,10 +33,9 @@ interface User {
 export function Sidebar({ role, userId: propUserId }: SidebarProps) {
     const pathname = usePathname();
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Immediate population from localStorage for a "no-blink" UI
+        // Read user data from localStorage only — no API call to prevent rate limiting
         if (typeof window !== "undefined") {
             const storedUser = localStorage.getItem("user");
             if (storedUser) {
@@ -47,26 +46,7 @@ export function Sidebar({ role, userId: propUserId }: SidebarProps) {
                 }
             }
         }
-
-        if (propUserId) {
-            fetchCurrentUser(propUserId);
-        }
     }, [propUserId]);
-
-    const fetchCurrentUser = async (id: number) => {
-        try {
-            const data = await apiFetch(`/auth/me`);
-            if (data) {
-                setUser(data);
-                localStorage.setItem("user", JSON.stringify(data));
-            }
-        } catch (error) {
-            // Silently fail if it's a fetch error to avoid disruptive popups
-            console.log("Sidebar: Fetching updated user failed - using local data.");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleSignOut = () => {
         localStorage.clear();
@@ -85,13 +65,11 @@ export function Sidebar({ role, userId: propUserId }: SidebarProps) {
         supervisor: [
             { href: `/supervisor/${effectiveUserId}`, label: "Dashboard", icon: LayoutDashboard },
             { href: "/supervisor/students", label: "My Students", icon: Users },
-            { href: "/supervisor/chat", label: "Chats", icon: Users },
             { href: "/supervisor/ratings", label: "Ratings", icon: FileText },
         ],
         student: [
             { href: `/student/${effectiveUserId}`, label: "Dashboard", icon: LayoutDashboard },
             { href: "/student/logbook", label: "Logbook", icon: FileText },
-            { href: "/student/chat", label: "Chats", icon: Users },
         ],
     };
 

@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
                 internshipEnd: internshipEnd ? new Date(internshipEnd) : null,
                 supervisorId: supervisorId || student.supervisorId,
                 profileCompleted: true,
-                profileToken: null, // Clear token after completion
+                profileToken: null, 
             },
             include: {
                 user: true,

@@ -46,7 +46,9 @@ model Student {
   companyAddress    String?
   companyPhone      String?
   companyEmail      String?
+  companyPOBox      String?
   supervisorName    String?
+  supervisorDesignation String?
   supervisorEmail   String?
   internshipStart   DateTime?
   internshipEnd     DateTime?
@@ -56,7 +58,40 @@ model Student {
   supervisor        Supervisor @relation(fields: [supervisorId], references: [id])
   tasks             Task[]
   logEntries        LogEntry[]
+  weeklyLogs        WeeklyLog[]
+  iapReport         IapReport?
   ratings           Rating[]
+}
+
+model WeeklyLog {
+  id                Int      @id @default(autoincrement())
+  studentId         Int
+  weekNumber        Int
+  startDate         DateTime
+  endDate           DateTime
+  
+  mondayTask        String?
+  mondayHours       Float?
+  tuesdayTask       String?
+  tuesdayHours      Float?
+  wednesdayTask     String?
+  wednesdayHours    Float?
+  thursdayTask      String?
+  thursdayHours     Float?
+  fridayTask        String?
+  fridayHours       Float?
+  
+  totalHours        Float?
+  generalStatement  String?
+  grade             String? // A, B, C, D, E
+  supervisorSignature String?
+  dateSigned        DateTime?
+
+  student           Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("weekly_logs")
 }
 
 
@@ -191,4 +226,21 @@ model Message {
   receiver      User      @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@map("messages")
+}
+
+model IapReport {
+  id                    Int      @id @default(autoincrement())
+  studentId             Int      @unique
+  loVisitCount          Int?
+  isUseful              Boolean?
+  improvedUnderstanding Boolean?
+  providedExperiences   Boolean?
+  programmeTypes        String[] // Array of checked categories
+  otherProgrammeDetails String?
+  
+  student               Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("iap_reports")
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin, Shield } from "lucide-react";
 
 export function Footer() {
     return (
@@ -7,9 +7,9 @@ export function Footer() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     <div className="space-y-6">
-                        <div className="flex items-center gap-2">
-                            <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-white font-bold text-xl">
-                                I
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
+                                <Shield className="h-6 w-6" />
                             </div>
                             <span className="text-xl font-bold font-heading tracking-tight text-white">
                                 IPA System

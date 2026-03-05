@@ -2,11 +2,23 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { motion } from "framer-motion";
+import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { Shield } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
+  const { scrollY } = useScroll();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (latest > 50) {
+      setIsScrolled(true);
+    } else {
+      setIsScrolled(false);
+    }
+  });
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -16,63 +28,88 @@ export function Navbar() {
   ];
 
   return (
-    <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-md border-b-2 border-neutral/200 shadow-sm m-10 my-3 rounded-3xl"
-    >
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <motion.div
-            whileHover={{ scale: 1.1 }}
-            className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-xl"
-          >
-            I
-          </motion.div>
-          <span className="text-xl font-bold text-primary font-heading tracking-tight">
-            IPA System
-          </span>
+    <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+      <motion.nav
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className={`
+          pointer-events-auto
+          flex items-center justify-between gap-4 py-2 px-6 rounded-full
+          transition-all duration-500 ease-in-out border
+          ${isScrolled
+            ? "w-[95%] max-w-4xl bg-white/80 backdrop-blur-xl border-primary/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)]"
+            : "w-full max-w-6xl bg-white/40 backdrop-blur-md border-white/20 shadow-none"
+          }
+        `}
+      >
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className={`
+            flex items-center justify-center rounded-xl bg-primary text-white transition-all duration-500
+            ${isScrolled ? "h-8 w-8" : "h-10 w-10 rotate-12 group-hover:rotate-0"}
+          `}>
+            <Shield className={isScrolled ? "h-4 w-4" : "h-6 w-6"} />
+          </div>
+          <div className="flex flex-col">
+            <span className={`
+              font-bold text-primary font-heading tracking-tight leading-none transition-all duration-300
+              ${isScrolled ? "text-sm" : "text-lg"}
+            `}>
+              IPA System
+            </span>
+            {!isScrolled && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-[8px] uppercase tracking-[0.2em] text-primary/60 font-bold"
+              >
+                Industrial Attachment
+              </motion.span>
+            )}
+          </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-1 bg-primary/5 rounded-full p-1 backdrop-blur-sm border border-primary/5">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
 
             return (
-              <motion.div key={item.href} whileHover={{ scale: 1.05 }}>
-                <Link
-                  href={item.href}
-                  className={`
-                    relative text-normal font-medium transition
-                    ${isActive ? "text-primary" : "text-neutral-700"}
-                    hover:text-primary
-                  `}
-                >
-                  {item.label}
-
-                  <span className="
-                    absolute left-0 -bottom-1 h-[2px] w-0 bg-primary 
-                    transition-all duration-300 group-hover:w-full
-                  "></span>
-
-                  {isActive && (
-                    <span className="absolute left-0 -bottom-2 h-[4px] w-full bg-primary rounded-full"></span>
-                  )}
-                </Link>
-              </motion.div>
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`
+                  relative px-4 py-2 text-[11px] font-bold transition-all duration-300 rounded-full uppercase tracking-wider
+                  ${isActive ? "text-white" : "text-primary/70 hover:text-primary"}
+                `}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="nav-active"
+                    className="absolute inset-0 bg-primary rounded-full -z-10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                {item.label}
+              </Link>
             );
           })}
         </div>
 
-        <div className="flex items-center gap-4">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link href="/login">
-              <Button className="rounded-xl px-6 cursor-pointer bg-primary hover:bg-primary/90 text-white">Login</Button>
-            </Link>
-          </motion.div>
+        <div className="flex items-center gap-3">
+          <Link href="/login">
+            <Button
+              variant={isScrolled ? "primary" : "outline"}
+              className={`
+                rounded-full px-5 font-black transition-all duration-300 border-2 uppercase tracking-tighter cursor-pointer
+                ${!isScrolled && "border-primary text-primary hover:bg-primary hover:text-white bg-transparent shadow-lg shadow-primary/5"}
+                ${isScrolled ? "h-8 text-[9px]" : "h-10 text-[10px]"}
+              `}
+            >
+              Log In
+            </Button>
+          </Link>
         </div>
-      </div>
-    </motion.nav>
+      </motion.nav>
+    </div>
   );
 }
