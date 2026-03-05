@@ -302,7 +302,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\mfura\\Documents\\work\\group\\IPA\\ipa-backend\\src\\generated\\client",
+      "value": "C:\\Projects\\Project\\ipa\\ipa\\ipa-backend\\src\\generated\\client",
       "fromEnvVar": null
     },
     "config": {
@@ -316,12 +316,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\mfura\\Documents\\work\\group\\IPA\\ipa-backend\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Projects\\Project\\ipa\\ipa\\ipa-backend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
-    "schemaEnvPath": "../../../.env"
+    "rootEnvPath": null
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.19.2",
@@ -330,6 +329,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
