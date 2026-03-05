@@ -78,10 +78,6 @@ export default function StudentDashboard() {
     const fetchStudent = async () => {
         try {
             const data = await apiFetch(`/students?id=${studentId}`);
-<<<<<<< HEAD
-            if (data.student) {
-                setStudentName(data.student.user?.name || data.student.fullName || "Student");
-=======
             // Backend findAll returns { student: {...} } when id is provided
             const s = data.student;
             if (s) {
@@ -103,7 +99,6 @@ export default function StudentDashboard() {
                 if (s.user?.name) {
                     setStudentName(s.user.name);
                 }
->>>>>>> 2bbe396d2e25605d5973c961b75a8a4ea493b20b
                 setProfileData({
                     phone: s.phone || "",
                     address: s.address || "",
@@ -712,3 +707,4 @@ function SendIcon(props: React.SVGProps<SVGSVGElement>) {
         </svg>
     );
 }
+

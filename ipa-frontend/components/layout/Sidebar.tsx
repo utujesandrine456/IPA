@@ -28,6 +28,8 @@ interface User {
     supervisorProfile?: {
         id: number;
     };
+    studentId?: number;
+    supervisorId?: number;
 }
 
 export function Sidebar({ role, userId: propUserId }: SidebarProps) {
@@ -63,12 +65,12 @@ export function Sidebar({ role, userId: propUserId }: SidebarProps) {
             { href: "/admin/visits", label: "LO Visits", icon: MapPin },
         ],
         supervisor: [
-            { href: `/supervisor/${user?.supervisorProfile?.id || user?.id || propUserId}`, label: "Dashboard", icon: LayoutDashboard },
+            { href: `/supervisor/${user?.supervisorId || user?.supervisorProfile?.id || user?.id || propUserId}`, label: "Dashboard", icon: LayoutDashboard },
             { href: "/supervisor/students", label: "My Students", icon: Users },
             { href: "/supervisor/ratings", label: "Ratings", icon: FileText },
         ],
         student: [
-            { href: `/student/${user?.studentProfile?.id || user?.id || propUserId}`, label: "Dashboard", icon: LayoutDashboard },
+            { href: `/student/${user?.studentId || user?.studentProfile?.id || user?.id || propUserId}`, label: "Dashboard", icon: LayoutDashboard },
             { href: "/student/logbook", label: "Logbook", icon: FileText },
         ],
     };

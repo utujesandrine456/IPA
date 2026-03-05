@@ -17,8 +17,10 @@ const tasks_module_1 = require("./tasks/tasks.module");
 const admin_module_1 = require("./admin/admin.module");
 const notifications_module_1 = require("./notifications/notifications.module");
 const log_entries_module_1 = require("./log-entries/log-entries.module");
-const chat_module_1 = require("./chat/chat.module");
 const weekly_logs_module_1 = require("./weekly-logs/weekly-logs.module");
+const iap_reports_module_1 = require("./iap-reports/iap-reports.module");
+const throttler_1 = require("@nestjs/throttler");
+const core_1 = require("@nestjs/core");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -34,8 +36,18 @@ exports.AppModule = AppModule = __decorate([
             notifications_module_1.NotificationsModule,
             log_entries_module_1.LogEntriesModule,
             weekly_logs_module_1.WeeklyLogsModule,
-            chat_module_1.ChatModule
+            iap_reports_module_1.IapReportsModule,
+            throttler_1.ThrottlerModule.forRoot([{
+                    ttl: 60000,
+                    limit: 10,
+                }]),
         ],
         controllers: [app_controller_1.AppController],
+        providers: [
+            {
+                provide: core_1.APP_GUARD,
+                useClass: throttler_1.ThrottlerGuard,
+            },
+        ],
     })
 ], AppModule);

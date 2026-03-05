@@ -77,8 +77,8 @@ export class WeeklyLogsService {
                 data: {
                     studentId,
                     weekNumber,
-                    weekStart,
-                    weekEnd,
+                    startDate: weekStart, // using the local weekStart variable but mapping to startDate field
+                    endDate: weekEnd,     // using the local weekEnd variable but mapping to endDate field
                     status: WeeklyLogStatus.DRAFT,
                 },
             });

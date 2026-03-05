@@ -37,40 +37,25 @@ export default function LoginPage() {
                 localStorage.setItem("user", JSON.stringify(user));
                 localStorage.setItem("token", data.token || "");
 
-<<<<<<< HEAD
-                const { role, profileCompleted, id, studentId, supervisorId } = data.user;
-=======
-                if (user.studentProfile?.id) {
-                    localStorage.setItem("studentProfileId", String(user.studentProfile.id));
-                }
-
-                const { role } = user;
-                const studentProfileId = user.studentProfile?.id;
-                const profileCompleted = user.profileCompleted || user.studentProfile?.profileCompleted;
->>>>>>> 2bbe396d2e25605d5973c961b75a8a4ea493b20b
+                const { role, profileCompleted, id, studentId, supervisorId } = user;
 
                 if (role === "ADMIN") {
                     router.push("/admin");
                 } else if (role === "SUPERVISOR") {
-<<<<<<< HEAD
-                    router.push(`/supervisor/${supervisorId || id}?supervisorId=${supervisorId || id}`);
-=======
-                    router.push(`/supervisor?supervisorId=${user.id}`);
->>>>>>> 2bbe396d2e25605d5973c961b75a8a4ea493b20b
+                    const sid = supervisorId || user.supervisorProfile?.id || id;
+                    router.push(`/supervisor/${sid}`);
                 } else if (role === "STUDENT") {
-                    if (!studentProfileId) {
-                        // No profile found at all — shouldn't happen, but fallback
+                    const sid = studentId || user.studentProfile?.id || id;
+                    // Always ensure we have a profile ID to redirect to
+                    if (!sid) {
                         setError("Student profile not found. Please contact admin.");
                         return;
                     }
+
                     if (profileCompleted) {
-<<<<<<< HEAD
-                        router.push(`/student/${studentId || id}`);
-=======
-                        router.push(`/student/${studentProfileId}`);
->>>>>>> 2bbe396d2e25605d5973c961b75a8a4ea493b20b
+                        router.push(`/student/${sid}`);
                     } else {
-                        router.push(`/complete-profile?token=login_${studentProfileId}`);
+                        router.push(`/complete-profile?token=login_${sid}`);
                     }
                 } else {
                     router.push("/login");
