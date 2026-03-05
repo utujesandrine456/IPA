@@ -64,9 +64,7 @@ export default function StudentDashboard() {
         try {
             const data = await apiFetch(`/students?id=${studentId}`);
             if (data.student) {
-                if (data.student.user?.name) {
-                    setStudentName(data.student.user.name);
-                }
+                setStudentName(data.student.user?.name || data.student.fullName || "Student");
                 setProfileData({
                     phone: data.student.phone || "",
                     address: data.student.address || "",

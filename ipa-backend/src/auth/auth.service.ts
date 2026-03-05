@@ -92,7 +92,7 @@ export class AuthService {
       { expiresIn: '3d' },
     );
 
-    const userResponse = {
+    const userResponse: any = {
       id: user.id,
       email: user.email,
       name: user.name,
@@ -102,6 +102,9 @@ export class AuthService {
 
     if (user.role === 'STUDENT' && user.studentProfile) {
       userResponse.profileCompleted = user.studentProfile.profileCompleted;
+      userResponse.studentId = user.studentProfile.id;
+    } else if (user.role === 'SUPERVISOR' && user.supervisorProfile) {
+      userResponse.supervisorId = user.supervisorProfile.id;
     }
 
     return {

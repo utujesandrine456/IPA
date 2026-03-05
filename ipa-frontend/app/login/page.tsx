@@ -31,15 +31,15 @@ export default function LoginPage() {
                 localStorage.setItem("user", JSON.stringify(data.user));
                 localStorage.setItem("token", data.token || "");
 
-                const { role, profileCompleted, id } = data.user;
+                const { role, profileCompleted, id, studentId, supervisorId } = data.user;
 
                 if (role === "ADMIN") {
                     router.push("/admin");
                 } else if (role === "SUPERVISOR") {
-                    router.push(`/supervisor?supervisorId=${id}`);
+                    router.push(`/supervisor/${supervisorId || id}?supervisorId=${supervisorId || id}`);
                 } else if (role === "STUDENT") {
                     if (profileCompleted) {
-                        router.push(`/student/${id}`);
+                        router.push(`/student/${studentId || id}`);
                     } else {
                         router.push(`/complete-profile?token=login_${id}`);
                     }

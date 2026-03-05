@@ -9,9 +9,21 @@ import { AdminModule } from './admin/admin.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { LogEntriesModule } from './log-entries/log-entries.module';
 import { ChatModule } from './chat/chat.module';
+import { WeeklyLogsModule } from './weekly-logs/weekly-logs.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, StudentsModule, SupervisorsModule, TasksModule, AdminModule, NotificationsModule, LogEntriesModule, ChatModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    StudentsModule,
+    SupervisorsModule,
+    TasksModule,
+    AdminModule,
+    NotificationsModule,
+    LogEntriesModule,
+    WeeklyLogsModule,
+    ChatModule
+  ],
   controllers: [AppController],
 })
 export class AppModule { }

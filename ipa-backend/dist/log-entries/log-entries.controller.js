@@ -27,6 +27,9 @@ let LogEntriesController = class LogEntriesController {
     async create(body) {
         return this.logEntriesService.create(body);
     }
+    async update(id, body) {
+        return this.logEntriesService.update(id, body);
+    }
     async delete(id) {
         return this.logEntriesService.delete(id);
     }
@@ -51,7 +54,9 @@ __decorate([
             type: 'object',
             properties: {
                 studentId: { type: 'number', example: 1 },
-                content: { type: 'string', example: 'Today I worked on implementing the authentication module...' }
+                content: { type: 'string', example: 'Today I worked on implementing the authentication module...' },
+                date: { type: 'string', format: 'date-time', example: '2025-03-05T10:00:00Z' },
+                mood: { type: 'string', example: 'GREAT' },
             }
         }
     }),
@@ -62,6 +67,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], LogEntriesController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update log entry', description: 'Update an existing daily log entry' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Log entry updated successfully' }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:returntype", Promise)
+], LogEntriesController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete log entry', description: 'Delete a specific log entry by ID' }),

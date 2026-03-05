@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPA Student Logbook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Base Reset & Variables ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #818cf8;
+      --primary-dark: #3730a3;
+      --primary-subtle: #eef2ff;
+      --success: #10b981;
+      --success-subtle: #d1fae5;
+      --warning: #f59e0b;
+      --warning-subtle: #fef3c7;
+      --danger: #ef4444;
+      --danger-subtle: #fee2e2;
+      --info: #3b82f6;
+      --info-subtle: #dbeafe;
+      --neutral-50: #f8fafc;
+      --neutral-100: #f1f5f9;
+      --neutral-200: #e2e8f0;
+      --neutral-300: #cbd5e1;
+      --neutral-400: #94a3b8;
+      --neutral-500: #64748b;
+      --neutral-600: #475569;
+      --neutral-700: #334155;
+      --neutral-800: #1e293b;
+      --neutral-900: #0f172a;
+      --bg: #f0f4ff;
+      --sidebar-bg: #1e1b4b;
+      --sidebar-width: 260px;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.05);
+      --shadow-lg: 0 8px 30px rgba(79,70,229,.12), 0 2px 8px rgba(0,0,0,.06);
+    }
+
+    html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--neutral-800); }
+
+    /* ─── Layout ────────────────────────────────────────────────────────── */
+    .shell { display: flex; min-height: 100vh; }
+
+    /* ─── Sidebar ───────────────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .sidebar-logo-icon {
+      width: 38px; height: 38px;
+      background: var(--primary);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(79,70,229,.4);
+    }
+    .sidebar-logo-text { font-weight: 700; font-size: 18px; color: #fff; letter-spacing: -.3px; }
+    .sidebar-logo-sub { font-size: 10px; color: rgba(255,255,255,.4); font-weight: 400; }
+
+    .sidebar-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+      padding: 20px 20px 8px;
+    }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 2px; padding: 0 12px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: rgba(255,255,255,.6);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
+    .nav-item.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(79,70,229,.4);
+    }
+    .nav-item .nav-icon { font-size: 17px; width: 20px; text-align: center; }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid rgba(255,255,255,.07);
+    }
+    .user-pill {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,.06);
+    }
+    .user-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-light), var(--primary));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; color: #fff;
+      flex-shrink: 0;
+    }
+    .user-name { font-size: 13px; font-weight: 600; color: #fff; }
+    .user-role { font-size: 11px; color: rgba(255,255,255,.4); margin-top: 1px; }
+
+    /* ─── Main ──────────────────────────────────────────────────────────── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: auto; }
+
+    .topbar {
+      background: white;
+      border-bottom: 1px solid var(--neutral-200);
+      padding: 0 32px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+      box-shadow: 0 1px 0 rgba(0,0,0,.04);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .topbar-title { font-size: 17px; font-weight: 700; color: var(--neutral-900); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .notif-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--neutral-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer;
+      position: relative;
+    }
+    .notif-dot {
+      position: absolute; top: 5px; right: 5px;
+      width: 8px; height: 8px;
+      background: var(--danger);
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+
+    .content { padding: 28px 32px; flex: 1; }
+
+    /* ─── Page Header ───────────────────────────────────────────────────── */
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 26px; font-weight: 800; color: var(--neutral-900); letter-spacing: -.5px; }
+    .page-header p { font-size: 14px; color: var(--neutral-500); margin-top: 4px; }
+
+    /* ─── Stats Bar ─────────────────────────────────────────────────────── */
+    .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      display: flex; align-items: center; gap: 14px;
+      border: 1px solid var(--neutral-100);
+    }
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .stat-card:nth-child(1) .stat-icon { background: var(--primary-subtle); }
+    .stat-card:nth-child(2) .stat-icon { background: var(--success-subtle); }
+    .stat-card:nth-child(3) .stat-icon { background: var(--warning-subtle); }
+    .stat-card:nth-child(4) .stat-icon { background: var(--info-subtle); }
+    .stat-value { font-size: 22px; font-weight: 800; color: var(--neutral-900); line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--neutral-500); margin-top: 3px; font-weight: 500; }
+
+    /* ─── Tabs ──────────────────────────────────────────────────────────── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: white; border-radius: 12px; padding: 6px; box-shadow: var(--shadow); width: fit-content; }
+    .tab-btn {
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--neutral-500);
+      transition: all .2s;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 3px 10px rgba(79,70,229,.35); }
+    .tab-btn:not(.active):hover { background: var(--neutral-100); color: var(--neutral-700); }
+
+    /* ─── Tab Panels ────────────────────────────────────────────────────── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ─── Progress Ring ─────────────────────────────────────────────────── */
+    .internship-banner {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-light) 100%);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      color: white;
+      overflow: hidden;
+      position: relative;
+    }
+    .internship-banner::before {
+      content: '';
+      position: absolute; right: -50px; top: -50px;
+      width: 200px; height: 200px;
+      background: rgba(255,255,255,.05);
+      border-radius: 50%;
+    }
+    .internship-banner::after {
+      content: '';
+      position: absolute; right: 60px; bottom: -80px;
+      width: 180px; height: 180px;
+      background: rgba(255,255,255,.05);
+      border-radius: 50%;
+    }
+    .banner-info h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .banner-info p { font-size: 13px; opacity: .8; }
+    .banner-company { font-size: 13px; opacity: .7; margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+    .progress-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; z-index: 1; }
+    .progress-ring-label { font-size: 12px; opacity: .8; font-weight: 500; }
+    .progress-ring { transform: rotate(-90deg); }
+    .progress-ring .bg { fill: none; stroke: rgba(255,255,255,.2); stroke-width: 8; }
+    .progress-ring .fg { fill: none; stroke: white; stroke-width: 8; stroke-linecap: round; stroke-dasharray: 220; stroke-dashoffset: 66; transition: stroke-dashoffset 1s; }
+    .ring-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 18px; font-weight: 800; }
+
+    /* ─── Weekly Log Cards ──────────────────────────────────────────────── */
+    .weeks-grid { display: flex; flex-direction: column; gap: 16px; }
+
+    .week-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--neutral-100);
+      overflow: hidden;
+      transition: box-shadow .2s;
+    }
+    .week-card:hover { box-shadow: var(--shadow-lg); }
+
+    .week-card-header {
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .week-number {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--primary-subtle);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; color: var(--primary);
+      flex-shrink: 0;
+    }
+    .week-meta { flex: 1; }
+    .week-title { font-size: 15px; font-weight: 700; color: var(--neutral-800); }
+    .week-dates { font-size: 12px; color: var(--neutral-400); margin-top: 2px; }
+    .week-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: .3px; }
+    .badge-draft { background: var(--neutral-100); color: var(--neutral-500); }
+    .badge-submitted { background: var(--info-subtle); color: var(--info); }
+    .badge-approved { background: var(--success-subtle); color: var(--success); }
+    .badge-rejected { background: var(--danger-subtle); color: var(--danger); }
+    .week-chevron { font-size: 18px; color: var(--neutral-400); transition: transform .25s; }
+    .week-card.open .week-chevron { transform: rotate(180deg); }
+
+    .week-card-body { display: none; border-top: 1px solid var(--neutral-100); }
+    .week-card.open .week-card-body { display: block; }
+
+    .week-body-inner { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* Daily entries inside week */
+    .daily-entries-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .daily-entries-title { font-size: 13px; font-weight: 700; color: var(--neutral-600); text-transform: uppercase; letter-spacing: .6px; }
+
+    .daily-entry {
+      display: flex; gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--neutral-100);
+    }
+    .daily-entry:last-child { border-bottom: none; }
+    .entry-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .entry-date { font-size: 11px; font-weight: 700; color: var(--neutral-400); margin-bottom: 4px; }
+    .entry-content { font-size: 13px; color: var(--neutral-700); line-height: 1.55; }
+    .entry-mood { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; padding: 2px 8px; border-radius: 20px; background: var(--neutral-100); font-size: 11px; color: var(--neutral-500); }
+
+    /* Weekly summary section */
+    .summary-box {
+      background: var(--neutral-50);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+    }
+    .summary-box-label { font-size: 11px; font-weight: 700; color: var(--neutral-500); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+    .summary-box p { font-size: 13px; color: var(--neutral-700); line-height: 1.55; }
+
+    /* Supervisor sign-off */
+    .signoff-box {
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .signoff-approved { background: var(--success-subtle); border: 1px solid #6ee7b7; }
+    .signoff-rejected { background: var(--danger-subtle); border: 1px solid #fca5a5; }
+    .signoff-pending { background: var(--warning-subtle); border: 1px solid #fcd34d; }
+    .signoff-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .signoff-title { font-size: 13px; font-weight: 700; }
+    .signoff-approved .signoff-title { color: #065f46; }
+    .signoff-rejected .signoff-title { color: #991b1b; }
+    .signoff-pending .signoff-title { color: #92400e; }
+    .signoff-meta { font-size: 12px; color: var(--neutral-500); margin-top: 2px; }
+    .signoff-note { font-size: 13px; color: var(--neutral-700); margin-top: 6px; font-style: italic; }
+
+    /* Week actions */
+    .week-actions { display: flex; gap: 10px; justify-content: flex-end; padding-top: 4px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .18s;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 4px 12px rgba(79,70,229,.35); }
+    .btn-outline { background: white; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-outline:hover { background: var(--primary-subtle); }
+    .btn-ghost { background: transparent; color: var(--neutral-600); }
+    .btn-ghost:hover { background: var(--neutral-100); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #059669; }
+
+    /* ─── New Entry Form ────────────────────────────────────────────────── */
+    .new-entry-form {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      border: 1.5px solid var(--primary-light);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .new-entry-form h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--neutral-800); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 12px; font-weight: 600; color: var(--neutral-600); }
+    .form-control {
+      padding: 9px 12px;
+      border: 1.5px solid var(--neutral-200);
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--neutral-800);
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-control:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(79,70,229,.1); }
+    textarea.form-control { resize: vertical; min-height: 90px; }
+    .mood-selector { display: flex; gap: 8px; }
+    .mood-option {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--neutral-200);
+      background: white;
+      transition: all .15s;
+    }
+    .mood-option.selected { border-color: var(--primary); background: var(--primary-subtle); color: var(--primary); }
+    .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px; }
+
+    /* ─── Tasks Tab ─────────────────────────────────────────────────────── */
+    .tasks-list { display: flex; flex-direction: column; gap: 14px; }
+    .task-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--neutral-100);
+      padding: 18px 20px;
+      transition: box-shadow .2s;
+    }
+    .task-card:hover { box-shadow: var(--shadow-lg); }
+    .task-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+    .task-title { font-size: 15px; font-weight: 700; color: var(--neutral-800); }
+    .task-date { font-size: 12px; color: var(--neutral-400); margin-top: 2px; }
+    .task-desc { font-size: 13px; color: var(--neutral-600); line-height: 1.5; margin-bottom: 12px; }
+    .task-submission {
+      background: var(--neutral-50);
+      border: 1px solid var(--neutral-200);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 12px;
+    }
+    .task-submission-label { font-size: 11px; font-weight: 700; color: var(--primary); margin-bottom: 4px; }
+    .task-submission p { font-size: 13px; color: var(--neutral-700); }
+    .task-footer { display: flex; align-items: center; justify-content: space-between; }
+    .stars { display: flex; gap: 2px; }
+    .star { font-size: 15px; }
+    .star.filled { color: var(--warning); }
+    .star.empty { color: var(--neutral-300); }
+    .task-comment {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #1e40af;
+    }
+    .task-comment-label { font-weight: 700; margin-bottom: 2px; }
+    .task-actions { margin-top: 14px; border-top: 1px solid var(--neutral-100); padding-top: 12px; display: flex; gap: 8px; }
+
+    /* ─── Supervisor Signoff Progress ───────────────────────────────────── */
+    .signoff-progress {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--neutral-100);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    .signoff-progress h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--neutral-800); }
+    .week-progress-row { display: flex; align-items: center; gap: 0; margin-bottom: 0; }
+    .week-step { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+    .week-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 15px; left: 50%; right: -50%;
+      height: 3px;
+      background: var(--neutral-200);
+      z-index: 0;
+    }
+    .week-step.done:not(:last-child)::after { background: var(--success); }
+    .week-dot {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 1;
+      border: 3px solid var(--neutral-200);
+      background: white;
+      color: var(--neutral-400);
+    }
+    .week-step.done .week-dot { background: var(--success); border-color: var(--success); color: white; }
+    .week-step.current .week-dot { border-color: var(--primary); color: var(--primary); background: var(--primary-subtle); }
+    .week-step.rejected .week-dot { background: var(--danger); border-color: var(--danger); color: white; }
+    .week-step-label { font-size: 10px; color: var(--neutral-400); margin-top: 6px; font-weight: 600; }
+    .week-step.done .week-step-label { color: var(--success); }
+    .week-step.current .week-step-label { color: var(--primary); }
+    .week-step.rejected .week-step-label { color: var(--danger); }
+
+    /* ─── Floating Action ───────────────────────────────────────────────── */
+    .fab {
+      position: fixed;
+      bottom: 32px; right: 32px;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(79,70,229,.45);
+      border: none;
+      transition: all .2s;
+      z-index: 100;
+    }
+    .fab:hover { transform: scale(1.08); box-shadow: 0 8px 28px rgba(79,70,229,.55); }
+
+    /* ─── Empty State ───────────────────────────────────────────────────── */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--neutral-400); }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* ─── Tooltip badge ─────────────────────────────────────────────────── */
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .chip-blue { background: var(--info-subtle); color: var(--info); }
+    .chip-green { background: var(--success-subtle); color: var(--success); }
+    .chip-amber { background: var(--warning-subtle); color: var(--warning); }
+    .chip-red { background: var(--danger-subtle); color: var(--danger); }
+    .chip-gray { background: var(--neutral-100); color: var(--neutral-500); }
+
+    /* Responsive tweaks */
+    @media (max-width: 900px) {
+      .sidebar { width: 60px; }
+      .sidebar-logo-text, .sidebar-logo-sub, .nav-item span, .sidebar-section-label, .user-name, .user-role { display: none; }
+      .sidebar-logo { justify-content: center; padding: 0 0 24px; }
+      .nav-item { justify-content: center; }
+      .stats-bar { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">🎓</div>
+      <div>
+        <div class="sidebar-logo-text">IPA</div>
+        <div class="sidebar-logo-sub">Internship Portal</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-label">Menu</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#"><span class="nav-icon">🏠</span><span>Dashboard</span></a>
+      <a class="nav-item active" href="#"><span class="nav-icon">📖</span><span>My Logbook</span></a>
+      <a class="nav-item" href="#"><span class="nav-icon">💬</span><span>Messages</span></a>
+      <a class="nav-item" href="#"><span class="nav-icon">🔔</span><span>Notifications</span></a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="user-pill">
+        <div class="user-avatar">JN</div>
+        <div>
+          <div class="user-name">Jean Nkurunziza</div>
+          <div class="user-role">Student</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="main">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">My Logbook</div>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+        <div class="user-avatar" style="width:34px;height:34px;font-size:12px;">JN</div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Page heading -->
+      <div class="page-header">
+        <h1>📒 My Logbook</h1>
+        <p>Track your daily activities, weekly progress, and task submissions throughout your internship.</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div>
+            <div class="stat-value">8</div>
+            <div class="stat-label">Weeks Logged</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div>
+            <div class="stat-value">6</div>
+            <div class="stat-label">Weeks Approved</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div>
+            <div class="stat-value">34</div>
+            <div class="stat-label">Daily Entries</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div>
+            <div class="stat-value">5 / 7</div>
+            <div class="stat-label">Tasks Completed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Internship Banner -->
+      <div class="internship-banner">
+        <div class="banner-info">
+          <h2>🏢 DataVision Rwanda Ltd.</h2>
+          <p>Software Engineering Internship &nbsp;·&nbsp; <strong>3 Feb 2025 → 31 May 2025</strong></p>
+          <div class="banner-company">
+            <span>👨‍💼 Supervisor: Mr. Patrick Habimana</span>
+            &nbsp;·&nbsp;
+            <span>📍 Kigali, Rwanda</span>
+          </div>
+        </div>
+        <div class="progress-ring-wrap">
+          <div style="position:relative;width:80px;height:80px;">
+            <svg class="progress-ring" width="80" height="80" viewBox="0 0 80 80">
+              <circle class="bg" cx="40" cy="40" r="33" />
+              <circle class="fg" cx="40" cy="40" r="33" stroke-dasharray="207" stroke-dashoffset="62" />
+            </svg>
+            <div class="ring-center" style="color:white;">70%</div>
+          </div>
+          <div class="progress-ring-label">Internship Progress</div>
+        </div>
+      </div>
+
+      <!-- Signoff Progress tracker -->
+      <div class="signoff-progress">
+        <h3>📊 Supervisor Sign-off Progress</h3>
+        <div class="week-progress-row">
+          <div class="week-step done"><div class="week-dot">✓</div><div class="week-step-label">Wk 1</div></div>
+          <div class="week-step done"><div class="week-dot">✓</div><div class="week-step-label">Wk 2</div></div>
+          <div class="week-step done"><div class="week-dot">✓</div><div class="week-step-label">Wk 3</div></div>
+          <div class="week-step done"><div class="week-dot">✓</div><div class="week-step-label">Wk 4</div></div>
+          <div class="week-step done"><div class="week-dot">✓</div><div class="week-step-label">Wk 5</div></div>
+          <div class="week-step done"><div class="week-dot">✓</div><div class="week-step-label">Wk 6</div></div>
+          <div class="week-step rejected"><div class="week-dot">✕</div><div class="week-step-label">Wk 7</div></div>
+          <div class="week-step current"><div class="week-dot">8</div><div class="week-step-label">Wk 8</div></div>
+          <div class="week-step"><div class="week-dot">9</div><div class="week-step-label">Wk 9</div></div>
+          <div class="week-step"><div class="week-dot">10</div><div class="week-step-label">Wk 10</div></div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('weekly')">📅 Weekly Log</button>
+        <button class="tab-btn" onclick="switchTab('daily')">✏️ Daily Entries</button>
+        <button class="tab-btn" onclick="switchTab('tasks')">✅ Assigned Tasks</button>
+      </div>
+
+      <!-- ══ TAB: WEEKLY LOG ══ -->
+      <div class="tab-panel active" id="tab-weekly">
+        <div class="weeks-grid">
+
+          <!-- WEEK 8 – DRAFT / current -->
+          <div class="week-card open" id="wk8">
+            <div class="week-card-header" onclick="toggleWeek('wk8')">
+              <div class="week-number">W8</div>
+              <div class="week-meta">
+                <div class="week-title">Week 8 – API Integration & Testing</div>
+                <div class="week-dates">Mon 24 Feb → Fri 28 Feb 2025 &nbsp;·&nbsp; 4 entries</div>
+              </div>
+              <span class="week-badge badge-draft">📝 Draft</span>
+              <span class="week-chevron">▾</span>
+            </div>
+            <div class="week-card-body">
+              <div class="week-body-inner">
+
+                <!-- Daily entries -->
+                <div>
+                  <div class="daily-entries-header">
+                    <div class="daily-entries-title">📆 Daily Entries</div>
+                    <button class="btn btn-outline" style="font-size:12px;padding:6px 14px;" onclick="switchTab('daily')">+ Add Entry</button>
+                  </div>
+                  <div class="daily-entry">
+                    <div class="entry-dot"></div>
+                    <div>
+                      <div class="entry-date">Monday, 24 Feb 2025</div>
+                      <div class="entry-content">Integrated the REST endpoint for the user authentication module. Wrote unit tests using Jest and fixed 3 failing tests related to token expiry logic.</div>
+                      <div class="entry-mood">😊 Great</div>
+                    </div>
+                  </div>
+                  <div class="daily-entry">
+                    <div class="entry-dot"></div>
+                    <div>
+                      <div class="entry-date">Tuesday, 25 Feb 2025</div>
+                      <div class="entry-content">Attended sprint planning meeting. Started working on the file upload endpoint using Multer middleware. Learned how to handle multipart/form-data in NestJS.</div>
+                      <div class="entry-mood">😊 Great</div>
+                    </div>
+                  </div>
+                  <div class="daily-entry">
+                    <div class="entry-dot"></div>
+                    <div>
+                      <div class="entry-date">Wednesday, 26 Feb 2025</div>
+                      <div class="entry-content">Debugged a CORS issue when the frontend (Next.js) tried to call the backend. Resolved it by updating the CORS origin config in main.ts.</div>
+                      <div class="entry-mood">😐 Okay</div>
+                    </div>
+                  </div>
+                  <div class="daily-entry">
+                    <div class="entry-dot"></div>
+                    <div>
+                      <div class="entry-date">Thursday, 27 Feb 2025</div>
+                      <div class="entry-content">Reviewed pull request from team member. Provided feedback on code structure. Started documenting Swagger API for the logbook module.</div>
+                      <div class="entry-mood">😊 Great</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Weekly summary -->
+                <div>
+                  <div class="daily-entries-title" style="margin-bottom:10px;">📝 Weekly Summary</div>
+                  <textarea class="form-control" rows="3" placeholder="Write a summary of what you accomplished this week...">This week I focused on API integration between the frontend and backend. Key achievements include implementing file uploads, fixing authentication bugs, and writing comprehensive unit tests. I improved my understanding of NestJS middleware and Prisma ORM relations.</textarea>
+                </div>
+
+                <!-- Next week objectives -->
+                <div>
+                  <div class="daily-entries-title" style="margin-bottom:10px;">🎯 Objectives for Next Week</div>
+                  <textarea class="form-control" rows="2" placeholder="What do you plan to work on next week?">Complete the logbook module frontend. Deploy to staging and conduct end-to-end testing. Start working on the supervisor dashboard.</textarea>
+                </div>
+
+                <!-- Supervisor sign-off – pending -->
+                <div class="signoff-box signoff-pending">
+                  <div class="signoff-icon">⏳</div>
+                  <div>
+                    <div class="signoff-title">Awaiting Submission</div>
+                    <div class="signoff-meta">Submit this week's log when you are ready for supervisor review.</div>
+                  </div>
+                </div>
+
+                <div class="week-actions">
+                  <button class="btn btn-ghost">💾 Save Draft</button>
+                  <button class="btn btn-primary">📤 Submit for Review</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- WEEK 7 – REJECTED -->
+          <div class="week-card" id="wk7">
+            <div class="week-card-header" onclick="toggleWeek('wk7')">
+              <div class="week-number" style="background:#fee2e2;color:#ef4444;">W7</div>
+              <div class="week-meta">
+                <div class="week-title">Week 7 – Database Optimization</div>
+                <div class="week-dates">Mon 17 Feb → Fri 21 Feb 2025 &nbsp;·&nbsp; 5 entries</div>
+              </div>
+              <span class="week-badge badge-rejected">✕ Revision Needed</span>
+              <span class="week-chevron">▾</span>
+            </div>
+            <div class="week-card-body">
+              <div class="week-body-inner">
+                <div class="daily-entry">
+                  <div class="entry-dot" style="background:#f87171;"></div>
+                  <div>
+                    <div class="entry-date">Monday, 17 Feb 2025</div>
+                    <div class="entry-content">Added database indexes to improve query performance. Measured query times before and after.</div>
+                    <div class="entry-mood">😊 Great</div>
+                  </div>
+                </div>
+
+                <div class="signoff-box signoff-rejected">
+                  <div class="signoff-icon">❌</div>
+                  <div>
+                    <div class="signoff-title">Revision Requested by Supervisor</div>
+                    <div class="signoff-meta">Mr. Patrick Habimana &nbsp;·&nbsp; 22 Feb 2025, 10:14 AM</div>
+                    <div class="signoff-note">"Good work on the indexes, but the weekly summary is too brief. Please elaborate on what specific indexes you added and what performance improvements you measured (in ms). Also missing entries for Thursday and Friday."</div>
+                  </div>
+                </div>
+
+                <div class="week-actions">
+                  <button class="btn btn-outline">✏️ Edit & Resubmit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- WEEK 6 – APPROVED -->
+          <div class="week-card" id="wk6">
+            <div class="week-card-header" onclick="toggleWeek('wk6')">
+              <div class="week-number" style="background:#d1fae5;color:#10b981;">W6</div>
+              <div class="week-meta">
+                <div class="week-title">Week 6 – Authentication Module</div>
+                <div class="week-dates">Mon 10 Feb → Fri 14 Feb 2025 &nbsp;·&nbsp; 5 entries</div>
+              </div>
+              <span class="week-badge badge-approved">✓ Approved</span>
+              <span class="week-chevron">▾</span>
+            </div>
+            <div class="week-card-body">
+              <div class="week-body-inner">
+                <div class="summary-box">
+                  <div class="summary-box-label">Weekly Summary</div>
+                  <p>Implemented JWT authentication with refresh tokens, integrated Passport.js strategy, and added role-based access control (RBAC) for student, supervisor, and admin roles. Wrote comprehensive tests for auth guards.</p>
+                </div>
+
+                <div class="signoff-box signoff-approved">
+                  <div class="signoff-icon">✅</div>
+                  <div>
+                    <div class="signoff-title">Approved by Supervisor</div>
+                    <div class="signoff-meta">Mr. Patrick Habimana &nbsp;·&nbsp; 15 Feb 2025, 9:02 AM</div>
+                    <div class="signoff-note">"Excellent work this week. The RBAC implementation is clean and well documented. Keep up the great work!"</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- WEEK 5 – APPROVED (collapsed) -->
+          <div class="week-card" id="wk5">
+            <div class="week-card-header" onclick="toggleWeek('wk5')">
+              <div class="week-number" style="background:#d1fae5;color:#10b981;">W5</div>
+              <div class="week-meta">
+                <div class="week-title">Week 5 – Prisma ORM & Migrations</div>
+                <div class="week-dates">Mon 3 Feb → Fri 7 Feb 2025 &nbsp;·&nbsp; 5 entries</div>
+              </div>
+              <span class="week-badge badge-approved">✓ Approved</span>
+              <span class="week-chevron">▾</span>
+            </div>
+            <div class="week-card-body">
+              <div class="week-body-inner">
+                <div class="summary-box">
+                  <div class="summary-box-label">Weekly Summary</div>
+                  <p>Designed and implemented the Prisma schema for the main entities (User, Student, Supervisor, Task, LogEntry). Ran database migrations and seeded initial test data.</p>
+                </div>
+                <div class="signoff-box signoff-approved">
+                  <div class="signoff-icon">✅</div>
+                  <div>
+                    <div class="signoff-title">Approved by Supervisor</div>
+                    <div class="signoff-meta">Mr. Patrick Habimana &nbsp;·&nbsp; 8 Feb 2025, 11:30 AM</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /weeks-grid -->
+      </div><!-- /tab-weekly -->
+
+      <!-- ══ TAB: DAILY ENTRIES ══ -->
+      <div class="tab-panel" id="tab-daily">
+
+        <!-- New entry form -->
+        <div class="new-entry-form">
+          <h3>✏️ Add Daily Entry — <span style="color:var(--primary);">Week 8</span></h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" class="form-control" value="2025-02-28" />
+            </div>
+            <div class="form-group">
+              <label>How was your day?</label>
+              <div class="mood-selector">
+                <div class="mood-option selected">😊 Great</div>
+                <div class="mood-option">😐 Okay</div>
+                <div class="mood-option">😔 Tough</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>What did you work on today?</label>
+            <textarea class="form-control" placeholder="Describe the tasks you worked on, what you learned, and any challenges you encountered..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-ghost">Cancel</button>
+            <button class="btn btn-primary">💾 Save Entry</button>
+          </div>
+        </div>
+
+        <!-- All recent daily entries list -->
+        <div style="background:white;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--neutral-100);overflow:hidden;">
+          <div style="padding:16px 20px;border-bottom:1px solid var(--neutral-100);display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-weight:700;color:var(--neutral-800);">Recent Daily Entries</div>
+            <select class="form-control" style="width:auto;font-size:12px;padding:5px 10px;">
+              <option>All Weeks</option>
+              <option selected>Week 8</option>
+              <option>Week 7</option>
+              <option>Week 6</option>
+            </select>
+          </div>
+          <div style="padding:8px 20px;">
+            <div class="daily-entry">
+              <div class="entry-dot"></div>
+              <div style="flex:1;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="entry-date">Thursday, 27 Feb 2025</div>
+                  <div style="display:flex;gap:6px;">
+                    <span class="chip chip-blue">Wk 8</span>
+                    <button style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--neutral-400);">✏️</button>
+                    <button style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--neutral-400);">🗑</button>
+                  </div>
+                </div>
+                <div class="entry-content">Reviewed pull request from team member. Provided feedback on code structure. Started documenting Swagger API for the logbook module.</div>
+                <div class="entry-mood">😊 Great</div>
+              </div>
+            </div>
+            <div class="daily-entry">
+              <div class="entry-dot"></div>
+              <div style="flex:1;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="entry-date">Wednesday, 26 Feb 2025</div>
+                  <div style="display:flex;gap:6px;">
+                    <span class="chip chip-blue">Wk 8</span>
+                    <button style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--neutral-400);">✏️</button>
+                    <button style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--neutral-400);">🗑</button>
+                  </div>
+                </div>
+                <div class="entry-content">Debugged a CORS issue when the frontend (Next.js) tried to call the backend. Resolved it by updating the CORS origin config in main.ts. Also added rate limiting middleware.</div>
+                <div class="entry-mood">😐 Okay</div>
+              </div>
+            </div>
+            <div class="daily-entry">
+              <div class="entry-dot"></div>
+              <div style="flex:1;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div class="entry-date">Tuesday, 25 Feb 2025</div>
+                  <div style="display:flex;gap:6px;">
+                    <span class="chip chip-blue">Wk 8</span>
+                    <button style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--neutral-400);">✏️</button>
+                    <button style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--neutral-400);">🗑</button>
+                  </div>
+                </div>
+                <div class="entry-content">Attended sprint planning. Started file upload endpoint using Multer. Learned multipart/form-data handling in NestJS.</div>
+                <div class="entry-mood">😊 Great</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /tab-daily -->
+
+      <!-- ══ TAB: TASKS ══ -->
+      <div class="tab-panel" id="tab-tasks">
+        <div class="tasks-list">
+
+          <!-- Task 1 – APPROVED -->
+          <div class="task-card">
+            <div class="task-header">
+              <div>
+                <div class="task-title">Set up NestJS project structure</div>
+                <div class="task-date">📅 Assigned: 4 Feb 2025</div>
+              </div>
+              <span class="week-badge badge-approved">✓ Approved</span>
+            </div>
+            <div class="task-desc">Initialize the NestJS project with Prisma, set up modules for auth, students, supervisors, and tasks. Use environment variables for DB config.</div>
+            <div class="task-submission">
+              <div class="task-submission-label">YOUR SUBMISSION</div>
+              <p>Completed the full NestJS boilerplate with Prisma integration, configured environment variables using dotenv, and created all required modules. Repository link: github.com/intern/ipa-backend</p>
+            </div>
+            <div class="task-comment">
+              <div class="task-comment-label">💬 Supervisor Comment</div>
+              Great structure! Clean separation of concerns. Make sure to add Swagger decorators in later tasks.
+            </div>
+            <div class="task-footer">
+              <div class="stars">
+                <span class="star filled">★</span><span class="star filled">★</span>
+                <span class="star filled">★</span><span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span style="font-size:12px;color:var(--neutral-500);margin-left:6px;">5/5</span>
+              </div>
+              <span style="font-size:12px;color:var(--success);">✅ Completed on 7 Feb 2025</span>
+            </div>
+          </div>
+
+          <!-- Task 2 – SUBMITTED -->
+          <div class="task-card">
+            <div class="task-header">
+              <div>
+                <div class="task-title">Implement Logbook Module (Backend)</div>
+                <div class="task-date">📅 Assigned: 24 Feb 2025</div>
+              </div>
+              <span class="week-badge badge-submitted">📤 Submitted</span>
+            </div>
+            <div class="task-desc">Create the WeeklyLog and LogEntry Prisma models, build the weekly-logs NestJS module with full CRUD, supervisor sign-off workflow (submit/approve/reject), and notification triggers.</div>
+            <div class="task-submission">
+              <div class="task-submission-label">YOUR SUBMISSION</div>
+              <p>Implemented WeeklyLog model, migration ran successfully. Created weekly-logs module with all 6 endpoints. Notifications trigger on submit & approve actions. Swagger docs added.</p>
+            </div>
+            <div class="task-footer">
+              <div style="font-size:12px;color:var(--info);">⏳ Awaiting supervisor review…</div>
+              <span style="font-size:12px;color:var(--neutral-400);">Submitted: 27 Feb 2025</span>
+            </div>
+          </div>
+
+          <!-- Task 3 – REJECTED -->
+          <div class="task-card" style="border-color:#fee2e2;">
+            <div class="task-header">
+              <div>
+                <div class="task-title">Write Unit Tests for Auth Guards</div>
+                <div class="task-date">📅 Assigned: 17 Feb 2025</div>
+              </div>
+              <span class="week-badge badge-rejected">✕ Revision Needed</span>
+            </div>
+            <div class="task-desc">Write Jest unit tests for the JwtAuthGuard and RolesGuard, achieving at least 80% code coverage for the auth module.</div>
+            <div class="task-submission">
+              <div class="task-submission-label">YOUR SUBMISSION</div>
+              <p>Added 12 unit tests for JwtAuthGuard. Coverage is at 65% currently.</p>
+            </div>
+            <div class="task-comment" style="background:#fff0f0;border-color:#fca5a5;color:#991b1b;">
+              <div class="task-comment-label" style="color:#991b1b;">💬 Supervisor Feedback</div>
+              Coverage is below the 80% threshold. Please add tests for the RolesGuard and edge cases (expired tokens, invalid roles). Resubmit when coverage is above 80%.
+            </div>
+            <div class="task-actions">
+              <button class="btn btn-outline">✏️ Update & Resubmit</button>
+            </div>
+          </div>
+
+          <!-- Task 4 – PENDING -->
+          <div class="task-card">
+            <div class="task-header">
+              <div>
+                <div class="task-title">Build Supervisor Logbook Review Page</div>
+                <div class="task-date">📅 Assigned: 28 Feb 2025</div>
+              </div>
+              <span class="week-badge badge-draft">🕐 Pending</span>
+            </div>
+            <div class="task-desc">Create the Next.js page at /supervisor/logbook that lists all students, their weekly logs, and allows the supervisor to approve or reject with notes.</div>
+            <div class="task-footer">
+              <div></div>
+            </div>
+            <div class="task-actions">
+              <button class="btn btn-primary">📤 Submit Work</button>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /tab-tasks -->
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- FAB -->
+<button class="fab" onclick="switchTab('daily')" title="Add daily entry">+</button>
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', ['weekly','daily','tasks'][i] === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+  }
+
+  function toggleWeek(id) {
+    const card = document.getElementById(id);
+    card.classList.toggle('open');
+  }
+
+  // Mood selector interaction
+  document.querySelectorAll('.mood-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      opt.closest('.mood-selector').querySelectorAll('.mood-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+</script>
+</body>
+</html>

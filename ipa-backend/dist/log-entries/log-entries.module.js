@@ -10,11 +10,14 @@ exports.LogEntriesModule = void 0;
 const common_1 = require("@nestjs/common");
 const log_entries_service_1 = require("./log-entries.service");
 const log_entries_controller_1 = require("./log-entries.controller");
+const prisma_module_1 = require("../prisma/prisma.module");
+const weekly_logs_module_1 = require("../weekly-logs/weekly-logs.module");
 let LogEntriesModule = class LogEntriesModule {
 };
 exports.LogEntriesModule = LogEntriesModule;
 exports.LogEntriesModule = LogEntriesModule = __decorate([
     (0, common_1.Module)({
+        imports: [prisma_module_1.PrismaModule, weekly_logs_module_1.WeeklyLogsModule],
         providers: [log_entries_service_1.LogEntriesService],
         controllers: [log_entries_controller_1.LogEntriesController],
     })
