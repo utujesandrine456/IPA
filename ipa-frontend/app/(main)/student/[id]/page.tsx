@@ -27,23 +27,12 @@ export default function StudentDashboard() {
     const studentId = Number(params.id);
 
     const [isAuthChecking, setIsAuthChecking] = useState(true);
-    const [showLogForm, setShowLogForm] = useState(false);
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [studentName, setStudentName] = useState<string | null>(null);
-    const [logEntries, setLogEntries] = useState<Record<string, { description: string; hours: string }>>({
-        Monday: { description: "", hours: "" },
-        Tuesday: { description: "", hours: "" },
-        Wednesday: { description: "", hours: "" },
-        Thursday: { description: "", hours: "" },
-        Friday: { description: "", hours: "" },
-        Saturday: { description: "", hours: "" },
-        Sunday: { description: "", hours: "" },
-    });
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [showTaskForm, setShowTaskForm] = useState(false);
     const [taskSubmission, setTaskSubmission] = useState({ taskId: 0, description: "", attachments: "" });
-    const [generalStatement, setGeneralStatement] = useState("");
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [profileData, setProfileData] = useState({
         phone: "",
@@ -52,6 +41,8 @@ export default function StudentDashboard() {
         companyAddress: "",
         supervisorName: "",
         supervisorEmail: "",
+        internshipStart: "",
+        internshipEnd: "",
     });
     const [supervisorInfo, setSupervisorInfo] = useState<{ name: string; email: string; phone: string } | null>(null);
 
@@ -106,6 +97,8 @@ export default function StudentDashboard() {
                     companyAddress: s.companyAddress || "",
                     supervisorName: s.supervisorName || "",
                     supervisorEmail: s.supervisorEmail || "",
+                    internshipStart: s.internshipStart ? s.internshipStart.split('T')[0] : "",
+                    internshipEnd: s.internshipEnd ? s.internshipEnd.split('T')[0] : "",
                 });
                 if (s.supervisor) {
                     setSupervisorInfo({
@@ -127,9 +120,9 @@ export default function StudentDashboard() {
 
     const handleUpdateProfile = async () => {
         try {
-            await apiFetch("/students/update", {
+            await apiFetch(`/students/${studentId}`, {
                 method: "PATCH",
-                body: JSON.stringify({ studentId, ...profileData }),
+                body: JSON.stringify(profileData),
             });
             setShowProfileModal(false);
             fetchStudent();
@@ -149,49 +142,6 @@ export default function StudentDashboard() {
         }
     };
 
-    const handleSubmitLog = async () => {
-        try {
-            const tasksToSubmit = Object.entries(logEntries)
-                .filter(([_, entry]) => entry.description.trim())
-                .map(([day, entry]) => ({
-                    studentId,
-                    title: `${day} Log Entry`,
-                    description: `${entry.description}\nHours: ${entry.hours || 0}`,
-                    date: new Date().toISOString(),
-                }));
-
-            if (generalStatement.trim()) {
-                tasksToSubmit.push({
-                    studentId,
-                    title: "Weekly Summary",
-                    description: generalStatement,
-                    date: new Date().toISOString(),
-                });
-            }
-
-            for (const task of tasksToSubmit) {
-                await apiFetch("/tasks", {
-                    method: "POST",
-                    body: JSON.stringify(task),
-                });
-            }
-
-            setLogEntries({
-                Monday: { description: "", hours: "" },
-                Tuesday: { description: "", hours: "" },
-                Wednesday: { description: "", hours: "" },
-                Thursday: { description: "", hours: "" },
-                Friday: { description: "", hours: "" },
-                Saturday: { description: "", hours: "" },
-                Sunday: { description: "", hours: "" },
-            });
-            setGeneralStatement("");
-            setShowLogForm(false);
-            fetchTasks();
-        } catch (error) {
-            console.error("Error submitting log:", error);
-        }
-    };
 
     if (isAuthChecking) {
         return (
@@ -221,15 +171,6 @@ export default function StudentDashboard() {
                         <p className="text-primary">Ready to log your progress for today?</p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.location.href = `/student/chat?studentId=${studentId}`}
-                            className="text-primary border-primary/20 hover:bg-primary/5 gap-2"
-                        >
-                            <MessageSquare className="h-4 w-4" />
-                            Chat with Supervisor
-                        </Button>
                         <Button variant="outline" size="sm" onClick={() => setShowProfileModal(true)} className="text-white bg-primary p-3 hover:bg-primary/80 transition-all duration-300 transform hover:scale-105 border-0 font-bold uppercase tracking-wider text-[10px] shadow-lg shadow-primary/20">Update Profile</Button>
                         <div className="flex items-center gap-2">
                             <input
@@ -243,6 +184,7 @@ export default function StudentDashboard() {
                 </div>
 
                 <div className="flex-1 overflow-x-auto">
+                    {/* Tasks Columns */}
                     <div className="flex gap-6 h-full min-w-[900px]">
                         <div className="flex-1 flex flex-col gap-4 bg-neutral/5 p-4 rounded-xl border border-neutral/10">
                             <div className="flex items-center justify-between mb-2">
@@ -368,120 +310,6 @@ export default function StudentDashboard() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-primary/20 shadow-sm shrink-0">
-                    <button onClick={() => setShowLogForm(!showLogForm)} className="w-full flex items-center justify-between p-4 hover:bg-neutral/5 transition-colors">
-                        <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                <FileTextIcon className="h-4 w-4" />
-                            </div>
-                            <div className="text-left">
-                                <h3 className="font-semibold text-primary">Daily Log Entry</h3>
-                                <p className="text-xs text-primary">Submit your daily activities for supervisor review.</p>
-                            </div>
-                        </div>
-                        {showLogForm ? <ChevronDown className="h-5 w-5 text-primary" /> : <ChevronUp className="h-5 w-5 text-primary" />}
-                    </button>
-
-                    <AnimatePresence>
-                        {showLogForm && (
-                            <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="border-t border-primary/10 bg-neutral/5"
-                            >
-                                <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar pb-20">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h3 className="text-lg font-semibold text-primary">Weekly Work Log</h3>
-                                        <p className="text-xs text-neutral">Fill in your daily activities and hours</p>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
-                                            <div key={day} className="bg-white p-4 rounded-xl border border-primary/10 shadow-sm transition-all hover:shadow-md group">
-                                                <div className="grid grid-cols-12 gap-4 items-start">
-                                                    <div className="col-span-12 md:col-span-2">
-                                                        <div className="flex items-center gap-2 md:block">
-                                                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs md:mb-2">
-                                                                {day.charAt(0)}
-                                                            </div>
-                                                            <span className="text-sm font-bold text-primary">{day}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="col-span-12 md:col-span-8">
-                                                        <textarea
-                                                            className="w-full rounded-lg border border-primary/10 bg-neutral/5 px-4 py-3 text-sm focus:border-primary focus:ring-1 focus:ring-primary min-h-[80px] text-primary transition-all group-hover:bg-white"
-                                                            placeholder={`Describe your activities for ${day}...`}
-                                                            value={logEntries[day].description}
-                                                            onChange={(e) => setLogEntries({
-                                                                ...logEntries,
-                                                                [day]: { ...logEntries[day], description: e.target.value }
-                                                            })}
-                                                        ></textarea>
-                                                    </div>
-                                                    <div className="col-span-12 md:col-span-2">
-                                                        <label className="text-[10px] uppercase tracking-wider text-neutral font-bold mb-1 block md:hidden">Hours</label>
-                                                        <div className="relative">
-                                                            <Input
-                                                                type="number"
-                                                                placeholder="Hours"
-                                                                min="0"
-                                                                max="8"
-                                                                value={logEntries[day].hours}
-                                                                onChange={(e) => setLogEntries({
-                                                                    ...logEntries,
-                                                                    [day]: { ...logEntries[day], hours: e.target.value }
-                                                                })}
-                                                                className="text-primary pr-8"
-                                                            />
-                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-neutral font-medium pointer-events-none">hrs</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="flex items-center justify-between gap-4 pt-6 border-t border-primary/10">
-                                        <Button
-                                            variant="ghost"
-                                            className="text-neutral hover:text-primary transition-colors"
-                                            onClick={() => {
-                                                setLogEntries({
-                                                    Monday: { description: "", hours: "" },
-                                                    Tuesday: { description: "", hours: "" },
-                                                    Wednesday: { description: "", hours: "" },
-                                                    Thursday: { description: "", hours: "" },
-                                                    Friday: { description: "", hours: "" },
-                                                    Saturday: { description: "", hours: "" },
-                                                    Sunday: { description: "", hours: "" },
-                                                });
-                                                setGeneralStatement("");
-                                            }}
-                                        >
-                                            Reset Form
-                                        </Button>
-                                        <div className="flex gap-3">
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => setShowLogForm(false)}
-                                            >
-                                                Cancel
-                                            </Button>
-                                            <Button
-                                                className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 px-8"
-                                                onClick={handleSubmitLog}
-                                            >
-                                                Submit Weekly Log
-                                                <CheckCircle2 className="h-4 w-4 ml-2" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
             </div>
 
 
@@ -524,6 +352,22 @@ export default function StudentDashboard() {
                                     </div>
                                     <div className="col-span-2 pt-4 border-t border-primary/10">
                                         <h4 className="font-semibold text-primary mb-3">Internship Details</h4>
+                                    </div>
+                                    <div className="col-span-1">
+                                        <label className="text-sm font-medium text-primary mb-1 block">Start Date</label>
+                                        <Input
+                                            type="date"
+                                            value={profileData.internshipStart || ""}
+                                            onChange={(e) => setProfileData({ ...profileData, internshipStart: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="col-span-1">
+                                        <label className="text-sm font-medium text-primary mb-1 block">End Date</label>
+                                        <Input
+                                            type="date"
+                                            value={profileData.internshipEnd || ""}
+                                            onChange={(e) => setProfileData({ ...profileData, internshipEnd: e.target.value })}
+                                        />
                                     </div>
                                     <div className="col-span-2">
                                         <label className="text-sm font-medium text-primary mb-1 block">Company Name</label>
@@ -665,28 +509,6 @@ export default function StudentDashboard() {
     );
 }
 
-function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-            <polyline points="14 2 14 8 20 8" />
-            <line x1="16" x2="8" y1="13" y2="13" />
-            <line x1="16" x2="8" y1="17" y2="17" />
-            <line x1="10" x2="8" y1="9" y2="9" />
-        </svg>
-    );
-}
 
 function SendIcon(props: React.SVGProps<SVGSVGElement>) {
     return (

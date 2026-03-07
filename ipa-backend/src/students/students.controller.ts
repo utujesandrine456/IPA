@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Patch, Body, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Query, UseInterceptors, UploadedFile, Param, ParseIntPipe } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiBody, ApiConsumes, ApiParam } from '@nestjs/swagger';
 import { StudentsService } from './students.service';
 
 @ApiTags('Students')
@@ -19,28 +19,24 @@ export class StudentsController {
         return this.studentsService.findAll(query);
     }
 
-    @Patch('update')
+    @Get(':id')
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({ summary: 'Get student by ID', description: 'Retrieve student information by their ID' })
+    @ApiParam({ name: 'id', type: 'number', description: 'Student ID' })
+    @ApiResponse({ status: 200, description: 'Returns student information' })
+    @ApiResponse({ status: 404, description: 'Student not found' })
+    async findOne(@Param('id', ParseIntPipe) id: number) {
+        return this.studentsService.findOne(id);
+    }
+
+    @Patch(':id')
     @ApiBearerAuth('JWT-auth')
     @ApiOperation({ summary: 'Update student profile', description: 'Update student profile information' })
-    @ApiBody({
-        schema: {
-            type: 'object',
-            properties: {
-                id: { type: 'number', example: 1 },
-                fullName: { type: 'string', example: 'John Doe' },
-                phone: { type: 'string', example: '+250788123456' },
-                email: { type: 'string', example: 'john@example.com' },
-                address: { type: 'string', example: 'Kigali, Rwanda' },
-                companyName: { type: 'string', example: 'Tech Corp' },
-                companyAddress: { type: 'string', example: 'KG 123 St' },
-                supervisorName: { type: 'string', example: 'Jane Smith' }
-            }
-        }
-    })
+    @ApiParam({ name: 'id', type: 'number', description: 'Student ID' })
     @ApiResponse({ status: 200, description: 'Profile updated successfully' })
     @ApiResponse({ status: 404, description: 'Student not found' })
-    async updateProfile(@Body() body: any) {
-        return this.studentsService.updateProfile(body);
+    async updateProfile(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
+        return this.studentsService.updateProfile(id, body);
     }
 
     @Get('complete-profile')

@@ -93,9 +93,9 @@ export default function AdminDashboard() {
     const handleAssignSupervisor = async (studentId: string, supervisorId: string) => {
         setAssigningSupervisor(studentId);
         try {
-            await apiFetch("/students/update", {
+            await apiFetch(`/students/${studentId}`, {
                 method: "PATCH",
-                body: JSON.stringify({ studentId, supervisorId }),
+                body: JSON.stringify({ supervisorId }),
             });
             fetchStudents();
         } catch (error) {

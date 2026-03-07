@@ -22,7 +22,8 @@ export class WeeklyLogsController {
 
     @Get()
     async findAll(@Query('studentId', ParseIntPipe) studentId: number) {
-        return this.weeklyLogsService.findByStudent(studentId);
+        const logs = await this.weeklyLogsService.findByStudent(studentId);
+        return { logs };
     }
 
     @Get(':id')
@@ -41,7 +42,9 @@ export class WeeklyLogsController {
         @Param('id', ParseIntPipe) id: number,
         @Body() body: { summary: string; objectives: string },
     ) {
-        return this.weeklyLogsService.submitWeek(id, body);
+        return this.weeklyLogsService.submitWeek(id, {
+            generalStatement: `${body.summary} ${body.objectives}`,
+        });
     }
 
     @Patch(':id/approve')

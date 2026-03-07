@@ -37,9 +37,6 @@ export default function LoginPage() {
                 localStorage.setItem("user", JSON.stringify(user));
                 localStorage.setItem("token", data.token || "");
 
-<<<<<<< HEAD
-                const { role, profileCompleted, id, studentId, supervisorId } = data.user;
-=======
                 if (user.studentProfile?.id) {
                     localStorage.setItem("studentProfileId", String(user.studentProfile.id));
                 }
@@ -47,16 +44,11 @@ export default function LoginPage() {
                 const { role } = user;
                 const studentProfileId = user.studentProfile?.id;
                 const profileCompleted = user.profileCompleted || user.studentProfile?.profileCompleted;
->>>>>>> 2bbe396d2e25605d5973c961b75a8a4ea493b20b
 
                 if (role === "ADMIN") {
                     router.push("/admin");
                 } else if (role === "SUPERVISOR") {
-<<<<<<< HEAD
-                    router.push(`/supervisor/${supervisorId || id}?supervisorId=${supervisorId || id}`);
-=======
                     router.push(`/supervisor?supervisorId=${user.id}`);
->>>>>>> 2bbe396d2e25605d5973c961b75a8a4ea493b20b
                 } else if (role === "STUDENT") {
                     if (!studentProfileId) {
                         // No profile found at all — shouldn't happen, but fallback
@@ -64,11 +56,7 @@ export default function LoginPage() {
                         return;
                     }
                     if (profileCompleted) {
-<<<<<<< HEAD
-                        router.push(`/student/${studentId || id}`);
-=======
                         router.push(`/student/${studentProfileId}`);
->>>>>>> 2bbe396d2e25605d5973c961b75a8a4ea493b20b
                     } else {
                         router.push(`/complete-profile?token=login_${studentProfileId}`);
                     }

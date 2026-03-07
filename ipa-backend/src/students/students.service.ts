@@ -54,19 +54,50 @@ export class StudentsService {
         return { students };
     }
 
-    async updateProfile(body: any) {
-        const {
-            studentId, phone, address, companyName, companyAddress,
-            supervisorName, supervisorEmail, supervisorId
-        } = body;
+    async findOne(id: number) {
+        const student = await this.prisma.student.findUnique({
+            where: { id },
+            include: {
+                user: {
+                    select: { id: true, name: true, email: true },
+                },
+                supervisor: { include: { user: true } },
+            },
+        });
 
+        if (!student) {
+            throw new NotFoundException('Student not found');
+        }
+
+        return student;
+    }
+
+    async updateProfile(studentId: number, body: any) {
         if (!studentId) {
             throw new BadRequestException('Student ID is required');
         }
 
+        // Extract all possible fields from the body
+        const {
+            fullName, sex, idOrPassport, dateOfBirth, year, graduationYear,
+            phone, email, address, companyName, companyAddress,
+            companyPhone, companyEmail, companyPOBox,
+            supervisorName, supervisorDesignation, supervisorEmail,
+            supervisorDepartment, supervisorPhone,
+            liaisonOfficerName, liaisonOfficerPhone,
+            internshipStart, internshipEnd, supervisorId
+        } = body;
+
         const updateData: any = {
-            phone, address, companyName, companyAddress,
-            supervisorName, supervisorEmail,
+            fullName, sex, idOrPassport,
+            dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+            year, graduationYear, phone, email, address,
+            companyName, companyAddress, companyPhone, companyEmail, companyPOBox,
+            supervisorName, supervisorDesignation, supervisorEmail,
+            supervisorDepartment, supervisorPhone,
+            liaisonOfficerName, liaisonOfficerPhone,
+            internshipStart: internshipStart ? new Date(internshipStart) : null,
+            internshipEnd: internshipEnd ? new Date(internshipEnd) : null,
             profileCompleted: true,
         };
 
@@ -77,6 +108,7 @@ export class StudentsService {
         const updatedStudent = await this.prisma.student.update({
             where: { id: Number(studentId) },
             data: updateData,
+            include: { user: true, supervisor: { include: { user: true } } }
         });
 
         return { message: 'Profile updated successfully', student: updatedStudent };
@@ -151,17 +183,23 @@ export class StudentsService {
             data: { password: hashedPassword },
         });
 
+        const updateData: any = {
+            phone, address, companyName, companyAddress,
+            companyPhone, companyEmail, supervisorName, supervisorEmail,
+            internshipStart: internshipStart ? new Date(internshipStart) : null,
+            internshipEnd: internshipEnd ? new Date(internshipEnd) : null,
+            supervisorId: targetSupervisorId, // Use the resolved targetSupervisorId
+            profileCompleted: true,
+            profileToken: null,
+        };
+
+        // Filter out undefined fields to avoid overwriting with null if they are not in the body
+        // This is important for partial updates where some fields might not be provided.
+        Object.keys(updateData).forEach(key => (updateData[key] === undefined) && delete updateData[key]);
+
         const updatedStudent = await this.prisma.student.update({
             where: { id: student.id },
-            data: {
-                phone, address, companyName, companyAddress,
-                companyPhone, companyEmail, supervisorName, supervisorEmail,
-                internshipStart: internshipStart ? new Date(internshipStart) : null,
-                internshipEnd: internshipEnd ? new Date(internshipEnd) : null,
-                supervisorId: targetSupervisorId > 0 ? targetSupervisorId : undefined,
-                profileCompleted: true,
-                profileToken: null,
-            },
+            data: updateData,
             include: {
                 user: true,
                 supervisor: { include: { user: true } },

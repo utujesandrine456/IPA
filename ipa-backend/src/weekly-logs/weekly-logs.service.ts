@@ -89,25 +89,29 @@ export class WeeklyLogsService {
 
     async submitWeek(
         id: number,
-        data: { summary: string; objectives: string },
+        data: { generalStatement: string },
     ) {
         const weeklyLog = await this.prisma.weeklyLog.update({
             where: { id },
             data: {
-                summary: data.summary,
-                objectives: data.objectives,
+                generalStatement: data.generalStatement,
                 status: WeeklyLogStatus.SUBMITTED,
             },
-            include: { student: { include: { supervisor: true } } },
+            include: {
+                student: {
+                    include: {
+                        supervisor: true,
+                    },
+                },
+            },
         });
 
-        if (weeklyLog.student.supervisor?.userId) {
+        if (weeklyLog.student?.supervisor?.userId) {
             await this.notificationsService.createNotification({
                 userId: weeklyLog.student.supervisor.userId,
                 title: 'Weekly Log Submitted',
-                message: `${weeklyLog.student.fullName} has submitted their Weekly Log for Week ${weeklyLog.weekNumber}.`,
+                message: `${weeklyLog.student.fullName} submitted Week ${weeklyLog.weekNumber}`,
                 type: 'INFO',
-                link: `/supervisor/students/${weeklyLog.studentId}/logbook`,
             });
         }
 
@@ -201,9 +205,25 @@ export class WeeklyLogsService {
             );
         }
 
-        if (rest.startDate) rest.startDate = new Date(rest.startDate);
-        if (rest.endDate) rest.endDate = new Date(rest.endDate);
-        if (rest.dateSigned) rest.dateSigned = new Date(rest.dateSigned);
+        // Handle date and number conversions for the new fields
+        // Frontend sends startDate/endDate, DB uses weekStart/weekEnd
+        if (rest.startDate) rest.weekStart = new Date(rest.startDate);
+        if (rest.endDate) rest.weekEnd = new Date(rest.endDate);
+        if (rest.weekStart) rest.weekStart = new Date(rest.weekStart);
+        if (rest.weekEnd) rest.weekEnd = new Date(rest.weekEnd);
+        if (rest.supervisorDate) rest.supervisorDate = new Date(rest.supervisorDate);
+
+        // Remove the original strings to avoid Prisma errors
+        delete (rest as any).startDate;
+        delete (rest as any).endDate;
+
+        // Convert hours to Float
+        if (rest.mondayHours !== undefined) rest.mondayHours = Number(rest.mondayHours);
+        if (rest.tuesdayHours !== undefined) rest.tuesdayHours = Number(rest.tuesdayHours);
+        if (rest.wednesdayHours !== undefined) rest.wednesdayHours = Number(rest.wednesdayHours);
+        if (rest.thursdayHours !== undefined) rest.thursdayHours = Number(rest.thursdayHours);
+        if (rest.fridayHours !== undefined) rest.fridayHours = Number(rest.fridayHours);
+        if (rest.totalHours !== undefined) rest.totalHours = Number(rest.totalHours);
 
         const existing = await this.prisma.weeklyLog.findFirst({
             where: { studentId: sId, weekNumber: wNum },
