@@ -529,3 +529,4 @@ function SendIcon(props: React.SVGProps<SVGSVGElement>) {
         </svg>
     );
 }
+

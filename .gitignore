@@ -1,0 +1,14 @@
+# IDE
+.vscode/
+.idea/
+
+# Documentation (if you want to keep it local only)
+docs/
+
+# Root level package files (projects are in subdirectories)
+package-lock.json
+package.json
+
+# OS files
+.DS_Store
+Thumbs.db

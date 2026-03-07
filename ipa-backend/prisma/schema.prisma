@@ -111,8 +111,8 @@ model WeeklyLog {
   weekNumber          Int
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
-  weekStart           DateTime
-  weekEnd             DateTime
+  startDate           DateTime
+  endDate             DateTime
   mondayTask          String?
   mondayHours         Float?
   tuesdayTask         String?

@@ -77,8 +77,8 @@ export class WeeklyLogsService {
                 data: {
                     studentId,
                     weekNumber,
-                    weekStart,
-                    weekEnd,
+                    startDate: weekStart, // using the local weekStart variable but mapping to startDate field
+                    endDate: weekEnd,     // using the local weekEnd variable but mapping to endDate field
                     status: WeeklyLogStatus.DRAFT,
                 },
             });
@@ -206,16 +206,9 @@ export class WeeklyLogsService {
         }
 
         // Handle date and number conversions for the new fields
-        // Frontend sends startDate/endDate, DB uses weekStart/weekEnd
-        if (rest.startDate) rest.weekStart = new Date(rest.startDate);
-        if (rest.endDate) rest.weekEnd = new Date(rest.endDate);
-        if (rest.weekStart) rest.weekStart = new Date(rest.weekStart);
-        if (rest.weekEnd) rest.weekEnd = new Date(rest.weekEnd);
+        if (rest.startDate) rest.startDate = new Date(rest.startDate);
+        if (rest.endDate) rest.endDate = new Date(rest.endDate);
         if (rest.supervisorDate) rest.supervisorDate = new Date(rest.supervisorDate);
-
-        // Remove the original strings to avoid Prisma errors
-        delete (rest as any).startDate;
-        delete (rest as any).endDate;
 
         // Convert hours to Float
         if (rest.mondayHours !== undefined) rest.mondayHours = Number(rest.mondayHours);
