@@ -65,15 +65,15 @@ model Student {
   internshipEnd         DateTime?
   supervisorId          Int
   liaisonId             Int?
-  supervisor            Supervisor      @relation(fields: [supervisorId], references: [id])
+  absentDays            Int?            @default(0)
   liaison               LiaisonOfficer? @relation(fields: [liaisonId], references: [id])
+  supervisor            Supervisor      @relation(fields: [supervisorId], references: [id])
   user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   iapReport             IapReport?
   logEntries            LogEntry[]
   ratings               Rating[]
   tasks                 Task[]
   weeklyLogs            WeeklyLog[]
-  absentDays            Int?            @default(0)
 }
 
 model Supervisor {
@@ -146,11 +146,11 @@ model WeeklyLog {
   supervisorName      String?
   supervisorDate      DateTime?
   supervisorNote      String?
-  liaisonSignature    Boolean         @default(false)
-  liaisonName         String?
-  liaisonDate         DateTime?
   approvedAt          DateTime?
   status              WeeklyLogStatus @default(DRAFT)
+  liaisonDate         DateTime?
+  liaisonName         String?
+  liaisonSignature    Boolean         @default(false)
   grade               String?
   dailyEntries        LogEntry[]
   student             Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -188,21 +188,21 @@ model Comment {
 model Rating {
   rating                 Int
   comment                String?
-  knowledgeWirelessOps   Int?       @default(0)
-  knowledgeWirelessEst   Int?       @default(0)
-  knowledgeWirelessMaint Int?       @default(0)
-  knowledgeApplication   Int?       @default(0)
-  responsibility         Int?       @default(0)
-  cooperativeness        Int?       @default(0)
-  complianceEtiquette    Int?       @default(0)
-  safetyAwareness        Int?       @default(0)
-  safetyCompliance       Int?       @default(0)
-  safetyArrangement      Int?       @default(0)
   createdAt              DateTime   @default(now())
   updatedAt              DateTime   @updatedAt
   id                     Int        @id @default(autoincrement())
   studentId              Int
   supervisorId           Int
+  complianceEtiquette    Int?       @default(0)
+  cooperativeness        Int?       @default(0)
+  knowledgeApplication   Int?       @default(0)
+  knowledgeWirelessEst   Int?       @default(0)
+  knowledgeWirelessMaint Int?       @default(0)
+  knowledgeWirelessOps   Int?       @default(0)
+  responsibility         Int?       @default(0)
+  safetyArrangement      Int?       @default(0)
+  safetyAwareness        Int?       @default(0)
+  safetyCompliance       Int?       @default(0)
   student                Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
   supervisor             Supervisor @relation(fields: [supervisorId], references: [id], onDelete: Cascade)
 
@@ -240,21 +240,24 @@ model Notification {
 model IapReport {
   id                      Int      @id @default(autoincrement())
   studentId               Int      @unique
+  nameOfUnit              String?
+  overviewGoals           String?
+  contentsTraining        String?
   loVisitCount            Int?
   isUseful                Boolean?
   improvedUnderstanding   Boolean?
   providedExperiences     Boolean?
   programmeTypes          String[]
   otherProgrammeDetails   String?
-  satisfactionIndustry    String?
-  satisfactionMajor       String?
-  satisfactionPractical   String?
-  satisfactionInstructors String?
-  notableAchievements     String?
-  futureCareerPlan        String?
-  suggestions             String?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
+  futureCareerPlan        String?
+  notableAchievements     String?
+  satisfactionIndustry    String?
+  satisfactionInstructors String?
+  satisfactionMajor       String?
+  satisfactionPractical   String?
+  suggestions             String?
   student                 Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@map("iap_reports")
