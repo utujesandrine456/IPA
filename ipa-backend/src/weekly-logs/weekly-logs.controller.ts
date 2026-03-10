@@ -65,7 +65,7 @@ export class WeeklyLogsController {
         @Body() body: { status: 'SUBMITTED' },
     ) {
         if (body.status === 'SUBMITTED') {
-            return this.weeklyLogsService.submitWeek(id, { generalStatement: '' }); // Uses existing submit function in service to trigger notifications
+            return this.weeklyLogsService.submitWeek(id, {}); // Uses existing submit function in service to trigger notifications
         }
         return this.weeklyLogsService.findOne(id);
     }

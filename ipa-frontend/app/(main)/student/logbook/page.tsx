@@ -18,6 +18,17 @@ import DOMPurify from "dompurify";
 
 const sanitize = (html: string) => ({ __html: DOMPurify.sanitize(html) });
 
+const formatDate = (date: string | null | undefined) => {
+    if (!date) return "";
+    try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return "";
+        return d.toISOString().split('T')[0];
+    } catch {
+        return "";
+    }
+};
+
 // Subcomponents
 function Field({ label, value }: { label: string; value: string }) {
     return (
@@ -1330,7 +1341,7 @@ export default function StudentLogbookPage() {
                                                                             type="date"
                                                                             disabled={true}
                                                                             className="w-full h-10 border border-amber-200 rounded-md px-3 text-sm bg-white/70 cursor-not-allowed"
-                                                                            value={getSafeLog(expandedWeek).supervisorDate || ""}
+                                                                            value={formatDate(getSafeLog(expandedWeek).supervisorDate)}
                                                                         />
                                                                     </div>
                                                                     <div className="col-span-2 space-y-2">
