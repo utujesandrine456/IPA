@@ -104,7 +104,7 @@ export default function CompleteProfilePage() {
       apiFetch(`/students/complete-profile?token=${token}`),
       apiFetch("/supervisors")
     ]).then(([profileData, supData]) => {
-      const s = profileData.student;
+      const s = profileData.data.student;
       setStudent(s);
       setFormData(prev => ({
         ...prev,
@@ -118,7 +118,7 @@ export default function CompleteProfilePage() {
         internshipEnd: s.internshipEnd ? new Date(s.internshipEnd).toISOString().split("T")[0] : "",
         supervisorId: s.supervisorId?.toString() || "",
       }));
-      if (supData.supervisors) setSupervisors(supData.supervisors);
+      if (supData.data.supervisors) setSupervisors(supData.data.supervisors);
     }).catch(() => {
       router.push("/login");
     }).finally(() => setLoading(false));

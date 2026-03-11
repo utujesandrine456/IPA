@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -17,6 +17,17 @@ import { toast, Toaster } from "react-hot-toast";
 import DOMPurify from "dompurify";
 
 const sanitize = (html: string) => ({ __html: DOMPurify.sanitize(html) });
+
+const formatDate = (date: string | null | undefined) => {
+    if (!date) return "";
+    try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return "";
+        return d.toISOString().split('T')[0];
+    } catch {
+        return "";
+    }
+};
 
 // Subcomponents
 function Field({ label, value }: { label: string; value: string }) {
@@ -423,10 +434,10 @@ export default function StudentLogbookPage() {
 
     const generatePDF = () => {
         const doc = new jsPDF() as any;
-
         const fontName = "helvetica";
         const primaryColor: [number, number, number] = [26, 38, 74];
 
+        // ─── PAGE 1: COVER ───────────────────────────────────────────────────────────
         doc.setFillColor(255, 255, 255);
         doc.rect(0, 0, 210, 297, 'F');
         doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -440,111 +451,211 @@ export default function StudentLogbookPage() {
         doc.setFontSize(30);
         doc.text("LOGBOOK", 105, 65, { align: "center" });
 
-        // Student details
-        let y = 100;
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
+        doc.setFont(fontName, "normal");
+
+        let y = 100;
+        doc.setFont(fontName, "bold");
         doc.text("Student details:", 20, y);
+        doc.setFont(fontName, "normal");
         y += 10;
-        doc.text(`Name of Student: ${student?.fullName || "__________________________________________"}`, 25, y);
-        y += 8;
-        doc.text(`Date of Birth: ${student?.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : "_____________________________________________"}`, 25, y);
-        y += 8;
-        doc.text(`ID/Passport No.: ${student?.idOrPassport || "__________________________________________"}`, 25, y);
-        y += 8;
-        doc.text(`Reg No.: ${student?.studentNumber || "_________________________________________________"}`, 25, y);
-        y += 8;
-        doc.text(`Cell Phone No.: ${student?.phone || "___________________________________________"}`, 25, y);
+        doc.text(`Name of Student: ${student?.fullName || ""}`, 25, y); y += 8;
+        doc.text(`Date of Birth: ${student?.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : ""}`, 25, y); y += 8;
+        doc.text(`ID/Passport No.: ${student?.idOrPassport || ""}`, 25, y); y += 8;
+        doc.text(`Reg No.: ${student?.studentNumber || ""}`, 25, y); y += 8;
+        doc.text(`Cell Phone No.: ${student?.phone || ""}`, 25, y);
 
-        // Company details
-        y += 20;
+        y += 18;
+        doc.setFont(fontName, "bold");
         doc.text("Company/Institution details:", 20, y);
+        doc.setFont(fontName, "normal");
         y += 10;
-        doc.text(`Name: ${student?.companyName || "___________________________________________________"}`, 25, y);
-        y += 8;
-        doc.text(`Address/Location: ${student?.companyAddress || "__________________________________________"}`, 25, y);
-        y += 8;
-        doc.text(`Tel No.: ${student?.companyPhone || "__________________________________________________"}`, 25, y);
-        y += 8;
-        doc.text(`Email: ${student?.companyEmail || "___________________________________________________"}`, 25, y);
-        y += 8;
-        doc.text(`P.O.Box: ${student?.companyPOBox || "_________________________________________________"}`, 25, y);
+        doc.text(`Name: ${student?.companyName || ""}`, 25, y); y += 8;
+        doc.text(`Address/Location: ${student?.companyAddress || ""}`, 25, y); y += 8;
+        doc.text(`Tel No.: ${student?.companyPhone || ""}`, 25, y); y += 8;
+        doc.text(`Email: ${student?.companyEmail || ""}`, 25, y); y += 8;
+        doc.text(`P.O.Box: ${student?.companyPOBox || ""}`, 25, y);
 
-
-        y += 20;
+        y += 18;
+        doc.setFont(fontName, "bold");
         doc.text("Supervisor details:", 20, y);
+        doc.setFont(fontName, "normal");
         y += 10;
-        doc.text(`IAP Company Supervisor Name: ${student?.supervisorName || "_______________________________"}`, 25, y);
-        y += 8;
-        doc.text(`Designation/Title: ${student?.supervisorDesignation || "__________________________________________"}`, 25, y);
-        y += 8;
-        doc.text(`Tel No.: ${student?.supervisorPhone || "__________________________________________________"}`, 25, y);
-        y += 8;
-        doc.text(`Email: ${student?.supervisorEmail || "___________________________________________________"}`, 25, y);
+        doc.text(`IAP Company Supervisor Name: ${student?.supervisorName || ""}`, 25, y); y += 8;
+        doc.text(`Designation/Title: ${student?.supervisorDesignation || ""}`, 25, y); y += 8;
+        doc.text(`Department: ${student?.supervisorDepartment || ""}`, 25, y); y += 8;
+        doc.text(`Tel No.: ${student?.supervisorPhone || ""}`, 25, y); y += 8;
+        doc.text(`Email: ${student?.supervisorEmail || ""}`, 25, y);
 
+        // ─── HELPERS FOR PAGINATED TEXT ───────────────────────────────────────────────
+        const PAGE_BOTTOM = 275;
+        const LINE_H = 5.5;
+        const CONTENT_W = 170;
+
+        const addGuidelinesHeader = (subtitle: string) => {
+            doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.rect(0, 0, 210, 20, 'F');
+            doc.setFontSize(13);
+            doc.setTextColor(255, 255, 255);
+            doc.setFont(fontName, "bold");
+            doc.text(subtitle, 105, 13, { align: "center" });
+            doc.setTextColor(0, 0, 0);
+        };
+
+        const checkPage = (cy: number, need: number): number => {
+            if (cy + need > PAGE_BOTTOM) {
+                doc.addPage();
+                addGuidelinesHeader("IAP OBJECTIVES & GUIDELINES (CONTINUED)");
+                return 28;
+            }
+            return cy;
+        };
+
+        const pBullet = (text: string, cy: number, indent = 25): number => {
+            const lines = doc.splitTextToSize(`\u2022  ${text}`, CONTENT_W - (indent - 20));
+            cy = checkPage(cy, lines.length * LINE_H + 2);
+            doc.setFont(fontName, "normal");
+            doc.text(lines, indent, cy);
+            return cy + lines.length * LINE_H + 2;
+        };
+
+        const pNumbered = (num: string, text: string, cy: number, indent = 25): number => {
+            const lines = doc.splitTextToSize(`${num}. ${text}`, CONTENT_W - (indent - 20));
+            cy = checkPage(cy, lines.length * LINE_H + 2);
+            doc.setFont(fontName, "normal");
+            doc.text(lines, indent, cy);
+            return cy + lines.length * LINE_H + 2;
+        };
+
+        const pHeader = (text: string, cy: number, bold = true): number => {
+            cy = checkPage(cy, 10);
+            doc.setFont(fontName, bold ? "bold" : "normalitalic");
+            doc.text(text, 20, cy);
+            doc.setFont(fontName, "normal");
+            return cy + 8;
+        };
+
+        const pPara = (text: string, cy: number, indent = 25): number => {
+            const lines = doc.splitTextToSize(text, CONTENT_W - (indent - 20));
+            cy = checkPage(cy, lines.length * LINE_H + 2);
+            doc.setFont(fontName, "normal");
+            doc.text(lines, indent, cy);
+            return cy + lines.length * LINE_H + 4;
+        };
+
+        // ─── PAGES 2+: FULL IAP OBJECTIVES & GUIDELINES ────────────────────────────
         doc.addPage();
-        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.rect(0, 0, 210, 20, 'F');
-        doc.setFontSize(14);
-        doc.setTextColor(255, 255, 255);
-        doc.text("IAP OBJECTIVES & GUIDELINES", 105, 13, { align: "center" });
-
-        doc.setTextColor(0, 0, 0);
+        addGuidelinesHeader("IAP OBJECTIVES & GUIDELINES");
         doc.setFontSize(10);
-        const objectives = [
-            "To develop students and enhance their range of technical and transferable skills.",
-            "To expose students to industry practices, trends, and real-world challenges.",
-            "To build professional networks and establish industry connections.",
-            "To explore career interests and clarify professional goals.",
-            "To foster professional growth, resilience, and adaptability.",
-            "To integrate academic learning with practical industrial application."
-        ];
+        let yPos = 28;
 
-        let yPos = 35;
-        doc.setFont(fontName, "bold");
-        doc.text("Primary Objectives:", 20, yPos);
-        doc.setFont(fontName, "normal");
-        yPos += 8;
-        objectives.forEach(obj => {
-            doc.text(`• ${obj}`, 25, yPos);
-            yPos += 6;
-        });
+        yPos = pHeader("IAP Objectives", yPos);
+        yPos = pBullet("To develop students and enhance their range of skills that are valuable for future careers, including technical skills and transferable skills such as communication, problem-solving, critical thinking, teamwork, adaptability, and time management.", yPos);
+        yPos = pBullet("To expose students to the industry they are interested in or studying, allowing them to gain a deeper understanding of industry practices, trends, challenges, and opportunities.", yPos);
+        yPos = pBullet("Opportunity for students to build professional networks and establish connections with industry professionals, facilitating future job opportunities, mentorship, and valuable industry contacts.", yPos);
+        yPos = pBullet("Students can explore their career interests and clarify their goals by experiencing a real work environment and gaining insights into different roles, industries, and work cultures.", yPos);
+        yPos = pBullet("To foster professional growth in students, challenging them, providing new experiences, and offering feedback to develop self-confidence, resilience, adaptability, and a growth mind-set.", yPos);
+        yPos = pBullet("To integrate academic learning with practical application, helping students understand how theoretical concepts and classroom learning align with real-world scenarios, enhancing their overall educational experience.", yPos);
+        yPos += 4;
 
-        yPos += 10;
-        doc.setFont(fontName, "bold");
-        doc.text("Key Compulsory Guidelines for Students:", 20, yPos);
-        doc.setFont(fontName, "normal");
-        yPos += 8;
-        const guidelines = [
-            "Maintain regular attendance and puncuality throughout the attachment.",
-            "Ensure the logbook is updated daily and reviewed by the supervisor weekly.",
-            "Adhere to all safety regulations and company policies at all times.",
-            "Maintain a professional attitude and foster positive relationships with colleagues.",
-            "Notify the liaison officer immediately in case of any challenges or absence."
-        ];
-        guidelines.forEach(g => {
-            const splitG = doc.splitTextToSize(`- ${g}`, 170);
-            doc.text(splitG, 25, yPos);
-            yPos += splitG.length * 5 + 1;
-        });
+        yPos = pHeader("Key points to keep in mind on a daily basis (Compulsory by the student).", yPos);
+        doc.setFont(fontName, "italic"); doc.text("Before IAP", 20, yPos); doc.setFont(fontName, "normal"); yPos += 7;
+        yPos = pNumbered("1", "Did you meet your IAP coordinator or any Liaison Officer (LO)?", yPos);
+        yPos += 2;
+        doc.setFont(fontName, "italic"); doc.text("During IAP", 20, yPos); doc.setFont(fontName, "normal"); yPos += 7;
+        yPos = pNumbered("2", "Did your company supervisor assess you weekly and record on your Log Book?", yPos);
+        yPos = pNumbered("3", "Did your LO assess your Log Book when you are visited?", yPos);
+        yPos += 2;
+        doc.setFont(fontName, "italic"); doc.text("After IAP", 20, yPos); doc.setFont(fontName, "normal"); yPos += 7;
+        yPos = pNumbered("4", "Did you send a Thank You letter to your IAP Company/Institution and give a copy to your LO with a reception stamp & signature? (Compulsory)", yPos);
+        yPos = pNumbered("5", "Did you complete the Student's Report Form?", yPos);
+        yPos = pNumbered("6", "Did you submit your Log Book plus your IAP-Report to your LO for grading within TWO weeks after the completion of IAP?", yPos);
+        yPos = pNumbered("7", "Did the LO sign your Log Book pages?", yPos);
+        yPos += 4;
 
-        // WEEKLY LOGS
-        const drawCheckbox = (x: number, y: number, checked: boolean) => {
+        yPos = pHeader("IAP Guidelines", yPos);
+        yPos = pHeader("1. Introduction", yPos, false);
+        yPos = pPara("Preparing for an IAP is crucial to ensure a successful and enriching experience. This guide presents instructions to students on how to make the most out of their placement, starting from the preparation phase, during the placement itself, and concluding with the post placement phase. Follow these guidelines to maximize your learning, professional growth, and overall experience.", yPos);
+
+        yPos = pHeader("2. Prior to Placement", yPos, false);
+        yPos = pBullet("Research the Company/Institution where you will be placed and familiarize yourself with it by understanding their mission, values, products/services, and any recent news or projects. This will help you align your expectations and demonstrate your interest during the placement.", yPos);
+        yPos = pBullet("Review Placement Objectives and understand the objectives of your placement as communicated by RCA. Review the specific skills and knowledge you are expected to gain and consider how you can actively work towards achieving those objectives during your placement.", yPos);
+        yPos = pBullet("Set personal goals that align with the placement objectives and always reflect on what you hope to achieve during the placement. This will provide a clear focus and direction for your efforts.", yPos);
+        yPos = pBullet("Familiarize yourself with professional etiquette and workplace norms. This includes appropriate behaviour, respect for colleagues and supervisors, confidentiality, punctuality, and a positive attitude. Prepare a professional-looking resume, if required, and bring any necessary identification or documentation requested by the placement host.", yPos);
+
+        yPos = pHeader("3. During the Placement", yPos, false);
+        yPos = pBullet("Be proactive and eager to learn by taking initiative, ask questions, and seek opportunities to contribute to new tasks, projects, and responsibilities that align with your learning goals.", yPos);
+        yPos = pBullet("Observe and learn from your colleagues and supervisors by paying attention to their work practices, communication styles, and problem-solving approaches. Actively seek feedback to improve your performance and demonstrate your commitment to growth.", yPos);
+        yPos = pBullet("Take advantage of networking opportunities within the workplace by engaging with colleagues, attend company events, and seek mentorship from experienced professionals. Building relationships can open your doors for future opportunities and provide valuable guidance.", yPos);
+        yPos = pBullet("Maintain a growth mind-set by embracing challenges and setbacks as learning opportunities. Be open to feedback, adapt to new situations, and continuously seek ways to improve your skills. Embody a growth mind-set that fosters resilience, adaptability, and a commitment to lifelong learning.", yPos);
+
+        yPos = pHeader("4. After the Placement", yPos, false);
+        yPos = pBullet("Take time to reflect on your placement experience by evaluating your accomplishments, challenges faced, and lessons learned. Consider how the experience has contributed to your personal and professional growth.", yPos);
+        yPos = pBullet("Document your achievements, skills acquired, and projects completed during the placement. Update your resume or portfolio to reflect your new experiences and competencies. These will be valuable assets when pursuing future opportunities.", yPos);
+        yPos = pBullet("Seek feedback and recommendations by approaching your supervisors or mentors. Request their insights on your performance and areas for further development. These testimonials can be valuable additions to your professional profile.", yPos);
+        yPos = pBullet("Apply the knowledge, skills, and insights gained during the placement to your future academic pursuits or career endeavours. Leverage the experience to enhance your academic performance, shape your career path, and make informed decisions.", yPos);
+        yPos += 4;
+
+        yPos = pHeader("IAP Instructions", yPos);
+
+        yPos = pHeader("Meet your LO", yPos, false);
+        yPos = pPara("It is very important that you obtain the contact number of your LO where they can be contacted outside office hours in case you may need it. Please consult him or her if you have any problems.", yPos);
+
+        yPos = pHeader("Rules and Regulations", yPos, false);
+        yPos = pPara("Please note the following instructions for students participating in the IAP:", yPos);
+        yPos = pBullet("Once your IAP placement has been confirmed, you are not permitted to change your attachment or withdraw from the program without obtaining approval from the RCA IAP coordinator.", yPos);
+        yPos = pBullet("It is mandatory for you to adhere to the rules and regulations that govern employees of the IAP company or institution to which you are attached.", yPos);
+        yPos = pBullet("Any instances of absenteeism, insubordination, tardiness, or misconduct reported against you will result in disciplinary action.", yPos);
+        yPos = pBullet("Direct negotiation with the company regarding matters such as the duration of your attachment, allowance, working hours, leave of absence, working conditions, and rules is strictly prohibited.", yPos);
+        yPos = pBullet("During your attachment, you are not entitled to any leave or days off, including returning to RCA or your home. However, in case of emergencies, please seek permission from your supervisor for a leave of absence. Your LO must also be notified.", yPos);
+        yPos = pBullet("For non-emergency situations, you must apply for a leave of absence from the company or institution's supervision and inform your LO. Please contact them during regular working hours, excluding weekends.", yPos);
+        yPos = pBullet("If you become ill, please inform your supervisor that you will be consulting a doctor. A Medical Certificate must be submitted to your supervisor on the day you return to work.", yPos);
+        yPos = pBullet("As an intern, you do not possess the authority to negotiate or influence company-wide decisions, such as changes to the organizational structure, budget allocations, or major strategic initiatives.", yPos);
+        yPos = pBullet("Harassment of any kind, including but not limited to sexual harassment, verbal abuse, or discrimination, will not be tolerated. If you experience or witness any form of harassment, immediately report it to your supervisor or the designated authority. Confidentiality and appropriate action will be ensured.", yPos);
+
+        yPos = pHeader("Allowance", yPos, false);
+        yPos = pBullet("The provision of an allowance by the company you are attached to is not guaranteed, unless specifically mentioned in your Placement Notice.", yPos);
+        yPos = pBullet("It is important to note that the allowance provided does not directly correspond to the productivity of your work. It is primarily intended as an out-of-pocket allowance.", yPos);
+        yPos = pBullet("In the event that the company fails to fulfil any officially agreed-upon arrangements at the conclusion of your attachment, please contact the designated person-in-charge within the IAP company or institution.", yPos);
+        yPos = pBullet("If you encounter any difficulties or issues with your IAP company that you are unable to resolve independently, please consult your LO for assistance.", yPos);
+
+        yPos = pHeader("Accident", yPos, false);
+        yPos = pBullet("Ensuring safety for yourself and others involved is of utmost importance. In the event of any injuries or hazards, promptly seek medical assistance or contact emergency services.", yPos);
+        yPos = pBullet("It is crucial to inform your supervisor at the IAP site about any accidents that occur, providing accurate details of the incident, including the date, time, location, and a description of what transpired.", yPos);
+        yPos = pBullet("Please be aware that you are covered under the RCA student's Accident Insurance Policy. If you require any necessary assistance, consult your IAP coordinator to ensure that you receive the appropriate support.", yPos);
+
+        yPos = pHeader("Logbook", yPos, false);
+        yPos = pBullet("Please read the instructions given in this Log Book as well as those written on the forms before completing them. If in doubt, please consult your LO.", yPos);
+        yPos = pBullet("At the end of each day, take some time to reflect on your activities and write down a detailed account of what you worked on, including tasks, projects, meetings, and any notable accomplishments or challenges.", yPos);
+        yPos = pBullet("Use clear and concise language when describing your activities, focusing on key points and outcomes rather than excessive detail.", yPos);
+        yPos = pBullet("Treat your log book as a valuable resource for self-reflection and future reference, as it can help you track your progress, identify areas for growth, and serve as supporting evidence for any reports, presentations, or evaluations related to your IAP.", yPos);
+
+        // ─── WEEKLY LOGS ────────────────────────────────────────────────────────────
+        const drawCheckbox = (cx: number, cy: number, checked: boolean) => {
             doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.rect(x, y - 3, 4, 4);
+            doc.setLineWidth(0.4);
+            doc.rect(cx, cy - 3.5, 5, 5);
             if (checked) {
-                doc.setLineWidth(0.5);
-                doc.line(x + 1, y - 1, x + 2, y + 1);
-                doc.line(x + 2, y + 1, x + 4, y - 3);
+                doc.setLineWidth(0.6);
+                doc.line(cx + 1, cy - 1, cx + 2.2, cy + 0.5);
+                doc.line(cx + 2.2, cy + 0.5, cx + 4.5, cy - 3);
                 doc.setLineWidth(0.1);
             }
+        };
+
+        const gradeLabels: Record<string, string> = {
+            A: 'A - Excellent',
+            B: 'B - Good',
+            C: 'C - Satisfactory',
+            D: 'D - Needs Improvement',
+            E: 'E - Unsatisfactory',
         };
 
         generatedWeeksList.forEach((week) => {
             const log = getSafeLog(week.number);
             doc.addPage();
 
-            // Header Bar
             doc.setFillColor(245, 247, 250);
             doc.rect(0, 0, 210, 45, 'F');
             doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
@@ -558,7 +669,6 @@ export default function StudentLogbookPage() {
             doc.setFontSize(10);
             doc.text(`${new Date(week.start).toLocaleDateString()} - ${new Date(week.end).toLocaleDateString()}`, 20, 28);
 
-            // Weekly Summary Box
             doc.setFillColor(255, 255, 255);
             doc.roundedRect(120, 10, 70, 25, 3, 3, 'FD');
             doc.setFontSize(8);
@@ -589,163 +699,136 @@ export default function StudentLogbookPage() {
 
             yPos = (doc as any).lastAutoTable.finalY + 10;
 
-            // Statement box
+            // General Statement
             doc.setFontSize(10);
             doc.setFont(fontName, "bold");
+            doc.setTextColor(0, 0, 0);
             doc.text("General Statement of student's progress:", 20, yPos);
-            yPos += 5;
+            yPos += 6;
             doc.setFont(fontName, "normal");
-            const stmt = doc.splitTextToSize(log.generalStatement || "No summary provided.", 170);
-            doc.text(stmt, 25, yPos);
-            yPos += stmt.length * 5 + 10;
+            const generalText = (log.generalStatement && log.generalStatement.trim() !== '')
+                ? log.generalStatement
+                : "No general statement provided.";
+            const stmtLines = doc.splitTextToSize(generalText, 170);
+            doc.text(stmtLines, 25, yPos);
+            yPos += stmtLines.length * 5.5 + 8;
 
             doc.setDrawColor(200, 200, 200);
             doc.setLineWidth(0.1);
             doc.line(20, yPos, 190, yPos);
             yPos += 10;
 
+            // Supervisor Assessment
             doc.setFont(fontName, "bold");
+            doc.setFontSize(10);
             doc.text("Supervisor's Assessment:", 20, yPos);
-            yPos += 10;
+            yPos += 8;
+            doc.setFontSize(9);
 
-            const grades = ['A', 'B', 'C', 'D', 'E'];
-            let xGrade = 25;
-            grades.forEach(g => {
-                drawCheckbox(xGrade, yPos, log.grade === g);
-                doc.text(g, xGrade + 6, yPos);
-                xGrade += 20;
+            const gradeScale = ['A', 'B', 'C', 'D', 'E'];
+            gradeScale.forEach((g, i) => {
+                const xBase = 22 + i * 36;
+                const isSelected = log.grade === g;
+                drawCheckbox(xBase, yPos, isSelected);
+                doc.setFont(fontName, isSelected ? "bold" : "normal");
+                doc.setTextColor(isSelected ? primaryColor[0] : 0, isSelected ? primaryColor[1] : 0, isSelected ? primaryColor[2] : 0);
+                doc.text(gradeLabels[g], xBase + 7, yPos);
+                doc.setTextColor(0, 0, 0);
             });
 
-            yPos += 15;
+            yPos += 13;
+            doc.setFont(fontName, "normal");
             doc.setFontSize(9);
             doc.text(`Print Name: ${log.supervisorName || '____________________'}`, 20, yPos);
-            doc.text(`Date: ${log.supervisorDate || '_____________________'}`, 120, yPos);
+            doc.text(`Date: ${log.supervisorDate ? new Date(log.supervisorDate).toLocaleDateString() : '_____________________'}`, 120, yPos);
             yPos += 10;
             doc.text(`Signature: ${log.supervisorSignature ? '[Signed Digitally]' : '____________________'}`, 20, yPos);
         });
 
+        // ─── RESULT REPORT PAGE ─────────────────────────────────────────────────────
         doc.addPage();
         doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.rect(0, 0, 210, 25, 'F');
-        doc.setFontSize(16);
+        doc.rect(0, 0, 210, 22, 'F');
+        doc.setFontSize(13);
         doc.setTextColor(255, 255, 255);
         doc.setFont(fontName, "bold");
-        doc.text("Industrial Attachment Assessment (Employer Copy)", 105, 16, { align: "center" });
-
+        doc.text("Industrial Attachment Result Report (for students)", 105, 14, { align: "center" });
         doc.setTextColor(0, 0, 0);
-        doc.setFontSize(10);
         doc.setFont(fontName, "normal");
 
-        yPos = 35;
-        doc.text(`Student Name: ${student?.fullName || 'N/A'}`, 20, yPos);
-        doc.text(`Department: ${student?.year || 'N/A'}`, 120, yPos);
-        yPos += 12;
-
-        doc.setFont(fontName, "bold");
-        doc.text("Detailed Marking Scheme", 20, yPos);
-
-        const latestRating = student?.ratings?.[0] || {};
-        const knowledgeScore = (latestRating?.knowledgeWirelessOps || 0) + (latestRating?.knowledgeWirelessEst || 0) + (latestRating?.knowledgeWirelessMaint || 0) + (latestRating?.knowledgeApplication || 0);
-        const responsibilityScore = (latestRating?.responsibility || 0) + (latestRating?.cooperativeness || 0) + (latestRating?.complianceEtiquette || 0);
-        const safetyScore = (latestRating?.safetyAwareness || 0) + (latestRating?.safetyCompliance || 0) + (latestRating?.safetyArrangement || 0);
+        yPos = 28;
 
         autoTable(doc, {
-            startY: yPos + 5,
-            head: [['Evaluation Category & Items', 'Max', 'Actual']],
+            startY: yPos,
             body: [
-                [{ content: '1. RELATED KNOWLEDGE', styles: { fontStyle: 'bold', fillColor: [245, 245, 245] } }, '40', knowledgeScore],
-                ['   - Support for wireless network ops', '10', latestRating?.knowledgeWirelessOps || '0'],
-                ['   - Establishment of wireless network', '10', latestRating?.knowledgeWirelessEst || '0'],
-                ['   - Maintenance of wireless comm room', '10', latestRating?.knowledgeWirelessMaint || '0'],
-                ['   - Related knowledge application', '10', latestRating?.knowledgeApplication || '0'],
-                [{ content: '2. RESPONSIBILITY & ATTITUDE', styles: { fontStyle: 'bold', fillColor: [245, 245, 245] } }, '30', responsibilityScore],
-                ['   - Reliability & Engagement', '10', latestRating?.responsibility || '0'],
-                ['   - Cooperativeness with team', '10', latestRating?.cooperativeness || '0'],
-                ['   - Compliance & Etiquette', '10', latestRating?.complianceEtiquette || '0'],
-                [{ content: '3. SAFETY MANAGEMENT', styles: { fontStyle: 'bold', fillColor: [245, 245, 245] } }, '30', safetyScore],
-                ['   - Awareness of safety protocols', '10', latestRating?.safetyAwareness || '0'],
-                ['   - Compliance with safety rules', '10', latestRating?.safetyCompliance || '0'],
-                ['   - Maintenance of safety gear', '10', latestRating?.safetyArrangement || '0'],
-                [{ content: 'TOTAL ASSESSMENT SCORE', styles: { fontStyle: 'bold', textColor: primaryColor } }, '100', latestRating?.rating || '0'],
+                ['Student Name', student?.fullName || ''],
+                ['Student Reg. No.', student?.studentNumber || ''],
+                ['Date of Birth', student?.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : ''],
+                ['ID / Passport No.', student?.idOrPassport || ''],
+                ['Company / Institution Name', student?.companyName || ''],
+                ['Unit / Department', report.nameOfUnit || ''],
+                ['IAP Duration', `${student?.internshipStart ? new Date(student.internshipStart).toLocaleDateString() : ''} to ${student?.internshipEnd ? new Date(student.internshipEnd).toLocaleDateString() : ''}`],
             ],
             theme: 'grid',
-            headStyles: { fillColor: primaryColor, textColor: [255, 255, 255] },
-            styles: { fontSize: 8.5, cellPadding: 4, font: fontName },
-            columnStyles: { 0: { cellWidth: 120 } }
+            styles: { fontSize: 9.5, cellPadding: 4, font: fontName },
+            columnStyles: { 0: { fontStyle: 'bold', cellWidth: 70, fillColor: [240, 244, 255] } }
         });
 
-        yPos = (doc as any).lastAutoTable.finalY + 15;
-        doc.setFontSize(10);
-        doc.setFont(fontName, "bold");
-        doc.text(`Days of Absence: ${student?.absentDays || 0} Days`, 20, yPos);
-        yPos += 8;
-        doc.setFont(fontName, "normal");
-        doc.setFontSize(8);
-        doc.setTextColor(100, 100, 100);
-        doc.text("* 10 points deducted for each unauthorised absence. Unauthorised late arrival (3x) = 1 day absence.", 20, yPos);
-
-        yPos += 15;
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(10);
-        doc.setFont(fontName, "bold");
-        doc.text("Overall Performance Review:", 20, yPos);
-        yPos += 6;
-        doc.setFont(fontName, "normal");
-        const review = doc.splitTextToSize(latestRating?.comment || "No formal review submitted yet.", 170);
-        doc.text(review, 25, yPos);
-
-        yPos += (review.length * 5) + 20;
-        doc.setLineWidth(0.5);
-        doc.setDrawColor(0);
-        doc.line(20, yPos, 80, yPos);
-        doc.line(120, yPos, 180, yPos);
-        doc.text("Evaluator Signature", 20, yPos + 5);
-        doc.text("Company Stamp", 120, yPos + 5);
-
-        doc.addPage();
-        doc.setFontSize(16);
-        doc.setFont(fontName, "bold");
-        doc.text("Industrial Attachment Result Report", 105, 20, { align: "center" });
+        yPos = (doc as any).lastAutoTable.finalY + 5;
 
         autoTable(doc, {
-            startY: 30,
+            startY: yPos,
             body: [
-                ['Student Name', student?.fullName || 'N/A'],
-                ['Company Name', student?.companyName || 'N/A'],
-                ['IAP Duration', `${student?.internshipStart ? new Date(student.internshipStart).toLocaleDateString() : 'N/A'} to ${student?.internshipEnd ? new Date(student.internshipEnd).toLocaleDateString() : 'N/A'}`],
+                [{ content: 'Overview / Goals of Training', styles: { fontStyle: 'bold', fillColor: [245, 247, 255] } }, report.overviewGoals || ''],
+                [{ content: 'Contents of Training', styles: { fontStyle: 'bold', fillColor: [245, 247, 255] } }, report.contentsTraining || ''],
+                [{ content: 'Notable Achievements', styles: { fontStyle: 'bold', fillColor: [245, 247, 255] } }, report.notableAchievements || ''],
+                [{ content: 'Future Career Plan', styles: { fontStyle: 'bold', fillColor: [245, 247, 255] } }, report.futureCareerPlan || ''],
+                [{ content: 'Suggestions / Recommendations', styles: { fontStyle: 'bold', fillColor: [245, 247, 255] } }, report.suggestions || ''],
             ],
             theme: 'grid',
-            styles: { fontSize: 10, cellPadding: 5, font: fontName },
-            columnStyles: { 0: { fontStyle: 'bold', cellWidth: 60, fillColor: [248, 250, 252] } }
+            styles: { fontSize: 9, cellPadding: 4, font: fontName },
+            columnStyles: { 0: { cellWidth: 70 } }
         });
 
-        yPos = (doc as any).lastAutoTable.finalY + 15;
-        doc.setFontSize(12);
-        doc.setFont(fontName, "bold");
-        doc.text("Student Satisfaction Matrix", 20, yPos);
+        yPos = (doc as any).lastAutoTable.finalY + 5;
 
         autoTable(doc, {
-            startY: yPos + 5,
-            head: [['Engagement Category', 'Excellent', 'Average', 'Poor']],
+            startY: yPos,
+            head: [['Question', 'Response']],
             body: [
-                ['Satisfaction with Industry Environment', report.satisfactionIndustry === 'Excellent' ? 'TICK' : '', report.satisfactionIndustry === 'Average' ? 'TICK' : '', report.satisfactionIndustry === 'Poor' ? 'TICK' : ''],
-                ['Satisfaction with Academic Relevance', report.satisfactionMajor === 'Excellent' ? 'TICK' : '', report.satisfactionMajor === 'Average' ? 'TICK' : '', report.satisfactionMajor === 'Poor' ? 'TICK' : ''],
-                ['Satisfaction with Practical Workflow', report.satisfactionPractical === 'Excellent' ? 'TICK' : '', report.satisfactionPractical === 'Average' ? 'TICK' : '', report.satisfactionPractical === 'Poor' ? 'TICK' : ''],
-                ['Satisfaction with Instructor Support', report.satisfactionInstructors === 'Excellent' ? 'TICK' : '', report.satisfactionInstructors === 'Average' ? 'TICK' : '', report.satisfactionInstructors === 'Poor' ? 'TICK' : ''],
+                ['Number of LO Visits', String(report.loVisitCount ?? '')],
+                ['Was IAP Useful to your career development?', report.isUseful === true ? 'Yes' : report.isUseful === false ? 'No' : ''],
+                ['Did IAP improve your understanding of the industry?', report.improvedUnderstanding === true ? 'Yes' : report.improvedUnderstanding === false ? 'No' : ''],
+                ['Did IAP provide valuable practical experiences?', report.providedExperiences === true ? 'Yes' : report.providedExperiences === false ? 'No' : ''],
             ],
             theme: 'grid',
-            styles: { fontSize: 9, font: fontName, halign: 'center' },
+            headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold' },
+            styles: { fontSize: 9, cellPadding: 4, font: fontName },
+            columnStyles: { 0: { cellWidth: 110 } }
         });
 
-        yPos = (doc as any).lastAutoTable.finalY + 15;
-        doc.setFontSize(12);
-        doc.setFont(fontName, "bold");
-        doc.text("Programme Activity Checklist", 20, yPos);
-        yPos += 8;
-        doc.setFont(fontName, "normal");
-        doc.setFontSize(10);
+        yPos = (doc as any).lastAutoTable.finalY + 5;
 
-        const activities = [
+        const tick = (val?: string, target?: string) => val === target ? '\u2713' : '';
+        autoTable(doc, {
+            startY: yPos,
+            head: [['Satisfaction Area', 'Excellent', 'Average', 'Poor']],
+            body: [
+                ['Satisfaction with the Industry Environment', tick(report.satisfactionIndustry, 'Excellent'), tick(report.satisfactionIndustry, 'Average'), tick(report.satisfactionIndustry, 'Poor')],
+                ['Satisfaction with Academic / Major Relevance', tick(report.satisfactionMajor, 'Excellent'), tick(report.satisfactionMajor, 'Average'), tick(report.satisfactionMajor, 'Poor')],
+                ['Satisfaction with Practical Workflow', tick(report.satisfactionPractical, 'Excellent'), tick(report.satisfactionPractical, 'Average'), tick(report.satisfactionPractical, 'Poor')],
+                ['Satisfaction with Instructor / Supervisor Support', tick(report.satisfactionInstructors, 'Excellent'), tick(report.satisfactionInstructors, 'Average'), tick(report.satisfactionInstructors, 'Poor')],
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold' },
+            styles: { fontSize: 9, cellPadding: 4, font: fontName, halign: 'center' },
+            columnStyles: { 0: { halign: 'left', cellWidth: 100 } }
+        });
+
+        yPos = (doc as any).lastAutoTable.finalY + 5;
+
+        doc.setFont(fontName, "bold"); doc.setFontSize(10); doc.text("Programme / Activity Checklist:", 20, yPos); yPos += 4;
+        const allActivities = [
             "Assisting in software development and coding tasks.",
             "Participating in the design, implementation, and testing of SW systems.",
             "Debugging and troubleshooting software issues.",
@@ -756,25 +839,189 @@ export default function StudentLogbookPage() {
             "Assisting in the development of embedded systems firmware or software.",
             "Testing and validating embedded systems functionality.",
             "Collaborating with HW engineers in the integration of SW and HW components.",
-            "Conducting performance optimization and memory management for embedded systems."
+            "Conducting performance optimization and memory management for embedded systems.",
         ];
-
-        activities.forEach(a => {
-            const isChecked = report.programmeTypes?.includes(a);
-            doc.text(`[${isChecked ? 'X' : ' '}] ${a}`, 25, yPos);
-            yPos += 6;
+        autoTable(doc, {
+            startY: yPos,
+            body: allActivities.map(a => [report.programmeTypes?.includes(a) ? '\u2713' : '', a]),
+            theme: 'grid',
+            styles: { fontSize: 8.5, cellPadding: 3, font: fontName },
+            columnStyles: { 0: { halign: 'center', cellWidth: 12, fontStyle: 'bold' }, 1: { cellWidth: 158 } }
         });
 
+        yPos = (doc as any).lastAutoTable.finalY + 4;
         if (report.otherProgrammeDetails) {
-            doc.text(`[X] Others: ${report.otherProgrammeDetails}`, 25, yPos);
-            yPos += 8;
+            doc.setFont(fontName, "normal"); doc.setFontSize(9);
+            doc.text(`Others: ${report.otherProgrammeDetails}`, 25, yPos); yPos += 8;
         }
 
-        yPos = Math.max(yPos + 20, 260);
+        yPos = (doc as any).lastAutoTable.finalY + 12;
+        doc.setFont(fontName, "normal"); doc.setFontSize(9);
         doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, yPos);
-        doc.text("Signature of Student: _______________________", 120, yPos);
+        doc.text("Signature of Student: _______________________", 110, yPos);
 
-        doc.save(`RCA_IAP_Portfolio_${student?.fullName?.replace(/\s+/g, '_')}.pdf`);
+        // ─── ASSESSMENT PAGE (for Companies) ────────────────────────────────────────
+        doc.addPage();
+        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.rect(0, 0, 210, 22, 'F');
+        doc.setFontSize(13);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont(fontName, "bold");
+        doc.text("Industrial Attachment Assessment (for Companies)", 105, 14, { align: "center" });
+        doc.setTextColor(0, 0, 0);
+        doc.setFont(fontName, "normal");
+
+        yPos = 28;
+        doc.setFontSize(10);
+        doc.text(`Student Name: ${student?.fullName || ''}`, 20, yPos);
+        doc.text(`Department: ${student?.supervisorDepartment || student?.year || ''}`, 120, yPos); yPos += 8;
+        doc.text(`Company: ${student?.companyName || ''}`, 20, yPos);
+        doc.text(`Supervisor: ${student?.supervisorName || ''}`, 120, yPos); yPos += 10;
+
+        const latestRating = student?.ratings?.[0] || {};
+
+        const getScoreMark = (score: number | null | undefined): [string, string, string, string, string] => {
+            if (score === null || score === undefined || score === 0) return ['', '', '', '', ''];
+            if (score >= 10) return ['\u25CF', '', '', '', ''];
+            if (score === 9) return ['', '\u25CF', '', '', ''];
+            if (score === 8) return ['', '', '\u25CF', '', ''];
+            if (score === 7) return ['', '', '', '\u25CF', ''];
+            return ['', '', '', '', '\u25CF'];
+        };
+
+        // Assignments from tasks
+        const assignmentTasks = tasks.filter((t: Task) => t.rating !== null && t.rating !== undefined);
+        const assignmentBody: any[] = [];
+
+        if (assignmentTasks.length > 0) {
+            assignmentTasks.forEach((t: Task, i: number) => {
+                const [vh, h, av, lo, vl] = getScoreMark(t.rating);
+                assignmentBody.push([
+                    i === 0 ? { content: 'Assignments', rowSpan: assignmentTasks.length, styles: { valign: 'middle', fontStyle: 'bold', fillColor: [240, 244, 255] } } : '',
+                    i + 1, t.title,
+                    '10', '9', '8', '7', '6',
+                    vh, h, av, lo, vl,
+                    i === 0 ? { content: `/40`, rowSpan: assignmentTasks.length, styles: { valign: 'middle', halign: 'center' } } : '',
+                ]);
+            });
+        } else {
+            const defaultTasks = ['Related knowledge', 'Support for operation of wireless communication network', 'Establishment of wireless communication network', 'Maintenance of wireless communication room'];
+            defaultTasks.forEach((title, i) => {
+                assignmentBody.push([
+                    i === 0 ? { content: 'Assignments', rowSpan: 4, styles: { valign: 'middle', fontStyle: 'bold', fillColor: [240, 244, 255] } } : '',
+                    i + 1, title,
+                    '10', '9', '8', '7', '6',
+                    '', '', '', '', '',
+                    i === 0 ? { content: `/40`, rowSpan: 4, styles: { valign: 'middle', halign: 'center' } } : '',
+                ]);
+            });
+        }
+
+        const [vh_resp, h_resp, av_resp, lo_resp, vl_resp] = getScoreMark(latestRating?.responsibility);
+        const [vh_coop, h_coop, av_coop, lo_coop, vl_coop] = getScoreMark(latestRating?.cooperativeness);
+        const [vh_comp, h_comp, av_comp, lo_comp, vl_comp] = getScoreMark(latestRating?.complianceEtiquette);
+        const attitudeBody: any[] = [
+            [{ content: 'Attitude', rowSpan: 3, styles: { valign: 'middle', fontStyle: 'bold', fillColor: [240, 244, 255] } }, 1, 'Responsibility', '10', '9', '8', '7', '6', vh_resp, h_resp, av_resp, lo_resp, vl_resp, { content: `/30\n\nSum:(_)/100`, rowSpan: 3, styles: { valign: 'middle', halign: 'center', fontSize: 7 } }],
+            ['', 2, 'Cooperativeness', '10', '9', '8', '7', '6', vh_coop, h_coop, av_coop, lo_coop, vl_coop, ''],
+            ['', 3, 'Compliance with company rules and workplace etiquette', '10', '9', '8', '7', '6', vh_comp, h_comp, av_comp, lo_comp, vl_comp, ''],
+        ];
+
+        const [vh_saw, h_saw, av_saw, lo_saw, vl_saw] = getScoreMark(latestRating?.safetyAwareness);
+        const [vh_scr, h_scr, av_scr, lo_scr, vl_scr] = getScoreMark(latestRating?.safetyCompliance);
+        const [vh_sar, h_sar, av_sar, lo_sar, vl_sar] = getScoreMark(latestRating?.safetyArrangement);
+        const safetyBody: any[] = [
+            [{ content: 'Safety Management', rowSpan: 3, styles: { valign: 'middle', fontStyle: 'bold', fillColor: [240, 244, 255] } }, 1, 'Awareness of safety management', '10', '9', '8', '7', '6', vh_saw, h_saw, av_saw, lo_saw, vl_saw, { content: `/30`, rowSpan: 3, styles: { valign: 'middle', halign: 'center' } }],
+            ['', 2, 'Compliance with safety rules', '10', '9', '8', '7', '6', vh_scr, h_scr, av_scr, lo_scr, vl_scr, ''],
+            ['', 3, 'Arrangement of safety instruments', '10', '9', '8', '7', '6', vh_sar, h_sar, av_sar, lo_sar, vl_sar, ''],
+        ];
+
+        autoTable(doc, {
+            startY: yPos,
+            head: [[
+                { content: 'Evaluation\nArea', styles: { halign: 'center' } },
+                { content: '#', styles: { halign: 'center' } },
+                { content: 'Evaluation Item', styles: { halign: 'center' } },
+                { content: 'Very\nHigh', styles: { halign: 'center' } },
+                { content: 'High', styles: { halign: 'center' } },
+                { content: 'Average', styles: { halign: 'center' } },
+                { content: 'Low', styles: { halign: 'center' } },
+                { content: 'Very\nLow', styles: { halign: 'center' } },
+                { content: '10', styles: { halign: 'center' } },
+                { content: '9', styles: { halign: 'center' } },
+                { content: '8', styles: { halign: 'center' } },
+                { content: '7', styles: { halign: 'center' } },
+                { content: '6', styles: { halign: 'center' } },
+                { content: 'Score', styles: { halign: 'center' } },
+            ]],
+            body: [...assignmentBody, ...attitudeBody, ...safetyBody],
+            theme: 'grid',
+            headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7, valign: 'middle' },
+            styles: { fontSize: 7.5, cellPadding: 2.5, font: fontName, valign: 'middle', overflow: 'linebreak' },
+            columnStyles: {
+                0: { cellWidth: 22 },
+                1: { cellWidth: 7, halign: 'center' },
+                2: { cellWidth: 48 },
+                3: { cellWidth: 10, halign: 'center' },
+                4: { cellWidth: 9, halign: 'center' },
+                5: { cellWidth: 12, halign: 'center' },
+                6: { cellWidth: 8, halign: 'center' },
+                7: { cellWidth: 10, halign: 'center' },
+                8: { cellWidth: 9, halign: 'center' },
+                9: { cellWidth: 8, halign: 'center' },
+                10: { cellWidth: 9, halign: 'center' },
+                11: { cellWidth: 8, halign: 'center' },
+                12: { cellWidth: 8, halign: 'center' },
+                13: { cellWidth: 14, halign: 'center' },
+            },
+        });
+
+        yPos = (doc as any).lastAutoTable.finalY + 2;
+
+        // Attendance
+        autoTable(doc, {
+            startY: yPos,
+            body: [
+                [
+                    { content: 'Attendance', rowSpan: 2, styles: { valign: 'middle', fontStyle: 'bold', fillColor: [240, 244, 255], cellWidth: 22 } },
+                    { content: `Days of Absence: ${student?.absentDays ?? 0}`, colSpan: 11, styles: { fontStyle: 'bold' } },
+                    { content: `/100\nTotal___/100`, styles: { valign: 'middle', halign: 'center', fontSize: 7 } }
+                ],
+                [
+                    '',
+                    {
+                        content: '* 10 points are deducted for each absence from work per day. However, points will not be deducted for sick leave with supporting documents attached.\n* Unauthorised late arrival, early departure without notice, 3 times of unauthorised results are treated as 1 day of absence from work',
+                        colSpan: 11,
+                        styles: { fontSize: 7, textColor: [80, 80, 80] }
+                    },
+                    ''
+                ],
+            ],
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 3, font: fontName, overflow: 'linebreak' },
+        });
+
+        yPos = (doc as any).lastAutoTable.finalY + 2;
+
+        // Marking formula
+        autoTable(doc, {
+            startY: yPos,
+            body: [[
+                { content: 'Marking', styles: { fontStyle: 'bold', fillColor: [240, 244, 255], cellWidth: 22 } },
+                { content: '(Doing Training assignments + Attitude + Safety management) score\u00D780% + Attendance', styles: { fontStyle: 'bold', halign: 'center' } }
+            ]],
+            theme: 'grid',
+            styles: { fontSize: 8.5, cellPadding: 4, font: fontName },
+        });
+
+        yPos = (doc as any).lastAutoTable.finalY + 14;
+        doc.setFont(fontName, "normal"); doc.setFontSize(9);
+        doc.setLineWidth(0.5); doc.setDrawColor(0);
+        doc.line(20, yPos, 80, yPos);
+        doc.line(120, yPos, 180, yPos);
+        doc.text("Evaluator Signature", 20, yPos + 5);
+        doc.text("Company Stamp", 120, yPos + 5);
+
+        doc.save(`RCA_IAP_Portfolio_${student?.fullName?.replace(/\s+/g, '_') || 'Student'}.pdf`);
         toast.success("Professional Portfolio Generated!");
     };
 
@@ -1332,7 +1579,7 @@ export default function StudentLogbookPage() {
                                                                             type="date"
                                                                             disabled={true}
                                                                             className="w-full h-10 border border-amber-200 rounded-md px-3 text-sm bg-white/70 cursor-not-allowed"
-                                                                            value={getSafeLog(expandedWeek).supervisorDate || ""}
+                                                                            value={formatDate(getSafeLog(expandedWeek).supervisorDate)}
                                                                         />
                                                                     </div>
                                                                     <div className="col-span-2 space-y-2">

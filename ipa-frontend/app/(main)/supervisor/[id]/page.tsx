@@ -22,6 +22,16 @@ import {
 import { toast, Toaster } from "react-hot-toast";
 import { apiFetch } from "@/lib/api";
 
+const formatDate = (date: string | null | undefined) => {
+  if (!date) return "";
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+    return d.toISOString().split('T')[0];
+  } catch {
+    return "";
+  }
+};
 
 interface Student {
   id: number;
@@ -1248,7 +1258,7 @@ export default function SupervisorDashboard() {
                             type="date"
                             id="review-date"
                             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-slate-50 disabled:text-slate-400"
-                            defaultValue={selectedWeeklyLog.supervisorDate || new Date().toISOString().split('T')[0]}
+                            defaultValue={formatDate(selectedWeeklyLog.supervisorDate) || new Date().toISOString().split('T')[0]}
                             disabled={selectedWeeklyLog.status === 'APPROVED' || isSaving}
                           />
                         </div>
