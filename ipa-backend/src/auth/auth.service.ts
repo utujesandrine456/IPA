@@ -222,4 +222,35 @@ export class AuthService {
 
     return { message: 'Password reset successful. You can now login.' };
   }
+
+  async changePassword(userId: number, oldPass: string, newPass: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.password) {
+      throw new UnauthorizedException('User not found or password not set');
+    }
+
+    const isValid = await bcrypt.compare(oldPass, user.password);
+    if (!isValid) {
+      throw new BadRequestException('Invalid old password');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPass, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        password: hashedPassword,
+        tokenVersion: { increment: 1 } // Logout other sessions
+      }
+    });
+
+    return { message: 'Password changed successfully' };
+  }
+
+  async updateMe(userId: number, name: string) {
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: { name }
+    });
+    return { message: 'User updated successfully', name: updated.name };
+  }
 }
