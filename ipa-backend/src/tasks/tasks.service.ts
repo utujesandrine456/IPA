@@ -74,16 +74,27 @@ export class TasksService {
     }
 
     async update(body: any) {
-        const { taskId, status, description, submissionContent, attachments, rating, comment, supervisorId } = body;
+        const { taskId, status, description, submissionContent, attachments, rating, comment, supervisorId, title, date } = body;
         const taskIdNumber = Number(taskId);
-        if (!taskIdNumber || !status) {
-            throw new BadRequestException('taskId and status are required');
+        if (!taskIdNumber) {
+            throw new BadRequestException('taskId is required');
         }
 
         const updateData: any = {
-            status,
             updatedAt: new Date(),
         };
+
+        if (status) {
+            updateData.status = status;
+        }
+
+        if (title) {
+            updateData.title = title;
+        }
+
+        if (date) {
+            updateData.date = new Date(date);
+        }
 
         if (description) {
             updateData.description = description + (attachments ? `\n\nAttachments: ${attachments}` : '');
@@ -166,5 +177,15 @@ export class TasksService {
         }
 
         return { message: 'Task updated successfully', task };
+    }
+
+    async remove(taskId: number) {
+        if (!taskId) {
+            throw new BadRequestException('taskId is required');
+        }
+        // Delete any related comments first to avoid FK constraint errors
+        await this.prisma.comment.deleteMany({ where: { taskId } });
+        await this.prisma.task.delete({ where: { id: taskId } });
+        return { message: 'Task deleted successfully' };
     }
 }

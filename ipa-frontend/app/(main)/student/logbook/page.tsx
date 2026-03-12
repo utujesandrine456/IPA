@@ -1690,7 +1690,7 @@ export default function StudentLogbookPage() {
                                     {/* Overview and Contents */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="space-y-4">
-                                            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
+                                            <h3 className="text-sm font-black text-slate-900 uppercase flex items-center gap-3">
                                                 <div className="h-6 w-1.5 bg-primary"></div> Overview and Goals of Placement
                                             </h3>
                                             <textarea
@@ -1701,7 +1701,7 @@ export default function StudentLogbookPage() {
                                             />
                                         </div>
                                         <div className="space-y-4">
-                                            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
+                                            <h3 className="text-sm font-black text-slate-900 uppercase flex items-center gap-3">
                                                 <div className="h-6 w-1.5 bg-primary"></div> Contents of Training
                                             </h3>
                                             <textarea
@@ -1715,7 +1715,7 @@ export default function StudentLogbookPage() {
 
                                     {/* Satisfaction Matrix */}
                                     <div className="space-y-4">
-                                        <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-3">
+                                        <h3 className="text-sm font-black text-slate-900 uppercase flex items-center gap-3">
                                             <div className="h-6 w-1.5 bg-primary"></div> Satisfaction with Industrial Attachment
                                         </h3>
                                         <div className="border-2 border-slate-900">
@@ -1801,7 +1801,7 @@ export default function StudentLogbookPage() {
                                             </div>
                                         </div>
                                         <div className="mt-8">
-                                            <h3 className="text-xs font-black text-slate-900 border-l-4 border-primary pl-3 uppercase tracking-widest mb-6 whitespace-normal leading-relaxed">Please tick the type of Programme you have been put through. (You can tick more than one box)</h3>
+                                            <h3 className="text-xs font-black text-slate-900 border-l-4 border-primary pl-3 uppercase mb-6 whitespace-normal leading-relaxed">Please tick the type of Programme you have been put through. (You can tick more than one box)</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                 {[
                                                     "Assisting in software development and coding tasks.",
@@ -1829,7 +1829,7 @@ export default function StudentLogbookPage() {
                                                                         setReport({ ...report, programmeTypes: types.filter(t => t !== activity) });
                                                                     }
                                                                 }}
-                                                                className="h-5 w-5 rounded border-2 border-slate-300 text-primary focus:ring-offset-0 focus:ring-primary/20 cursor-pointer"
+                                                                className="h-5 w-5 rounded border-2 border-slate-300 text-primary accent-primary focus:ring-offset-0 focus:ring-primary/20 cursor-pointer"
                                                             />
                                                         </div>
                                                         <span className="text-xs font-medium text-slate-600 group-hover:text-slate-900 leading-normal">{activity}</span>
@@ -1890,7 +1890,6 @@ export default function StudentLogbookPage() {
                                         </div>
                                     ) : (
                                         <>
-                                            {/* Student Report Documentation Summary */}
                                             <div className="border-2 border-slate-900 rounded-sm overflow-hidden bg-white">
                                                 <div className="bg-slate-900 text-white p-3 text-[10px] font-black uppercase tracking-widest text-center">Student Report Documentation Summary</div>
                                                 <div className="p-6 space-y-6">
@@ -2077,7 +2076,6 @@ export default function StudentLogbookPage() {
                                 </CardContent>
                             </Card>
                         )}
-
                     </motion.div>
                 </AnimatePresence>
             </main>

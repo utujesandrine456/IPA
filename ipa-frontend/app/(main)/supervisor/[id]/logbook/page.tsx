@@ -169,7 +169,7 @@ export default function SupervisorLogbookPage() {
                         Institutional Logbook Archive
                     </h1>
                     <p className="text-slate-400 text-sm md:text-base font-medium leading-relaxed">
-                        systematic oversight of student technical progress. track daily industrial activities, verify work hours, and provide professional feedback through institutional grade assignments.
+                        Systematic oversight of student technical progress. Track daily industrial activities, verify work hours, and provide professional feedback through institutional grade assignments.
                     </p>
                 </div>
             </div>

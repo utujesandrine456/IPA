@@ -39,6 +39,7 @@ export default function StudentRatingPage() {
     const studentId = params.studentId as string;
 
     const [student, setStudent] = useState<any>(null);
+    const [tasks, setTasks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [rating, setRating] = useState<RatingData>({
@@ -59,27 +60,33 @@ export default function StudentRatingPage() {
     });
 
     useEffect(() => {
-        const fetchStudent = async () => {
+        const fetchData = async () => {
             try {
-                const result = await apiFetch(`/students/${studentId}`);
-                if (result.ok) {
-                    const studentData = result.data.student || result.data;
+                const [studentRes, tasksRes] = await Promise.all([
+                    apiFetch(`/students/${studentId}`),
+                    apiFetch(`/tasks?studentId=${studentId}`)
+                ]);
+
+                if (studentRes.ok) {
+                    const studentData = studentRes.data.student || studentRes.data;
                     setStudent(studentData);
-                    // Force default 0 for absentDays if not set
                     setRating(prev => ({
                         ...prev,
                         absentDays: (studentData.absentDays !== undefined && studentData.absentDays !== null) ? studentData.absentDays : 0
                     }));
-                } else {
-                    toast.error("failed to load student data");
+                }
+
+                if (tasksRes.ok) {
+                    setTasks(tasksRes.data.tasks || []);
                 }
             } catch (error) {
-                console.error("error fetching student:", error);
+                console.error("error fetching data:", error);
+                toast.error("failed to load assessment data");
             } finally {
                 setLoading(false);
             }
         };
-        fetchStudent();
+        fetchData();
     }, [studentId]);
 
     const assignmentsScore = rating.knowledgeWirelessOps + rating.knowledgeWirelessEst + rating.knowledgeWirelessMaint + rating.knowledgeApplication;
@@ -166,10 +173,10 @@ export default function StudentRatingPage() {
                     <Button
                         onClick={handleSaveAssessment}
                         disabled={isSaving}
-                        className="bg-slate-900 hover:bg-slate-800 text-white px-6 h-10 rounded text-xs font-medium shadow-sm transition-all cursor-pointer"
+                        className="bg-slate-900 hover:bg-slate-800 text-white px-6 h-10 rounded text-sm font-medium shadow-sm transition-all cursor-pointer"
                     >
                         {isSaving ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : <Save className="h-3 w-3 mr-2" />}
-                        finalize assessment
+                        Finalize Assessment
                     </Button>
                 </div>
             </div>
@@ -179,7 +186,6 @@ export default function StudentRatingPage() {
                 <div className="bg-white border-2 border-slate-900 p-0 overflow-hidden">
                     {/* header */}
                     <div className="border-b-2 border-slate-900 p-6 flex flex-col items-center justify-center space-y-4">
-                        <h1 className="text-xl font-black text-center uppercase tracking-tight">Industrial Attachment Assessment (for Companies)</h1>
                         <div className="w-full space-y-4 pt-4 px-4">
                             <div className="flex gap-2 items-end">
                                 <span className="text-sm font-bold whitespace-nowrap">Student name:</span>
@@ -217,49 +223,64 @@ export default function StudentRatingPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* Assignments Area */}
-                                {[
-                                    { id: 'knowledgeWirelessOps', label: 'Related knowledge', index: 1 },
-                                    { id: 'knowledgeWirelessEst', label: 'Support for operation of wireless communication network', index: 2 },
-                                    { id: 'knowledgeWirelessMaint', label: 'Establishment of wireless communication network', index: 3 },
-                                    { id: 'knowledgeApplication', label: 'Maintenance of wireless communication room', index: 4 },
-                                ].map((item, i) => (
-                                    <tr key={item.id} className="border-b border-slate-300">
-                                        {i === 0 && (
-                                            <td rowSpan={4} className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-50">
-                                                Assignments
-                                            </td>
-                                        )}
-                                        <td className="border-r border-slate-300 p-2 text-center font-bold">{item.index}</td>
-                                        <td className="border-r border-slate-300 p-3 leading-tight">{item.label}</td>
-                                        {[10, 9, 8, 7, 6].map(val => (
-                                            <td key={val} className="border-r border-slate-300 p-2 text-center">
-                                                <div
-                                                    onClick={() => setRating(prev => ({ ...prev, [item.id]: val }))}
-                                                    className={cn(
-                                                        "h-8 w-8 mx-auto flex items-center justify-center rounded-lg cursor-pointer transition-all border-2",
-                                                        rating[item.id as keyof RatingData] === val
-                                                            ? "bg-slate-900 text-white border-slate-900 scale-110 shadow-md"
-                                                            : "border-transparent text-slate-400 hover:border-slate-200 hover:text-slate-600 font-bold"
-                                                    )}
-                                                >
-                                                    {val}
-                                                </div>
-                                            </td>
-                                        ))}
-                                        <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50">
-                                            {i === 0 ? `/40` : ""}
-                                        </td>
-                                        {i === 0 && (
-                                            <td rowSpan={4} className="p-4 align-middle bg-white">
-                                                <div className="h-20 w-full border-4 border-slate-200 rounded-2xl flex flex-col items-center justify-center">
-                                                    <span className="text-[10px] font-black uppercase text-slate-400">sum</span>
-                                                    <span className="text-2xl font-black text-slate-900">{assignmentsScore}</span>
-                                                </div>
-                                            </td>
-                                        )}
-                                    </tr>
-                                ))}
+                                {(() => {
+                                    const assignmentRowConfig = [
+                                        { id: 'knowledgeWirelessOps', key: 0 },
+                                        { id: 'knowledgeWirelessEst', key: 1 },
+                                        { id: 'knowledgeWirelessMaint', key: 2 },
+                                        { id: 'knowledgeApplication', key: 3 },
+                                    ];
+
+                                    // show only as many rows as there are tasks, or at least 1 if none
+                                    const displayRows = tasks.length > 0
+                                        ? assignmentRowConfig.slice(0, Math.min(tasks.length, 4))
+                                        : [assignmentRowConfig[0]];
+
+                                    return displayRows.map((item, i) => {
+                                        const task = tasks[item.key];
+                                        const label = task ? task.title : "Related Knowledge";
+
+                                        return (
+                                            <tr key={item.id} className="border-b border-slate-300">
+                                                {i === 0 && (
+                                                    <td rowSpan={displayRows.length} className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-50">
+                                                        Assignments
+                                                    </td>
+                                                )}
+                                                <td className="border-r border-slate-300 p-2 text-center font-bold">{i + 1}</td>
+                                                <td className="border-r border-slate-300 p-3 leading-tight min-w-[200px]">
+                                                    {label}
+                                                </td>
+                                                {[10, 9, 8, 7, 6].map(val => (
+                                                    <td key={val} className="border-r border-slate-300 p-2 text-center">
+                                                        <div
+                                                            onClick={() => setRating(prev => ({ ...prev, [item.id]: val }))}
+                                                            className={cn(
+                                                                "h-8 w-8 mx-auto flex items-center justify-center rounded-lg cursor-pointer transition-all border-2",
+                                                                rating[item.id as keyof RatingData] === val
+                                                                    ? "bg-slate-900 text-white border-slate-900 scale-110 shadow-md"
+                                                                    : "border-transparent text-slate-400 hover:border-slate-200 hover:text-slate-600 font-bold"
+                                                            )}
+                                                        >
+                                                            {val}
+                                                        </div>
+                                                    </td>
+                                                ))}
+                                                <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50">
+                                                    {i === 0 ? `/40` : ""}
+                                                </td>
+                                                {i === 0 && (
+                                                    <td rowSpan={displayRows.length} className="p-4 align-middle bg-white">
+                                                        <div className="h-20 w-full border-4 border-slate-200 rounded-2xl flex flex-col items-center justify-center">
+                                                            <span className="text-[10px] font-black uppercase text-slate-400">sum</span>
+                                                            <span className="text-2xl font-black text-slate-900">{assignmentsScore}</span>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        );
+                                    });
+                                })()}
 
                                 {/* Attitude Area */}
                                 {[
@@ -359,9 +380,9 @@ export default function StudentRatingPage() {
                                                 type="number"
                                                 className="w-24 border-b-2 border-black border-dotted focus:outline-none text-center font-black text-lg h-10"
                                                 value={rating.absentDays}
-                                                onChange={(e) => setRating(prev => ({ ...prev, absentDays: Math.max(0, parseInt(e.target.value) || 0) }))}
+                                                onChange={(e) => setRating(prev => ({ ...prev, absentDays: Number(e.target.value) || 0 }))}
                                             />
-                                            <span className="text-[10px] font-bold text-slate-400 italic leading-tight">
+                                            <span className="text-[11px] font-medium text-slate-400 italic leading-tight">
                                                 * 10 points are deducted for each absence from work per day. However, points will not be deducted for sick leave with supporting documents attached.
                                                 <br />
                                                 * Unauthorised late arrival, early departure without notice, 3 times of unauthorised results are treated as 1 day of absence from work
@@ -401,25 +422,54 @@ export default function StudentRatingPage() {
                         <div className="border-r border-slate-900 p-6 flex items-center justify-center bg-slate-50">
                             <span className="text-sm font-black uppercase">Scheme</span>
                         </div>
-                        <div className="col-span-3 p-8 flex items-center justify-center gap-12">
-                            <div className="flex items-center gap-4 text-lg">
-                                <span className="font-black italic">score × 20% =</span>
-                                <div className="border-b-2 border-black border-dotted w-16 text-center font-black">{attendanceWeighted}</div>
-                                <span className="font-black">/ 100</span>
+                        <div className="col-span-3 p-6 flex flex-col gap-4">
+                            {/* Performance component */}
+                            <div className="flex items-center gap-2 text-sm flex-wrap">
+                                <span className="font-bold text-slate-500 italic">performance score</span>
+                                <div className="border-b-2 border-black w-12 text-center font-black text-slate-900">{rawScore}</div>
+                                <span className="font-bold text-slate-500">× 80% =</span>
+                                <div className="border-b-2 border-black border-dotted w-14 text-center font-black text-slate-900">{Math.round(weightedPerformance * 10) / 10}</div>
+                            </div>
+                            {/* Attendance component */}
+                            <div className="flex items-center gap-2 text-sm flex-wrap">
+                                <span className="font-bold text-slate-500 italic">attendance score</span>
+                                <div className="border-b-2 border-black w-12 text-center font-black text-slate-900">{attendanceRaw}</div>
+                                <span className="font-bold text-slate-500">× 20% =</span>
+                                <div className="border-b-2 border-black border-dotted w-14 text-center font-black text-slate-900">{Math.round(attendanceWeighted * 10) / 10}</div>
+                            </div>
+                            {/* Final total */}
+                            <div className="flex items-center gap-2 text-base border-t border-slate-200 pt-4 flex-wrap">
+                                <span className="font-black">Total</span>
+                                <div className="border-b-2 border-black w-14 text-center font-black text-slate-900 text-lg">{finalTotal}</div>
+                                <span className="font-black text-slate-500">/ 100</span>
                             </div>
                         </div>
                     </div>
                     <div className="p-8 border-b border-slate-900 text-center">
-                        <div className="flex items-center justify-center gap-4 text-sm font-bold">
-                            <span>Period</span>
-                            <div className="border-b border-black border-dotted w-12 text-center text-slate-400">dd.</div>
-                            <span>mm.</span>
-                            <div className="border-b border-black border-dotted w-12 text-center text-slate-400">202X</div>
-                            <span>~</span>
-                            <div className="border-b border-black border-dotted w-12 text-center text-slate-400">dd.</div>
-                            <span>mm.</span>
-                            <div className="border-b border-black border-dotted w-12 text-center text-slate-400">202X</div>
-                        </div>
+                        {(() => {
+                            const fmt = (dateStr: string | null | undefined, part: 'dd' | 'mm' | 'yyyy') => {
+                                if (!dateStr) return part === 'yyyy' ? '202X' : part === 'mm' ? 'mm.' : 'dd.';
+                                const d = new Date(dateStr);
+                                if (isNaN(d.getTime())) return part === 'yyyy' ? '202X' : part === 'mm' ? 'mm.' : 'dd.';
+                                if (part === 'dd') return String(d.getDate()).padStart(2, '0') + '.';
+                                if (part === 'mm') return String(d.getMonth() + 1).padStart(2, '0') + '.';
+                                return String(d.getFullYear());
+                            };
+                            const start = student?.internshipStart;
+                            const end = student?.internshipEnd;
+                            return (
+                                <div className="flex items-center justify-center gap-3 text-sm font-bold flex-wrap">
+                                    <span>Period</span>
+                                    <div className={`border-b border-black border-dotted w-12 text-center ${start ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(start, 'dd')}</div>
+                                    <div className={`border-b border-black border-dotted w-12 text-center ${start ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(start, 'mm')}</div>
+                                    <div className={`border-b border-black border-dotted w-16 text-center ${start ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(start, 'yyyy')}</div>
+                                    <span>~</span>
+                                    <div className={`border-b border-black border-dotted w-12 text-center ${end ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(end, 'dd')}</div>
+                                    <div className={`border-b border-black border-dotted w-12 text-center ${end ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(end, 'mm')}</div>
+                                    <div className={`border-b border-black border-dotted w-16 text-center ${end ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(end, 'yyyy')}</div>
+                                </div>
+                            );
+                        })()}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 border-b border-slate-900 h-40">
                         <div className="border-r border-slate-900 p-6 flex items-center justify-center bg-slate-50 text-center">
@@ -427,7 +477,7 @@ export default function StudentRatingPage() {
                         </div>
                         <div className="col-span-3 p-0">
                             <textarea
-                                className="w-full h-full p-6 text-sm italic resize-none focus:outline-none placeholder:text-slate-200"
+                                className="w-full h-full p-6 text-sm resize-none focus:outline-none placeholder:text-slate-200"
                                 placeholder="Write overall student performance review here..."
                                 value={rating.comment}
                                 onChange={(e) => setRating(prev => ({ ...prev, comment: e.target.value }))}
@@ -437,12 +487,12 @@ export default function StudentRatingPage() {
                     <div className="p-10 space-y-8 bg-slate-50">
                         <div className="flex gap-4 items-end">
                             <span className="text-sm font-bold uppercase w-48">Company Name:</span>
-                            <div className="flex-1 border-b-2 border-black border-dotted h-6 uppercase font-black px-4">{student?.companyName || "................................................................................................................................"}</div>
+                            <div className="flex-1 h-6 font-semibold px-4 border-b-2 border-black border-dotted">{student?.companyName || "................................................................................................................................"}</div>
                         </div>
                         <div className="flex gap-4 items-end">
                             <span className="text-sm font-bold uppercase w-48">Evaluator's Position:</span>
                             <Input
-                                className="flex-1 bg-transparent border-b-2 border-black border-dotted rounded-none shadow-none h-6 p-0 text-sm font-black uppercase focus-visible:ring-0"
+                                className="flex-1 bg-transparent border-b-2 border-black border-dotted rounded-none shadow-none h-6 p-0 text-md font-semibold focus-visible:ring-0"
                                 value={rating.evaluatorPosition}
                                 onChange={(e) => setRating(prev => ({ ...prev, evaluatorPosition: e.target.value }))}
                                 placeholder="................................................................................................................................"
@@ -451,7 +501,7 @@ export default function StudentRatingPage() {
                         <div className="flex gap-4 items-end relative">
                             <span className="text-sm font-bold uppercase w-48">Name:</span>
                             <Input
-                                className="flex-1 bg-transparent border-b-2 border-black border-dotted rounded-none shadow-none h-6 p-0 text-sm font-black uppercase focus-visible:ring-0"
+                                className="flex-1 bg-transparent border-b-2 border-black border-dotted rounded-none shadow-none h-6 p-0 text-md font-semibold focus-visible:ring-0"
                                 value={rating.evaluatorName}
                                 onChange={(e) => setRating(prev => ({ ...prev, evaluatorName: e.target.value }))}
                                 placeholder="................................................................................................................................"
@@ -461,9 +511,6 @@ export default function StudentRatingPage() {
                     </div>
                 </div>
 
-                <div className="py-12 border-t-2 border-slate-900 mt-12 text-center text-slate-400 italic text-[11px] max-w-2xl mx-auto leading-relaxed uppercase tracking-wider">
-                    this verification form is a formal academic record. by finalizing this assessment, the company supervisor confirms the accuracy of the student attendance and technical performance evaluation during the placement period.
-                </div>
             </div>
         </div>
     );

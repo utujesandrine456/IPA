@@ -314,7 +314,7 @@ export default function StudentDashboard() {
                             <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center">
                                 <FileText className="h-4 w-4" />
                             </div>
-                            Update Daily Logbook
+                            Update Logbook
                         </Button>
                         <Button
                             variant="outline"
@@ -324,24 +324,23 @@ export default function StudentDashboard() {
                             <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center text-primary">
                                 <CheckCircle2 className="h-4 w-4" />
                             </div>
-                            Browse Assignment Board
+                            Assignment Board
                         </Button>
 
                         <div className="mt-auto pt-6 border-t border-slate-100">
-                            <div className="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex items-center gap-4">
-                                <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+                            <div className="p-4 bg-primary/5 rounded-2xl border border-primary/20 flex items-center gap-4">
+                                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">
                                     {supervisorInfo?.name[0]}
                                 </div>
                                 <div className="overflow-hidden">
-                                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mb-1">Assigned Supervisor</p>
-                                    <p className="text-sm font-bold text-indigo-900 truncate">{supervisorInfo?.name || "Field Agent"}</p>
+                                    <p className="text-[12px] font-medium text-primary leading-none mb-1">Assigned Supervisor</p>
+                                    <p className="text-sm font-bold text-primary truncate">{supervisorInfo?.name || "Field Agent"}</p>
                                 </div>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
             </div>
-
 
             <AnimatePresence>
                 {showProfileModal && (

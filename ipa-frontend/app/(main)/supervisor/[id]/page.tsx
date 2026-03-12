@@ -18,6 +18,11 @@ import {
   AlertCircle,
   Clock,
   RefreshCw,
+  Pencil,
+  Trash2,
+  Eye,
+  ChevronRight,
+  ArrowLeft,
 } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
 import { apiFetch } from "@/lib/api";
@@ -153,6 +158,14 @@ export default function SupervisorDashboard() {
   const [isSaving, setIsSaving] = useState(false);
   const [logFilter, setLogFilter] = useState<'SUBMITTED' | 'ALL'>('SUBMITTED');
   const [studentSearch, setStudentSearch] = useState("");
+  // assignments tab specific state
+  const [assignmentsStudent, setAssignmentsStudent] = useState<Student | null>(null);
+  const [assignmentsStudentSearch, setAssignmentsStudentSearch] = useState("");
+  const [editTask, setEditTask] = useState<Task | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [deleteTaskId, setDeleteTaskId] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [expandedTaskId, setExpandedTaskId] = useState<number | null>(null);
 
   const router = useRouter();
   useEffect(() => {
@@ -333,12 +346,13 @@ export default function SupervisorDashboard() {
   };
 
   const handleAssignTask = async () => {
-    if (newTask.studentId === "" || !newTask.title) return;
+    const studentIdToUse = assignmentsStudent ? assignmentsStudent.id : (newTask.studentId === "" ? null : newTask.studentId);
+    if (!studentIdToUse || !newTask.title) return;
     try {
       await apiFetch("/tasks", {
         method: "POST",
         body: JSON.stringify({
-          studentId: newTask.studentId,
+          studentId: studentIdToUse,
           title: newTask.title,
           description: newTask.description,
           date: newTask.dueDate || new Date().toISOString(),
@@ -347,8 +361,46 @@ export default function SupervisorDashboard() {
       setNewTask({ studentId: "", title: "", description: "", dueDate: "" });
       setShowTaskModal(false);
       fetchTasks();
+      toast.success("Assignment issued successfully");
     } catch (error) {
       console.error(error);
+      toast.error("Failed to issue assignment");
+    }
+  };
+
+  const handleEditTask = async () => {
+    if (!editTask) return;
+    try {
+      await apiFetch("/tasks", {
+        method: "PATCH",
+        body: JSON.stringify({
+          taskId: editTask.id,
+          title: editTask.title,
+          description: editTask.description,
+          date: editTask.date,
+        }),
+      });
+      setEditTask(null);
+      setShowEditModal(false);
+      fetchTasks();
+      toast.success("Assignment updated");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update assignment");
+    }
+  };
+
+  const handleDeleteTask = async () => {
+    if (!deleteTaskId) return;
+    try {
+      await apiFetch(`/tasks/${deleteTaskId}`, { method: "DELETE" });
+      setDeleteTaskId(null);
+      setShowDeleteConfirm(false);
+      fetchTasks();
+      toast.success("Assignment deleted");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete assignment");
     }
   };
 
@@ -638,118 +690,211 @@ export default function SupervisorDashboard() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="flex-1 overflow-y-auto space-y-8 pr-2 hide-scrollbar pb-10"
+            className="flex-1 overflow-y-auto space-y-6 pr-2 hide-scrollbar pb-10"
           >
+            {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 p-8 rounded-4xl text-white shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-5">
                 <Check className="h-40 w-40" />
               </div>
               <div className="relative z-10">
-                <h2 className="text-2xl font-black uppercase tracking-tight">Task Command & Control</h2>
-                <p className="text-white/50 text-normal font-md mt-1">Manage institutional assignments and monitor student submissions</p>
+                <h2 className="text-3xl font-bold tracking-tight">Task Command & Control</h2>
+                <p className="text-white/50 text-sm mt-1">
+                  {assignmentsStudent
+                    ? `Managing assignments for ${assignmentsStudent.user?.name || assignmentsStudent.name}`
+                    : "Select a student to manage their assignments"}
+                </p>
               </div>
-              <Button
-                onClick={() => setShowTaskModal(true)}
-                className="bg-primary hover:bg-white hover:text-primary text-white px-8 h-12 rounded-2xl font-medium text-md transition-all relative z-10"
-              >
-                <Plus className="h-4 w-4 mr-2" /> Issue New Assignment
-              </Button>
+              {assignmentsStudent && (
+                <Button
+                  onClick={() => {
+                    setNewTask({ studentId: assignmentsStudent.id, title: "", description: "", dueDate: "" });
+                    setShowTaskModal(true);
+                  }}
+                  className="bg-primary hover:bg-white hover:text-primary text-white px-8 h-12 rounded-2xl font-medium text-md transition-all relative z-10"
+                >
+                  <Plus className="h-4 w-4 mr-2" /> Issue Assignment
+                </Button>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Pending Reviews */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 border-b-2 border-amber-100 pb-3">
-                  <div className="h-8 w-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                    <Clock className="h-4 w-4" />
-                  </div>
-                  <h3 className="text-md font-bold text-slate-700">Awaiting Submission Review</h3>
+            {!assignmentsStudent ? (
+              // --- Student picker ---
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Input
+                    placeholder="Search students..."
+                    value={assignmentsStudentSearch}
+                    onChange={(e) => setAssignmentsStudentSearch(e.target.value)}
+                    className="max-w-xs h-10 text-sm"
+                  />
+                  <span className="text-xs text-slate-400 font-medium">{students.length} student{students.length !== 1 ? "s" : ""}</span>
                 </div>
-
-                <div className="grid gap-4">
-                  {tasks.filter(t => t.status === 'SUBMITTED').length === 0 ? (
-                    <div className="py-12 text-center bg-white border-2 border-dashed border-slate-100 rounded-3xl">
-                      <p className="text-xs font-bold text-slate-300 ">No pending reviews</p>
-                    </div>
-                  ) : tasks.filter(t => t.status === 'SUBMITTED').map(task => (
-                    <Card key={task.id} className="border-2 border-slate-100 rounded-3xl hover:border-primary/20 transition-all group overflow-hidden bg-white hover:shadow-xl hover:shadow-slate-100">
-                      <CardContent className="p-6">
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-xs">
-                              {task.student?.user.name[0]}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {students
+                    .filter(s => (s.user?.name || s.name).toLowerCase().includes(assignmentsStudentSearch.toLowerCase()))
+                    .map(student => {
+                      const studentTasks = tasks.filter(t => t.studentId === student.id);
+                      const pending = studentTasks.filter(t => ['PENDING', 'IN_PROGRESS'].includes(t.status)).length;
+                      const submitted = studentTasks.filter(t => t.status === 'SUBMITTED').length;
+                      return (
+                        <button
+                          key={student.id}
+                          onClick={() => setAssignmentsStudent(student)}
+                          className="text-left p-5 bg-white border-2 border-slate-100 rounded-2xl hover:border-slate-300 hover:shadow-md transition-all group cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-sm shrink-0">
+                              {(student.user?.name || student.name)[0]?.toUpperCase()}
                             </div>
-                            <div>
-                              <p className="text-[10px] font-black text-slate-400 ">Assigned to</p>
-                              <p className="text-xs font-black text-slate-900">{task.student?.user.name}</p>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-slate-900 text-sm truncate">{student.user?.name || student.name}</p>
+                              <p className="text-[10px] text-slate-400 font-medium truncate">{student.companyName || "No company set"}</p>
                             </div>
+                            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-500 transition-colors shrink-0" />
                           </div>
-                          <span className="text-[9px] font-black bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full border border-amber-200">Pending Review</span>
-                        </div>
-                        <h4 className="text-sm font-black text-slate-900 group-hover:text-primary transition-colors">{task.title}</h4>
-                        <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">{task.description}</p>
-                        <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-slate-400 tracking-tighter">Due: {new Date(task.date).toLocaleDateString()}</span>
-                          <Button
-                            onClick={() => {
-                              setSelectedTask(task);
-                              router.push(`/supervisor/${supervisorId}/ratings/${task.studentId}`);
-                            }}
-                            className="h-8 bg-slate-900 hover:bg-black text-white text-[10px] font-black  px-4 rounded-xl"
-                          >
-                            Review Submission
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          <div className="flex gap-2 flex-wrap">
+                            <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{studentTasks.length} total</span>
+                            {pending > 0 && <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded-full">{pending} pending</span>}
+                            {submitted > 0 && <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-1 rounded-full">{submitted} to review</span>}
+                          </div>
+                        </button>
+                      );
+                    })}
                 </div>
-              </div>
-
-              {/* Active & Completed */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 border-b-2 border-slate-100 pb-3">
-                  <div className="h-8 w-8 rounded-lg bg-slate-50 text-slate-600 flex items-center justify-center">
-                    <LayoutDashboard className="h-4 w-4" />
+                {students.length === 0 && (
+                  <div className="py-16 text-center rounded-2xl border-2 border-dashed border-slate-100">
+                    <p className="text-slate-300 font-medium text-sm">No students assigned to you yet</p>
                   </div>
-                  <h3 className="text-md font-bold text-slate-700">Active institutional Tasks</h3>
+                )}
+              </div>
+            ) : (
+              // --- Student assignment detail view ---
+              <div className="space-y-5">
+                {/* Back + Student header */}
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => { setAssignmentsStudent(null); setExpandedTaskId(null); }}
+                    className="h-9 w-9 rounded-xl bg-white border-2 border-slate-100 flex items-center justify-center hover:border-slate-300 transition-colors cursor-pointer"
+                  >
+                    <ArrowLeft className="h-4 w-4 text-slate-500" />
+                  </button>
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-sm">
+                      {(assignmentsStudent.user?.name || assignmentsStudent.name)[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900">{assignmentsStudent.user?.name || assignmentsStudent.name}</p>
+                      <p className="text-xs text-slate-400">{assignmentsStudent.companyName || "No company set"}</p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid gap-4">
-                  {tasks.filter(t => t.status !== 'SUBMITTED').length === 0 ? (
-                    <div className="py-12 text-center bg-white border-2 border-dashed border-slate-100 rounded-3xl">
-                      <p className="text-xs font-bold text-slate-300">No active tasks</p>
+                {/* Tasks list */}
+                {(() => {
+                  const studentTasks = tasks.filter(t => t.studentId === assignmentsStudent.id);
+                  return studentTasks.length === 0 ? (
+                    <div className="py-16 text-center rounded-2xl border-2 border-dashed border-slate-100">
+                      <p className="text-slate-300 font-medium text-sm">No assignments yet</p>
+                      <p className="text-slate-200 text-xs mt-1">Use the button above to issue the first assignment</p>
                     </div>
-                  ) : tasks.filter(t => t.status !== 'SUBMITTED').map(task => (
-                    <div key={task.id} className="p-5 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-between group hover:border-slate-200 transition-all">
-                      <div className="flex items-center gap-4">
-                        <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center",
-                          task.status === 'COMPLETED' ? "bg-emerald-50 text-emerald-600" : "bg-slate-50 text-slate-400"
-                        )}>
-                          {task.status === 'COMPLETED' ? <Check className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
-                        </div>
-                        <div>
-                          <h4 className="text-md font-semibold text-slate-900">{task.title}</h4>
-                          <p className="text-xs font-semibold text-slate-400">{task.student?.user.name}</p>
-                        </div>
-                      </div>
-                      <span className={cn("text-[8px] font-black uppercase px-2 py-1 rounded-md",
-                        task.status === 'COMPLETED' ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
-                      )}>
-                        {task.status}
-                      </span>
+                  ) : (
+                    <div className="space-y-3">
+                      {studentTasks.map(task => {
+                        const statusColors: Record<string, string> = {
+                          PENDING: "bg-slate-100 text-slate-600",
+                          IN_PROGRESS: "bg-blue-100 text-blue-700",
+                          SUBMITTED: "bg-amber-100 text-amber-700",
+                          COMPLETED: "bg-emerald-100 text-emerald-700",
+                          APPROVED: "bg-green-100 text-green-700",
+                          REJECTED: "bg-red-100 text-red-700",
+                        };
+                        const isExpanded = expandedTaskId === task.id;
+                        return (
+                          <div key={task.id} className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden transition-all hover:border-slate-200">
+                            <div className="p-5 flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0",
+                                  task.status === 'COMPLETED' || task.status === 'APPROVED' ? "bg-emerald-50 text-emerald-600" :
+                                    task.status === 'SUBMITTED' ? "bg-amber-50 text-amber-600" :
+                                      "bg-slate-50 text-slate-400"
+                                )}>
+                                  {task.status === 'COMPLETED' || task.status === 'APPROVED' ? <Check className="h-4 w-4" /> :
+                                    task.status === 'SUBMITTED' ? <Eye className="h-4 w-4" /> :
+                                      <Clock className="h-4 w-4" />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-bold text-slate-900 text-sm truncate">{task.title}</p>
+                                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Due: {new Date(task.date).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className={cn("text-[9px] font-black px-2 py-1 rounded-full", statusColors[task.status] || "bg-slate-100 text-slate-500")}>
+                                  {task.status}
+                                </span>
+                                {task.status === 'SUBMITTED' && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
+                                    className="h-7 text-[10px] font-black bg-amber-500 hover:bg-amber-600 text-white px-2 rounded-xl cursor-pointer"
+                                  >
+                                    <Eye className="h-3 w-3 mr-1" /> {isExpanded ? "Hide" : "View"}
+                                  </Button>
+                                )}
+                                <button
+                                  onClick={() => { setEditTask({ ...task }); setShowEditModal(true); }}
+                                  className="h-7 w-7 rounded-lg border-2 border-slate-100 flex items-center justify-center hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer"
+                                  title="Edit assignment"
+                                >
+                                  <Pencil className="h-3 w-3 text-slate-400" />
+                                </button>
+                                <button
+                                  onClick={() => { setDeleteTaskId(task.id); setShowDeleteConfirm(true); }}
+                                  className="h-7 w-7 rounded-lg border-2 border-slate-100 flex items-center justify-center hover:border-red-200 hover:bg-red-50 transition-colors cursor-pointer"
+                                  title="Delete assignment"
+                                >
+                                  <Trash2 className="h-3 w-3 text-slate-400" />
+                                </button>
+                              </div>
+                            </div>
+                            {/* Submission expanded view */}
+                            {isExpanded && (
+                              <div className="border-t-2 border-slate-100 p-5 bg-slate-50 space-y-4">
+                                <div>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Task Description</p>
+                                  <p className="text-sm text-slate-700 leading-relaxed">{task.description || "No description provided."}</p>
+                                </div>
+                                <div className="pt-3 border-t border-slate-200 flex gap-3">
+                                  <Button
+                                    onClick={() => router.push(`/supervisor/${supervisorId}/ratings/${task.studentId}`)}
+                                    className="h-8 bg-slate-900 hover:bg-black text-white text-xs font-bold px-4 rounded-xl"
+                                  >
+                                    Rate Student
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => setExpandedTaskId(null)}
+                                    className="h-8 text-xs font-bold px-4 rounded-xl"
+                                  >
+                                    Collapse
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
               </div>
-            </div>
+            )}
           </motion.div>
         )}
 
 
       </AnimatePresence >
 
-      {/* Task Modal */}
       <AnimatePresence>
         {
           showTaskModal && (
@@ -761,7 +906,9 @@ export default function SupervisorDashboard() {
             >
               <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div className="p-6 border-b border-primary/10 flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-primary">Assign New Task</h3>
+                  <h3 className="text-xl font-bold text-primary">
+                    {assignmentsStudent ? `New Assignment for ${assignmentsStudent.user?.name || assignmentsStudent.name}` : "Assign New Task"}
+                  </h3>
                   <button
                     onClick={() => setShowTaskModal(false)}
                     className="text-primary hover:text-primary/80"
@@ -807,7 +954,7 @@ export default function SupervisorDashboard() {
                   <Button
                     onClick={handleAssignTask}
                     className="bg-primary hover:bg-primary/90 text-white"
-                    disabled={!newTask.title || !newTask.studentId}
+                    disabled={!newTask.title || (!assignmentsStudent && !newTask.studentId)}
                   >
                     <Check className="h-4 w-4 mr-2" /> Assign Task
                   </Button>
@@ -819,6 +966,95 @@ export default function SupervisorDashboard() {
       </AnimatePresence >
 
       {/* Modal removed based on user request to use separate page */}
+
+      {/* Edit Task Modal */}
+      <AnimatePresence>
+        {showEditModal && editTask && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          >
+            <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 className="text-lg font-bold text-slate-900">Edit Assignment</h3>
+                <button onClick={() => { setShowEditModal(false); setEditTask(null); }} className="text-slate-400 hover:text-slate-700">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">Title *</label>
+                  <Input
+                    value={editTask.title}
+                    onChange={(e) => setEditTask({ ...editTask, title: e.target.value })}
+                    placeholder="Assignment title"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">Description</label>
+                  <textarea
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-slate-400 focus:ring-1 focus:ring-slate-400 min-h-[100px] resize-none"
+                    value={editTask.description}
+                    onChange={(e) => setEditTask({ ...editTask, description: e.target.value })}
+                    placeholder="Describe the assignment..."
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">Due Date</label>
+                  <Input
+                    type="date"
+                    value={formatDate(editTask.date)}
+                    onChange={(e) => setEditTask({ ...editTask, date: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                <Button variant="outline" onClick={() => { setShowEditModal(false); setEditTask(null); }}>Cancel</Button>
+                <Button
+                  onClick={handleEditTask}
+                  className="bg-slate-900 hover:bg-black text-white"
+                  disabled={!editTask.title}
+                >
+                  <Check className="h-4 w-4 mr-2" /> Save Changes
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirm Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          >
+            <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="p-6 text-center space-y-3">
+                <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+                  <Trash2 className="h-5 w-5 text-red-500" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Delete Assignment?</h3>
+                <p className="text-sm text-slate-500">This action cannot be undone. The assignment and all student submissions for it will be permanently deleted.</p>
+              </div>
+              <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => { setShowDeleteConfirm(false); setDeleteTaskId(null); }}>Cancel</Button>
+                <Button
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  onClick={handleDeleteTask}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Profile Modal */}
       <AnimatePresence>

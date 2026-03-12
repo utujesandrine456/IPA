@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Query, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
 
@@ -54,5 +54,13 @@ export class TasksController {
     @ApiResponse({ status: 404, description: 'Task not found' })
     async update(@Body() body: any) {
         return this.tasksService.update(body);
+    }
+
+    @Delete(':id')
+    @ApiOperation({ summary: 'Delete task', description: 'Permanently delete a task by ID' })
+    @ApiResponse({ status: 200, description: 'Task deleted successfully' })
+    @ApiResponse({ status: 404, description: 'Task not found' })
+    async remove(@Param('id') id: string) {
+        return this.tasksService.remove(Number(id));
     }
 }
