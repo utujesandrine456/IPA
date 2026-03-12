@@ -15,12 +15,7 @@ export default function MainLayout({
     const router = useRouter();
     const [userId, setUserId] = useState<number | null>(null);
     const [mounted, setMounted] = useState(false);
-
-    let role: "admin" | "supervisor" | "student" | "liaison" = "student";
-    if (pathname.startsWith("/admin")) role = "admin";
-    else if (pathname.startsWith("/supervisor")) role = "supervisor";
-    else if (pathname.startsWith("/liaison")) role = "liaison";
-    else if (pathname.startsWith("/student")) role = "student";
+    const [role, setRole] = useState<"admin" | "supervisor" | "student" | "liaison">("student");
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -51,6 +46,12 @@ export default function MainLayout({
                     return;
                 }
 
+                // Set role for sidebar/topbar
+                if (userRole === "ADMIN") setRole("admin");
+                else if (userRole === "SUPERVISOR") setRole("supervisor");
+                else if (userRole === "LIAISON") setRole("liaison");
+                else setRole("student");
+
                 // If user visits "/", redirect to their dashboard
                 if (pathname === "/") {
                     if (userRole === "ADMIN") router.replace("/admin");
@@ -72,6 +73,7 @@ export default function MainLayout({
                     (pathname.startsWith("/supervisor") && userRole === "SUPERVISOR") ||
                     (pathname.startsWith("/liaison") && userRole === "LIAISON") ||
                     (pathname.startsWith("/student") && userRole === "STUDENT") ||
+                    pathname === "/settings" ||
                     pathname === "/login" ||
                     pathname === "/complete-profile" ||
                     pathname.startsWith("/reset-password") ||
