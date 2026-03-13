@@ -996,7 +996,7 @@ export default function StudentLogbookPage() {
             startY: baseY + 37,
             margin: { left: 10, right: 10 },
             head: [[
-                { content: '', styles: { halign: 'center', valign: 'middle', fillColor: 255 }, isRotatedText: true, rotatedText: 'EVALUATION AREA' },
+                { content: '', styles: { halign: 'center', valign: 'middle', fillColor: 255, minCellHeight: 25 }, isRotatedText: true, rotatedText: 'EVALUATION AREA' },
                 { content: '', styles: { fillColor: 255 } },
                 { content: 'EVALUATION ITEM', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
                 { content: 'VERY\nHIGH', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
@@ -1028,12 +1028,12 @@ export default function StudentLogbookPage() {
                 [{ content: '', styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fillColor: [20, 30, 45], textColor: 255 }, isRotatedText: true, rotatedText: 'ATTENDANCE' }, { content: `DAYS OF ABSENCE:       ${absentDays}`, colSpan: 4, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 9 } }, { content: `* 10 points are deducted for each absence from work per day. However, points will not be deducted for sick leave with supporting documents attached.\n* Unauthorised late arrival, early departure without notice, 3 times of unauthorised results are treated as 1 day of absence from work.`, colSpan: 3, styles: { fontStyle: 'italic', fontSize: 6.5, textColor: [100, 100, 100], valign: 'middle' } }, { content: `${attendanceRaw}/100`, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 9, fillColor: [240, 240, 245] } }, { content: `FINAL WEIGHTED\n\n${finalWeightedTotal}\n/ 100`, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 12, fillColor: [20, 30, 45], textColor: 255 } }],
                 
                 // Marking formula
-                [{ content: 'MARKING', styles: { fontStyle: 'bold', fontSize: 7, halign: 'center', valign: 'middle' } }, { content: '(Doing Training assignments + Attitude + Safety management) score × 80% + Attendance (20%)', colSpan: 9, styles: { fontStyle: 'bold', halign: 'center', valign: 'middle', fontSize: 9 } }]
+                [{ content: 'MARKING', colSpan: 2, styles: { fontStyle: 'bold', fontSize: 7, halign: 'center', valign: 'middle' } }, { content: '(Doing Training assignments + Attitude + Safety management) score × 80% + Attendance (20%)', colSpan: 8, styles: { fontStyle: 'bold', halign: 'center', valign: 'middle', fontSize: 9 } }]
             ] as any[],
             theme: 'grid',
-            styles: { font: fontName, fontSize: 8, textColor: 0, lineColor: [200, 200, 200], cellPadding: 4, minCellHeight: 12 },
+            styles: { font: fontName, fontSize: 8, textColor: 0, lineColor: [200, 200, 200], cellPadding: 2, minCellHeight: 12 },
             headStyles: { fillColor: 255, textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
-            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 5, halign: 'center', valign: 'middle' }, 2: { cellWidth: 50 }, 3: { cellWidth: 12 }, 4: { cellWidth: 12 }, 5: { cellWidth: 12 }, 6: { cellWidth: 12 }, 7: { cellWidth: 12 }, 8: { cellWidth: 12 }, 9: { cellWidth: 43 } },
+            columnStyles: { 0: { cellWidth: 8 }, 1: { cellWidth: 4, halign: 'center', valign: 'middle' }, 2: { cellWidth: 47 }, 3: { cellWidth: 13 }, 4: { cellWidth: 13 }, 5: { cellWidth: 13 }, 6: { cellWidth: 13 }, 7: { cellWidth: 13 }, 8: { cellWidth: 13 }, 9: { cellWidth: 53 } },
             didDrawCell: (data: any) => {
                 if (data.cell.raw && data.cell.raw.isRotatedText) {
                     const text = data.cell.raw.rotatedText;
@@ -1088,23 +1088,56 @@ export default function StudentLogbookPage() {
             margin: { left: 10, right: 10 },
             body: [
                 [
-                    { content: 'SCHEME', styles: { fontStyle: 'bold', halign: 'center', valign: 'middle', cellWidth: 30 } },
-                    { content: `\nperformance score  ____${rawTotalScore}____  * 80% =  ____${Math.round(rawTotalScore * 0.8 * 10) / 10}____\n\nattendance score  ____${attendanceRaw}____  * 20% =  ____${Math.round(attendanceRaw * 0.2 * 10) / 10}____\n\nTotal  ____${finalWeightedTotal}____ /100\n`, styles: { halign: 'left', fontStyle: 'bold', fontSize: 10, cellPadding: 6 } }
+                    { content: 'SCHEME', rowSpan: 3, styles: { fontStyle: 'bold', halign: 'center', valign: 'middle', cellWidth: 25 } },
+                    { content: 'performance score', styles: { halign: 'right', fontStyle: 'bold', fontSize: 10, cellPadding: { top: 6, bottom: 6, left: 10 } } },
+                    { content: `___ ${rawTotalScore} ___`, styles: { halign: 'center', fontStyle: 'bold', fontSize: 10, cellPadding: 6 } },
+                    { content: '* 80% =', styles: { halign: 'center', fontStyle: 'bold', fontSize: 10, cellPadding: 6 } },
+                    { content: `___ ${Math.round(rawTotalScore * 0.8 * 10) / 10} ___`, styles: { halign: 'left', fontStyle: 'bold', fontSize: 10, cellPadding: 6 } }
                 ],
                 [
-                    { content: `Period      ${new Date().toLocaleDateString()}   ~   ${new Date().toLocaleDateString()}`, colSpan: 2, styles: { halign: 'center', fontStyle: 'bold', fontSize: 9 } }
+                    { content: 'attendance score', styles: { halign: 'right', fontStyle: 'bold', fontSize: 10, cellPadding: { top: 6, bottom: 6, left: 10 } } },
+                    { content: `___ ${attendanceRaw} ___`, styles: { halign: 'center', fontStyle: 'bold', fontSize: 10, cellPadding: 6 } },
+                    { content: '* 20% =', styles: { halign: 'center', fontStyle: 'bold', fontSize: 10, cellPadding: 6 } },
+                    { content: `___ ${Math.round(attendanceRaw * 0.2 * 10) / 10} ___`, styles: { halign: 'left', fontStyle: 'bold', fontSize: 10, cellPadding: 6 } }
                 ],
                 [
-                    { content: 'OVERALL\nREVIEW', styles: { fontStyle: 'bold', halign: 'center', valign: 'middle' } },
-                    { content: '\nWrite overall student performance review here...\n\n\n\n', styles: { textColor: [200, 200, 200] } }
+                    { content: 'Total', styles: { halign: 'right', fontStyle: 'bold', fontSize: 10, cellPadding: { top: 6, bottom: 6, left: 10 } } },
+                    { content: `___ ${finalWeightedTotal} ___`, styles: { halign: 'left', fontStyle: 'bold', fontSize: 10, cellPadding: 6 } },
+                    { content: '/ 100', colSpan: 2, styles: { halign: 'left', fontStyle: 'bold', fontSize: 10, cellPadding: 6 } }
                 ],
                 [
-                    { content: 'COMPANY NAME:\n\nEVALUATOR\'S\nPOSITION:\n\nNAME:', styles: { fontStyle: 'bold', halign: 'left', valign: 'middle', cellPadding: 5 } },
-                    { content: `\n        ${student?.company || '_________________________________________'}\n.......................................................................................................................................\n\n\n.......................................................................................................................................\n\n\n.......................................................................................................................................(signature)`, styles: { halign: 'left', fontStyle: 'bold' } }
+                    { content: `Period      ${new Date().toLocaleDateString()}   ~   ${new Date().toLocaleDateString()}`, colSpan: 5, styles: { halign: 'center', fontStyle: 'bold', fontSize: 9 } }
+                ],
+                [
+                    { content: 'OVERALL\nREVIEW', colSpan: 2, styles: { fontStyle: 'bold', halign: 'center', valign: 'middle' } },
+                    { content: '\nWrite overall student performance review here...\n\n\n\n', colSpan: 3, styles: { textColor: [200, 200, 200] } }
+                ],
+                [
+                    { content: 'COMPANY NAME:\n\nEVALUATOR\'S\nPOSITION:\n\nNAME:', colSpan: 2, styles: { fontStyle: 'bold', halign: 'left', valign: 'middle', cellPadding: 5 } },
+                    { content: `\n        ${student?.company || '_________________________________________'}\n.......................................................................................................................................\n\n\n.......................................................................................................................................\n\n\n.......................................................................................................................................(signature)`, colSpan: 3, styles: { halign: 'left', fontStyle: 'bold' } }
                 ]
             ],
             theme: 'grid',
-            styles: { font: fontName, fontSize: 9, textColor: 0, lineColor: [200, 200, 200] }
+            styles: { font: fontName, fontSize: 9, textColor: 0, lineColor: [200, 200, 200] },
+            columnStyles: {
+                0: { cellWidth: 35 },
+                1: { cellWidth: 40 },
+                2: { cellWidth: 40 },
+                3: { cellWidth: 30 },
+                4: { cellWidth: 45 }
+            },
+            didParseCell: (hookData: any) => {
+                if (hookData.section === 'body') {
+                    if (hookData.row.index >= 0 && hookData.row.index <= 2 && hookData.column.index > 0) {
+                        hookData.cell.styles.lineWidth = 0;
+                        if (hookData.row.index === 0) hookData.cell.styles.lineWidth = { top: 0.1, bottom: 0, left: 0, right: 0 };
+                        if (hookData.row.index === 2) hookData.cell.styles.lineWidth = { top: 0, bottom: 0.1, left: 0, right: 0 };
+                        if (hookData.column.index === 4 && hookData.row.index === 0) hookData.cell.styles.lineWidth = { top: 0.1, bottom: 0, left: 0, right: 0.1 };
+                        if (hookData.column.index === 4 && hookData.row.index === 1) hookData.cell.styles.lineWidth = { top: 0, bottom: 0, left: 0, right: 0.1 };
+                        if (hookData.column.index === 4 && hookData.row.index === 2) hookData.cell.styles.lineWidth = { top: 0, bottom: 0.1, left: 0, right: 0.1 };
+                    }
+                }
+            }
         });
 
 
