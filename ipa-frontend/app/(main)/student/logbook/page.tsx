@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -455,7 +455,7 @@ export default function StudentLogbookPage() {
         const addHeader = (title: string, pageNum: number) => {
             doc.setFont(fontName, "bold");
             doc.setFontSize(10);
-            doc.text("Logo / Institution Name Placeholder", 20, 15); // Adjust if logo available
+            doc.text("Industrial Attachment Program", 20, 15);
             doc.text(`Page ${pageNum}`, 180, 15);
             doc.setLineWidth(0.5);
             doc.line(20, 18, 190, 18);
@@ -731,8 +731,8 @@ export default function StudentLogbookPage() {
                 const isSelected = log.grade === g.charAt(0);
                 doc.rect(25 + i * 32, y + 15, 4, 4);
                 if (isSelected) {
-                    doc.setFont(fontName, "bold"); doc.text("X", 26 + i * 32, y + 18);
-                    doc.setFont(fontName, "normal");
+                    doc.setFillColor(0);
+                    doc.rect(25.5 + i * 32, y + 15.5, 3, 3, 'F');
                 }
                 doc.text(g, 31 + i * 32, y + 19);
             });
@@ -791,7 +791,7 @@ export default function StudentLogbookPage() {
 
         // Satisfaction Matrix
         doc.setFontSize(10); doc.setFont(fontName, "bold"); doc.text("Satisfaction with Industrial Attachment", 20, y + 4); y += 6;
-        const tick = (val?: string, target?: string) => val === target ? '\u2713' : '';
+        const tick = (val?: string, target?: string) => val === target ? 'v' : '';
         autoTable(doc, {
             startY: y,
             head: [['', 'Excellent', 'Average', 'Poor']],
