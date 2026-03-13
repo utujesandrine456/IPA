@@ -921,20 +921,38 @@ export default function StudentLogbookPage() {
 
         // ─── ASSESSMENT (FOR COMPANIES) ────────────────────────────────────────────
         doc.addPage();
-        addHeader("ASSESSMENT (FOR COMPANIES)", currentPageNum);
-        doc.setFontSize(14); doc.setFont(fontName, "bold");
-        doc.text("Industrial Attachment Assessment (for Companies)", 105, 30, { align: "center" });
+        doc.setFontSize(10); doc.setFont(fontName, "bold");
+        doc.text("Industrial Attachment Program", 20, 15);
+        doc.text(`Page 7`, 180, 15);
+        doc.setLineWidth(0.5);
+        // doc.line(20, 18, 190, 18); // Actually we draw the main outline ourselves below
 
-        // Header Box
-        doc.setDrawColor(0); doc.setLineWidth(0.5);
-        doc.rect(20, 40, 170, 15);
-        doc.setFontSize(9); doc.setFont(fontName, "normal");
-        doc.text(`Student name: ${student?.fullName || "___________________________"}`, 25, 45);
-        doc.text(`Department/Class: ${student?.studentProfile?.department || "___________________________"}`, 25, 50);
+        // Main outlining and headers
+        let baseY = 25;
+        doc.setLineWidth(0.6);
+        doc.line(10, baseY, 200, baseY);
 
-        doc.setFillColor(240, 240, 240);
-        doc.rect(20, 55, 170, 6, "FD");
-        doc.setFont(fontName, "bold"); doc.text("Marking Scheme", 105, 59, { align: 'center' });
+        doc.setFontSize(10); doc.setFont(fontName, "bold");
+        doc.text("Student name: ", 15, baseY + 10);
+        doc.setFont(fontName, "normal");
+        doc.text(student?.fullName || "_____________________________________________", 40, baseY + 10);
+        doc.setLineDashPattern([1, 1], 0);
+        doc.line(40, baseY + 11, 190, baseY + 11);
+
+        doc.setFont(fontName, "bold");
+        doc.text("Department/Class: ", 15, baseY + 20);
+        doc.setFont(fontName, "normal");
+        doc.text(student?.studentProfile?.department || "_________________________________________", 45, baseY + 20);
+        doc.line(45, baseY + 21, 190, baseY + 21);
+        doc.setLineDashPattern([], 0);
+
+        doc.setLineWidth(0.6);
+        doc.line(10, baseY + 25, 200, baseY + 25);
+
+        doc.setFontSize(11); doc.setFont(fontName, "bold");
+        doc.text("MARKING SCHEME", 105, baseY + 32, { align: 'center' });
+
+        doc.line(10, baseY + 37, 200, baseY + 37);
 
         // Compile Assessment Data
         const latestRating = student?.ratings?.[0] || {};
@@ -947,25 +965,26 @@ export default function StudentLogbookPage() {
         const finalWeightedTotal = Math.round((rawTotalScore * 0.8 + attendanceRaw * 0.2) * 10) / 10;
 
         const markBox = (score: number | undefined, target: number): any => {
-            if (score === target) {
-                return { content: String(target), styles: { fontStyle: 'bold', fillColor: [20, 30, 45], textColor: 255, halign: 'center' } };
-            }
-            return { content: String(target), styles: { textColor: 200, halign: 'center' } };
+            return {
+                content: String(target),
+                styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', textColor: score === target ? 255 : [100, 100, 100] },
+                isSelectedScore: score === target
+            };
         };
 
         const tR = (item: string, score: number | undefined): any[] => [
-            { content: item, styles: { cellWidth: 50 } },
+            { content: item, styles: { cellWidth: 50, halign: 'left' } },
             markBox(score, 10), markBox(score, 9), markBox(score, 8), markBox(score, 7), markBox(score, 6)
         ];
 
-        const t1 = tR(tasks[0]?.title || 'Related Knowledge 1', latestRating.knowledgeWirelessOps);
+        const t1 = tR(tasks[0]?.title || 'Make an SRS', latestRating.knowledgeWirelessOps);
         const t2 = tR(tasks[1]?.title || 'Related Knowledge 2', latestRating.knowledgeWirelessEst);
         const t3 = tR(tasks[2]?.title || 'Related Knowledge 3', latestRating.knowledgeWirelessMaint);
         const t4 = tR(tasks[3]?.title || 'Related Knowledge 4', latestRating.knowledgeApplication);
 
         const a1 = tR('Responsibility', latestRating.responsibility);
         const a2 = tR('Cooperativeness', latestRating.cooperativeness);
-        const a3 = tR('Compliance with company rules and etiquette', latestRating.complianceEtiquette);
+        const a3 = tR('Compliance with company rules and workplace etiquette', latestRating.complianceEtiquette);
 
         const s1 = tR('Awareness of safety management', latestRating.safetyAwareness);
         const s2 = tR('Compliance with safety rules', latestRating.safetyCompliance);
@@ -974,92 +993,114 @@ export default function StudentLogbookPage() {
         const assignmentsRowCount = tasks.length > 0 ? Math.min(tasks.length, 4) : 4;
 
         autoTable(doc, {
-            startY: 65,
+            startY: baseY + 37,
+            margin: { left: 10, right: 10 },
             head: [[
-                '', '', '', '10', '9', '8', '7', '6', '', ''
+                { content: '', styles: { halign: 'center', valign: 'middle', fillColor: 255 }, isRotatedText: true, rotatedText: 'EVALUATION AREA' },
+                { content: '', styles: { fillColor: 255 } },
+                { content: 'EVALUATION ITEM', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
+                { content: 'VERY\nHIGH', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
+                { content: 'HIGH', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
+                { content: 'AVERAGE', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
+                { content: 'LOW', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
+                { content: 'VERY\nLOW', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
+                { content: 'SCORE', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
+                { content: '* Mark the score for each\nevaluation item and add up the\ntotal score and record it in the\nscore column.', styles: { fontStyle: 'italic', fontSize: 6.5, textColor: [100, 100, 100], fillColor: 255 } }
             ]],
             body: [
                 // Assignments
-                [{ content: 'ASSIGNMENTS', rowSpan: assignmentsRowCount, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fillColor: [245, 245, 248], fontSize: 6.5 } }, '1', ...t1, { content: '/40', styles: { halign: 'center', fontStyle: 'bold' } }, { content: `SUM\n${assignmentsScore}`, rowSpan: assignmentsRowCount, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 10 } }],
+                [{ content: '', rowSpan: assignmentsRowCount, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fillColor: 255, textColor: [20, 30, 45] }, isRotatedText: true, rotatedText: 'ASSIGNMENTS' }, '1', ...t1, { content: '/40', styles: { halign: 'center', fontStyle: 'bold', valign: 'middle' } }, { content: `SUM\n\n${assignmentsScore}`, rowSpan: assignmentsRowCount, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 16 }, drawSumBox: true }],
                 ...(assignmentsRowCount > 1 ? [['2', ...t2, '']] : []),
                 ...(assignmentsRowCount > 2 ? [['3', ...t3, '']] : []),
                 ...(assignmentsRowCount > 3 ? [['4', ...t4, '']] : []),
 
                 // Attitude
-                [{ content: 'ATTITUDE', rowSpan: 3, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fillColor: [245, 245, 248], fontSize: 6.5 } }, '1', ...a1, { content: '/30', styles: { halign: 'center', fontStyle: 'bold' } }, { content: `SUM\n${attitudeScore}`, rowSpan: 3, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 10 } }],
+                [{ content: '', rowSpan: 3, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fillColor: 255, textColor: [20, 30, 45] }, isRotatedText: true, rotatedText: 'ATTITUDE' }, '1', ...a1, { content: '/30', styles: { halign: 'center', fontStyle: 'bold', valign: 'middle' } }, { content: `SUM\n\n${attitudeScore}`, rowSpan: 3, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 16 }, drawSumBox: true }],
                 ['2', ...a2, ''],
                 ['3', ...a3, ''],
 
                 // Safety
-                [{ content: 'SAFETY MANAGEMENT', rowSpan: 3, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fillColor: [245, 245, 248], fontSize: 6 } }, '1', ...s1, { content: '/30', styles: { halign: 'center', fontStyle: 'bold' } }, { content: `TOTAL SCORE\n${rawTotalScore}/100`, rowSpan: 3, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 12 } }],
+                [{ content: '', rowSpan: 3, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fillColor: 255, textColor: [20, 30, 45] }, isRotatedText: true, rotatedText: 'SAFETY MANAGEMENT' }, '1', ...s1, { content: '/30', styles: { halign: 'center', fontStyle: 'bold', valign: 'middle' } }, { content: `TOTAL SCORE\n\n${rawTotalScore}/100`, rowSpan: 3, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 14, fillColor: 255, textColor: [20, 30, 45] } }],
                 ['2', ...s2, ''],
-                ['3', ...s3, '']
+                ['3', ...s3, ''],
+
+                // Attendance
+                [{ content: '', styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fillColor: [20, 30, 45], textColor: 255 }, isRotatedText: true, rotatedText: 'ATTENDANCE' }, { content: `DAYS OF ABSENCE:       ${absentDays}`, colSpan: 4, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 9 } }, { content: `* 10 points are deducted for each absence from work per day. However, points will not be deducted for sick leave with supporting documents attached.\n* Unauthorised late arrival, early departure without notice, 3 times of unauthorised results are treated as 1 day of absence from work.`, colSpan: 3, styles: { fontStyle: 'italic', fontSize: 6.5, textColor: [100, 100, 100], valign: 'middle' } }, { content: `${attendanceRaw}/100`, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 9, fillColor: [240, 240, 245] } }, { content: `FINAL WEIGHTED\n\n${finalWeightedTotal}\n/ 100`, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 12, fillColor: [20, 30, 45], textColor: 255 } }],
+                
+                // Marking formula
+                [{ content: 'MARKING', styles: { fontStyle: 'bold', fontSize: 7, halign: 'center', valign: 'middle' } }, { content: '(Doing Training assignments + Attitude + Safety management) score × 80% + Attendance (20%)', colSpan: 9, styles: { fontStyle: 'bold', halign: 'center', valign: 'middle', fontSize: 9 } }]
             ] as any[],
             theme: 'grid',
-            styles: { font: fontName, fontSize: 7, textColor: 0, lineColor: [200, 200, 200], cellPadding: 3, minCellHeight: 12 },
-            headStyles: { fillColor: 255, textColor: [200, 200, 200], fontStyle: 'bold', halign: 'center' },
-            columnStyles: { 0: { cellWidth: 22 }, 1: { cellWidth: 5, halign: 'center' }, 2: { cellWidth: 50 }, 3: { cellWidth: 8.5 }, 4: { cellWidth: 8.5 }, 5: { cellWidth: 8.5 }, 6: { cellWidth: 8.5 }, 7: { cellWidth: 8.5 }, 8: { cellWidth: 10 }, 9: { cellWidth: 32 } }
+            styles: { font: fontName, fontSize: 8, textColor: 0, lineColor: [200, 200, 200], cellPadding: 4, minCellHeight: 12 },
+            headStyles: { fillColor: 255, textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' },
+            columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 5, halign: 'center', valign: 'middle' }, 2: { cellWidth: 50 }, 3: { cellWidth: 12 }, 4: { cellWidth: 12 }, 5: { cellWidth: 12 }, 6: { cellWidth: 12 }, 7: { cellWidth: 12 }, 8: { cellWidth: 12 }, 9: { cellWidth: 43 } },
+            didDrawCell: (data: any) => {
+                if (data.cell.raw && data.cell.raw.isRotatedText) {
+                    const text = data.cell.raw.rotatedText;
+                    doc.setFont(fontName, 'bold');
+                    doc.setFontSize(7);
+                    doc.setTextColor(data.cell.styles.textColor || [20, 30, 45]);
+                    const x = data.cell.x + data.cell.width / 2;
+                    const y = data.cell.y + data.cell.height / 2;
+                    doc.text(text, x, y, { align: 'center', baseline: 'middle', angle: 90 });
+                }
+                if (data.cell.raw && data.cell.raw.isSelectedScore) {
+                    const dimX = 8;
+                    const dimY = 8;
+                    const x = data.cell.x + (data.cell.width - dimX) / 2;
+                    const y = data.cell.y + (data.cell.height - dimY) / 2;
+                    doc.setFillColor(20, 30, 45); // Dark box
+                    doc.roundedRect(x, y, dimX, dimY, 2, 2, 'F');
+                    doc.setTextColor(255);
+                    doc.setFontSize(8);
+                    doc.setFont(fontName, 'bold');
+                    doc.text(data.cell.raw.content, data.cell.x + data.cell.width / 2, data.cell.y + data.cell.height / 2 + 1, { align: 'center', baseline: 'middle' });
+                }
+                if (data.cell.raw && data.cell.raw.drawSumBox) {
+                    const boxW = data.cell.width * 0.8;
+                    const boxH = 15;
+                    const x = data.cell.x + (data.cell.width - boxW) / 2;
+                    const y = data.cell.y + (data.cell.height - boxH) / 2;
+                    doc.setDrawColor(220, 220, 230);
+                    doc.setLineWidth(1);
+                    doc.roundedRect(x, y, boxW, boxH, 2, 2, 'S');
+                }
+            }
         });
 
-        // Attendance Record and Final Weighting
-        yPos = (doc as any).lastAutoTable.finalY + 5;
+        const tableEndY = (doc as any).lastAutoTable.finalY + 5;
 
+        // ─── FINAL SIGN-OFF / STUDENT ATTENDANCE SHEET ────────────────────────────
+        if (tableEndY > 200) { doc.addPage(); addHeader("ASSESSMENT (FOR COMPANIES)", 8); yPos = 30; } 
+        else { yPos = tableEndY + 5; }
+
+        doc.setFontSize(11); doc.setFont(fontName, "bold");
+        doc.text("STUDENT ATTENDANCE SHEET", 10, yPos);
+        yPos += 5;
+        
         autoTable(doc, {
             startY: yPos,
+            margin: { left: 10, right: 10 },
             body: [
-                [{ content: 'ATTENDANCE', styles: { fontStyle: 'bold', fillColor: [0, 0, 0], textColor: 255, halign: 'center', valign: 'middle', cellWidth: 25 } },
-                { content: `Days of Absence: ${absentDays} \n\n* 10 points are deducted for each absence from work per day. However, points will not be deducted for sick leave with supporting documents attached.\n* Unauthorised late arrival, early departure without notice, 3 times of unauthorised results are treated as 1 day of absence from work`, styles: { fontSize: 7, fontStyle: 'italic', cellWidth: 100 } },
-                { content: `${attendanceRaw} / 100`, styles: { fontStyle: 'bold', halign: 'center', valign: 'middle', fillColor: [240, 240, 240] } },
-                { content: `Final Weighted\n\n${finalWeightedTotal} / 100`, styles: { fontStyle: 'bold', halign: 'center', valign: 'middle', fillColor: [0, 0, 0], textColor: 255 } }]
+                [
+                    { content: 'SCHEME', styles: { fontStyle: 'bold', halign: 'center', valign: 'middle', cellWidth: 30 } },
+                    { content: `\nperformance score  ____${rawTotalScore}____  * 80% =  ____${Math.round(rawTotalScore * 0.8 * 10) / 10}____\n\nattendance score  ____${attendanceRaw}____  * 20% =  ____${Math.round(attendanceRaw * 0.2 * 10) / 10}____\n\nTotal  ____${finalWeightedTotal}____ /100\n`, styles: { halign: 'left', fontStyle: 'bold', fontSize: 10, cellPadding: 6 } }
+                ],
+                [
+                    { content: `Period      ${new Date().toLocaleDateString()}   ~   ${new Date().toLocaleDateString()}`, colSpan: 2, styles: { halign: 'center', fontStyle: 'bold', fontSize: 9 } }
+                ],
+                [
+                    { content: 'OVERALL\nREVIEW', styles: { fontStyle: 'bold', halign: 'center', valign: 'middle' } },
+                    { content: '\nWrite overall student performance review here...\n\n\n\n', styles: { textColor: [200, 200, 200] } }
+                ],
+                [
+                    { content: 'COMPANY NAME:\n\nEVALUATOR\'S\nPOSITION:\n\nNAME:', styles: { fontStyle: 'bold', halign: 'left', valign: 'middle', cellPadding: 5 } },
+                    { content: `\n        ${student?.company || '_________________________________________'}\n.......................................................................................................................................\n\n\n.......................................................................................................................................\n\n\n.......................................................................................................................................(signature)`, styles: { halign: 'left', fontStyle: 'bold' } }
+                ]
             ],
             theme: 'grid',
-            styles: { font: fontName, textColor: 0, lineColor: 0 }
+            styles: { font: fontName, fontSize: 9, textColor: 0, lineColor: [200, 200, 200] }
         });
-
-        yPos = (doc as any).lastAutoTable.finalY;
-        autoTable(doc, {
-            startY: yPos,
-            body: [
-                [{ content: 'Marking', styles: { fontStyle: 'bold', fillColor: [240, 240, 240], halign: 'center', cellWidth: 25 } }, { content: '(Assignments + Attitude + Safety management) score * 80% + Attendance (20%)', styles: { fontStyle: 'bold', halign: 'center' } }]
-            ],
-            theme: 'grid',
-            styles: { font: fontName, fontSize: 8, textColor: 0, lineColor: 0 }
-        });
-
-        addFooter(currentPageNum);
-        currentPageNum++;
-
-        // ─── ATTENDANCE MATRIX ─────────────────────────────────────────────────────
-        doc.addPage();
-        addHeader("STUDENT ATTENDANCE SHEET", currentPageNum);
-        doc.setFontSize(12); doc.setFont(fontName, "bold");
-        doc.text("Trainee's Attendance Matrix", 105, 30, { align: "center" });
-
-        const attendanceBody = generatedWeeksList.map(week => {
-            const log = weeklyLogs.find(l => l.weekNumber === week.number);
-            const filledDaysCount = [log?.mondayTask, log?.tuesdayTask, log?.wednesdayTask, log?.thursdayTask, log?.fridayTask].filter(t => t && t.trim().length > 0).length;
-            const status = log?.status === 'APPROVED' ? 'Approved' : log?.status === 'SUBMITTED' ? 'Submitted' : log?.status === 'REJECTED' ? 'Rejected' : 'Pending';
-
-            return [
-                `Week ${week.number}`,
-                `${new Date(week.start).toLocaleDateString()} to ${new Date(week.end).toLocaleDateString()}`,
-                String(filledDaysCount),
-                String(5 - filledDaysCount),
-                status
-            ];
-        });
-
-        autoTable(doc, {
-            startY: 40,
-            head: [['Week Num', 'Date Range', 'Days Present', 'Days Absent', 'Supervisor Signature / Status']],
-            body: attendanceBody.length > 0 ? attendanceBody : [['No data', '--', '0', '0', 'Pending']],
-            theme: 'grid',
-            styles: { font: fontName, fontSize: 9, textColor: 0, lineColor: 0, cellPadding: 3, halign: 'center' },
-            headStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' }
-        });
-
-        addFooter(currentPageNum);
-        currentPageNum++;
 
 
 
