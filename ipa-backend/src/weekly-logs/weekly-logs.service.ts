@@ -109,7 +109,12 @@ export class WeeklyLogsService {
                 weeklyLogs: { orderBy: { weekNumber: 'asc' } },
                 iapReport: true,
                 tasks: true,
-                ratings: true
+                ratings: true,
+                supervisor: {
+                    include: {
+                        user: true
+                    }
+                }
             }
         });
 
@@ -293,6 +298,7 @@ export class WeeklyLogsService {
             doc.addPage();
             doc.font(fontBold).fontSize(14).text('Industrial Attachment Result Report (for students)', 30, 40, { align: 'center' });
             
+            // ─── INDUSTRIAL ATTACHMENT ASSESSMENT (FOR COMPANIES) ──────────────────────
             doc.addPage();
             doc.text('Industrial Attachment Assessment (for Companies)', 30, 40, { align: 'center' });
             
