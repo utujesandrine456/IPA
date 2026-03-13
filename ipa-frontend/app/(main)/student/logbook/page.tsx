@@ -1006,7 +1006,7 @@ export default function StudentLogbookPage() {
                 { content: 'VERY\nLOW', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
                 { content: 'SCORE', styles: { halign: 'center', valign: 'middle', fillColor: 255, textColor: [20, 30, 45] } },
                 { content: '* Mark the score for each\nevaluation item and add up the\ntotal score and record it in the\nscore column.', styles: { fontStyle: 'italic', fontSize: 6.5, textColor: [100, 100, 100], fillColor: 255 } }
-            ]],
+            ]] as any[],
             body: [
                 // Assignments
                 [{ content: '', rowSpan: assignmentsRowCount, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fillColor: 255, textColor: [20, 30, 45] }, isRotatedText: true, rotatedText: 'ASSIGNMENTS' }, '1', ...t1, { content: '/40', styles: { halign: 'center', fontStyle: 'bold', valign: 'middle' } }, { content: `SUM\n\n${assignmentsScore}`, rowSpan: assignmentsRowCount, styles: { halign: 'center', valign: 'middle', fontStyle: 'bold', fontSize: 16 }, drawSumBox: true }],
