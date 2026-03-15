@@ -27,7 +27,7 @@ export class TasksController {
                 studentId: { type: 'number', example: 1 },
                 title: { type: 'string', example: 'Complete project documentation' },
                 description: { type: 'string', example: 'Write comprehensive documentation for the project' },
-                status: { type: 'string', enum: ['PENDING', 'IN_PROGRESS', 'SUBMITTED', 'APPROVED', 'REJECTED', 'COMPLETED'], example: 'PENDING' }
+                status: { type: 'string', enum: ['PENDING', 'IN_PROGRESS', 'SUBMITTED', 'REJECTED', 'COMPLETED'], example: 'PENDING' }
             }
         }
     })
@@ -44,7 +44,7 @@ export class TasksController {
             type: 'object',
             properties: {
                 id: { type: 'number', example: 1 },
-                status: { type: 'string', enum: ['PENDING', 'IN_PROGRESS', 'SUBMITTED', 'APPROVED', 'REJECTED', 'COMPLETED'], example: 'SUBMITTED' },
+                status: { type: 'string', enum: ['PENDING', 'IN_PROGRESS', 'SUBMITTED', 'REJECTED', 'COMPLETED'], example: 'SUBMITTED' },
                 submissionContent: { type: 'string', example: 'Task completed as requested' },
                 rating: { type: 'number', minimum: 1, maximum: 5, example: 4 }
             }

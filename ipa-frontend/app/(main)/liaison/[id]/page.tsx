@@ -41,7 +41,7 @@ interface WeeklyLog {
     fridayHours?: number;
     totalHours?: number;
     generalStatement?: string;
-    status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+    status: 'DRAFT' | 'SUBMITTED' | 'COMPLETED' | 'REJECTED';
     student?: { user: { name: string } };
     liaisonName?: string;
     liaisonDate?: string;
@@ -170,7 +170,7 @@ export default function LiaisonDashboard() {
     }
 
     const completedLogs = weeklyLogs.filter(w => w.liaisonSignature).length;
-    const pendingLogs = weeklyLogs.filter(w => !w.liaisonSignature && (w.status === 'SUBMITTED' || w.status === 'APPROVED')).length;
+    const pendingLogs = weeklyLogs.filter(w => !w.liaisonSignature && (w.status === 'SUBMITTED' || w.status === 'COMPLETED')).length;
 
     return (
         <div className="h-[calc(100vh-12rem)] flex flex-col max-w-7xl mx-auto w-full">
@@ -375,7 +375,7 @@ export default function LiaisonDashboard() {
                                                     <ShieldCheck className="h-3.5 w-3.5" />
                                                     Verified
                                                 </span>
-                                            ) : log.status === 'APPROVED' ? (
+                                            ) : log.status === 'COMPLETED' ? (
                                                 <span className="px-3 py-1 flex items-center gap-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200">
                                                     <Clock className="h-3.5 w-3.5" />
                                                     Needs Verification

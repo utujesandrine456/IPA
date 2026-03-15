@@ -113,7 +113,7 @@ export class WeeklyLogsController {
     ) {
         const buffer = await this.weeklyLogsService.generatePdf(id, req.user);
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="weekly-log-${id}.pdf"`);
+        res.setHeader('Content-Disposition', `attachment; filename="Logbook.pdf"`);
         res.send(buffer);
     }
 }

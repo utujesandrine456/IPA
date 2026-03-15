@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
         results.success.push({
           email: student.user.email,
           name: student.user.name,
-          studentId: student.studentId,
+          studentId: student.studentNumber,
         });
       } catch (err: any) {
         results.errors.push({ row: { id }, error: err.message });

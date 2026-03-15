@@ -89,7 +89,7 @@ interface WeeklyLog {
   fridayHours?: number;
   totalHours?: number;
   generalStatement?: string;
-  status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+  status: 'DRAFT' | 'SUBMITTED' | 'COMPLETED' | 'REJECTED';
   student?: { user: { name: string } };
   grade?: string;
   supervisorName?: string;
@@ -401,7 +401,7 @@ export default function SupervisorDashboard() {
         method: "PATCH",
         body: JSON.stringify({
           taskId: task.id,
-          status: "COMPLETED", // Changed from APPROVED per user request
+          status: "COMPLETED",
           rating: taskRating,
           comment: taskComment || "Approved by supervisor",
           supervisorId: supervisorId,
@@ -871,10 +871,10 @@ export default function SupervisorDashboard() {
                         const isExpanded = expandedTaskId === task.id;
                         return (
                           <div key={task.id} className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden transition-all hover:border-slate-200">
-                             <div 
-                               className="p-5 flex items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 transition-colors"
-                               onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
-                             >
+                            <div
+                              className="p-5 flex items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                              onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
+                            >
                               <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0",
                                   task.status === 'COMPLETED' ? "bg-emerald-50 text-emerald-600" :
@@ -910,7 +910,7 @@ export default function SupervisorDashboard() {
                                 </button>
                               </div>
                             </div>
-                             {/* Submission expanded view */}
+                            {/* Submission expanded view */}
                             {isExpanded && (
                               <div className="border-t-2 border-slate-100 p-5 bg-slate-50 space-y-4">
                                 {taskActionId === task.id ? (
@@ -934,8 +934,8 @@ export default function SupervisorDashboard() {
                                               onClick={() => setTaskRating(val)}
                                               className={cn(
                                                 "h-10 w-10 min-w-[40px] rounded-lg font-semibold text-xs transition-all border-2",
-                                                taskRating === val 
-                                                  ? "bg-slate-900 border-slate-900 text-white shadow-lg scale-105" 
+                                                taskRating === val
+                                                  ? "bg-slate-900 border-slate-900 text-white shadow-lg scale-105"
                                                   : "border-slate-100 text-slate-400 hover:border-slate-200 bg-slate-50"
                                               )}
                                             >
@@ -1322,7 +1322,7 @@ export default function SupervisorDashboard() {
                             id="review-grade"
                             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-slate-50 disabled:text-slate-400"
                             defaultValue={selectedWeeklyLog.grade || ""}
-                            disabled={selectedWeeklyLog.status === 'APPROVED' || isSaving}
+                            disabled={selectedWeeklyLog.status === 'COMPLETED' || isSaving}
                           >
                             <option value="" disabled>Select...</option>
                             <option value="A">A - Excellent</option>
@@ -1339,7 +1339,7 @@ export default function SupervisorDashboard() {
                             id="review-date"
                             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-slate-50 disabled:text-slate-400"
                             defaultValue={formatDate(selectedWeeklyLog.supervisorDate) || new Date().toISOString().split('T')[0]}
-                            disabled={selectedWeeklyLog.status === 'APPROVED' || isSaving}
+                            disabled={selectedWeeklyLog.status === 'COMPLETED' || isSaving}
                           />
                         </div>
                         <div className="col-span-2 space-y-2">
@@ -1350,7 +1350,7 @@ export default function SupervisorDashboard() {
                             className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-slate-50 disabled:text-slate-400"
                             placeholder="Your Full Name"
                             defaultValue={selectedWeeklyLog.supervisorName || ""}
-                            disabled={selectedWeeklyLog.status === 'APPROVED' || isSaving}
+                            disabled={selectedWeeklyLog.status === 'COMPLETED' || isSaving}
                           />
                         </div>
                         <div className="col-span-2 space-y-2">
@@ -1359,7 +1359,7 @@ export default function SupervisorDashboard() {
                             id="review-note"
                             className="w-full h-24 rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none resize-none disabled:bg-slate-50 disabled:text-slate-400"
                             placeholder="Add comments for the student..."
-                            disabled={selectedWeeklyLog.status === 'APPROVED' || isSaving}
+                            disabled={selectedWeeklyLog.status === 'COMPLETED' || isSaving}
                           />
                         </div>
                       </div>
@@ -1374,7 +1374,7 @@ export default function SupervisorDashboard() {
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Awaiting Verification</span>
                 </div>
                 <div className="flex gap-4 w-full md:w-auto">
-                  {selectedWeeklyLog.status !== 'APPROVED' ? (
+                  {selectedWeeklyLog.status !== 'COMPLETED' ? (
                     <>
                       <Button
                         variant="ghost"

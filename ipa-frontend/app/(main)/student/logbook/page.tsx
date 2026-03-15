@@ -60,22 +60,22 @@ function StatusBadge({ status }: { status: string }) {
     const isCompleted = status === "COMPLETED";
     const isRejected = status === "REJECTED";
     const isSubmitted = status === "SUBMITTED";
-    
+
     return (
         <div className={cn(
             "px-4 py-1.5 rounded-full text-xs font-bold shadow-sm flex items-center gap-2 transition-all border",
             isCompleted ? "bg-green-50 text-green-700 border-green-200" :
-            isRejected ? "bg-red-50 text-red-700 border-red-200" :
-            isSubmitted ? "bg-amber-50 text-amber-700 border-amber-200" :
-            "bg-slate-50 text-slate-700 border-slate-200"
+                isRejected ? "bg-red-50 text-red-700 border-red-200" :
+                    isSubmitted ? "bg-amber-50 text-amber-700 border-amber-200" :
+                        "bg-slate-50 text-slate-700 border-slate-200"
         )}>
             <div className={cn(
                 "h-1.5 w-1.5 rounded-full",
                 isCompleted ? "bg-green-500" :
-                isRejected ? "bg-red-500" :
-                "bg-amber-500 animate-pulse"
+                    isRejected ? "bg-red-500" :
+                        "bg-amber-500 animate-pulse"
             )} />
-            {status === "COMPLETED" ? "APPROVED" : status}
+            {status}
         </div>
     );
 }
@@ -351,7 +351,7 @@ export default function StudentLogbookPage() {
 
     const handleSaveStudentInfo = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!student?.internshipStart || !student?.internshipEnd) {
             toast.error("Please provide both start and end dates");
             return;
@@ -365,7 +365,7 @@ export default function StudentLogbookPage() {
             });
             if (result.ok) {
                 toast.success("Profile details saved to database");
-                
+
                 // Update local storage to reflect completed profile
                 try {
                     const storedUserRaw = localStorage.getItem("user");
@@ -469,18 +469,13 @@ export default function StudentLogbookPage() {
             setIsSaving(false);
         }
     };
-
     const generatePDF = () => {
         const doc = new jsPDF() as any;
-        const fontName = "helvetica"; // Falls back to helvetica, but styled to look like Outfit
+        const fontName = "helvetica";
         const primaryColor: [number, number, number] = [26, 38, 74];
         const slateColor: [number, number, number] = [241, 245, 249];
 
         // ─── HELPERS ─────────────────────────────────────────────────────────────────
-        const PAGE_BOTTOM = 275;
-        const LINE_H = 6;
-        const CONTENT_W = 170;
-
         const addHeader = (title: string, subtitle: string = "RCA Industrial Attachment Program") => {
             doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             doc.rect(0, 0, 210, 25, 'F');
@@ -506,9 +501,9 @@ export default function StudentLogbookPage() {
             }
         };
 
+        // ─── COVER PAGE ─────────────────────────────────────────────────────────────
         doc.setFillColor(255, 255, 255);
         doc.rect(0, 0, 210, 297, 'F');
-        
         doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.rect(0, 0, 15, 297, 'F');
 
@@ -516,7 +511,7 @@ export default function StudentLogbookPage() {
         doc.setFont(fontName, "bold");
         doc.setFontSize(10);
         doc.text("RWANDA CODING ACADEMY", 30, 30);
-        
+
         doc.setFontSize(48);
         doc.text("IAP", 30, 70);
         doc.setFontSize(24);
@@ -575,7 +570,6 @@ export default function StudentLogbookPage() {
             { label: "Liaison Officer", value: student?.liaisonOfficerName || "" }
         ]);
 
-        // Footer note
         doc.setFontSize(8);
         doc.setTextColor(148, 163, 184);
         doc.text("Generated via IPA Digital System • Confidential Institutional Document", 105, 285, { align: "center" });
@@ -595,7 +589,7 @@ export default function StudentLogbookPage() {
             doc.setFont(fontName, "normal");
             doc.setFontSize(9);
             doc.setTextColor(71, 85, 105);
-            
+
             text.forEach(item => {
                 const lines = doc.splitTextToSize(type === 'bullet' ? `\u2022  ${item}` : item, 170);
                 if (yPos + (lines.length * 5) > 280) {
@@ -624,13 +618,12 @@ export default function StudentLogbookPage() {
             "Harassment and misconduct will result in immediate disciplinary action."
         ], 'para');
 
-        // ─── WEEKLY LOGS ────────────────────────────────────────────────────────────
+        // ─── WEEKLY LOGS ───────────────────────────────────
         generatedWeeksList.forEach((week) => {
             const log = getSafeLog(week.number);
             doc.addPage();
             addHeader(`WEEKLY PROGRESS REPORT • WEEK ${week.number}`, `${formatDate(week.start)} — ${formatDate(week.end)}`);
-            
-            // Summary Stats box
+
             doc.setFillColor(slateColor[0], slateColor[1], slateColor[2]);
             doc.roundedRect(20, 35, 170, 20, 2, 2, 'F');
             doc.setFont(fontName, "bold");
@@ -664,7 +657,6 @@ export default function StudentLogbookPage() {
 
             yPos = (doc as any).lastAutoTable.finalY + 12;
 
-            // General Statement block
             doc.setFillColor(252, 252, 253);
             doc.setDrawColor(226, 232, 240);
             const stmtText = log.generalStatement || "No weekly summary provided by student.";
@@ -679,16 +671,15 @@ export default function StudentLogbookPage() {
             doc.setFontSize(9);
             doc.setTextColor(30, 41, 59);
             doc.text(stmtLines, 25, yPos + 12);
-            
+
             yPos += boxH + 12;
 
-            // Assessment Block
             doc.setFont(fontName, "bold");
             doc.setFontSize(9);
             doc.setTextColor(15, 23, 42);
             doc.text("SUPERVISOR'S ASSESSMENT & SIGNATURE", 20, yPos);
             yPos += 6;
-            
+
             const gradeScale = [
                 { id: 'A', label: 'A - Excellent' },
                 { id: 'B', label: 'B - Good' },
@@ -711,7 +702,7 @@ export default function StudentLogbookPage() {
             doc.line(20, yPos, 80, yPos);
             doc.line(110, yPos, 145, yPos);
             doc.line(155, yPos, 190, yPos);
-            
+
             doc.setFontSize(7);
             doc.setFont(fontName, "normal");
             doc.setTextColor(148, 163, 184);
@@ -729,13 +720,12 @@ export default function StudentLogbookPage() {
             }
         });
 
-        // ─── FINAL RESULT REPORT ─────────────────────────────────────────────────────
+        // ─── FINAL RESULT REPORT ───────────────────────────
         doc.addPage();
         addHeader("INDUSTRIAL ATTACHMENT RESULT REPORT", "Student Performance Summary");
-        
-        yPos = 35;
+
         autoTable(doc, {
-            startY: yPos,
+            startY: 40,
             body: [
                 ['Student Full Name', student?.fullName || 'N/A'],
                 ['Registration Number', student?.studentNumber || 'N/A'],
@@ -749,7 +739,7 @@ export default function StudentLogbookPage() {
         });
 
         yPos = (doc as any).lastAutoTable.finalY + 10;
-        
+
         autoTable(doc, {
             startY: yPos,
             body: [
@@ -773,8 +763,7 @@ export default function StudentLogbookPage() {
         doc.line(130, yPos, 180, yPos);
         doc.text("Seal of RCA / LO Signature", 130, yPos + 5);
 
-        // ─── SAVE ───────────────────────────────────────────────────────────────────
-        doc.save(`Logbook.pdf`);
+        doc.save(`Logbook_${student?.fullName || "Student"}.pdf`);
         toast.success("Professional Logbook Generated!");
     };
 
@@ -1362,16 +1351,16 @@ export default function StudentLogbookPage() {
 
                                                         {/* Actions */}
                                                         <div className="p-6 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-4">
-                                                             {getSafeLog(expandedWeek).status !== 'DRAFT' && (
+                                                            {getSafeLog(expandedWeek).status !== 'DRAFT' && (
                                                                 <div className="flex flex-col gap-2">
                                                                     <div className="flex items-center gap-2">
                                                                         <StatusBadge status={getSafeLog(expandedWeek).status} />
                                                                         <span className="text-xs text-slate-500 font-medium">
-                                                                            {getSafeLog(expandedWeek).status === 'COMPLETED' 
-                                                                                ? "This log has been approved and is locked for editing." 
+                                                                            {getSafeLog(expandedWeek).status === 'COMPLETED'
+                                                                                ? "This log has been approved and is locked for editing."
                                                                                 : getSafeLog(expandedWeek).status === 'SUBMITTED'
-                                                                                ? "This log has been submitted and is locked for editing."
-                                                                                : "This log was rejected. Please address the feedback below and re-submit."}
+                                                                                    ? "This log has been submitted and is locked for editing."
+                                                                                    : "This log was rejected. Please address the feedback below and re-submit."}
                                                                         </span>
                                                                     </div>
                                                                     {getSafeLog(expandedWeek).status === 'REJECTED' && getSafeLog(expandedWeek).supervisorNote && (
@@ -1665,7 +1654,30 @@ export default function StudentLogbookPage() {
                                         <>
                                             {student?.ratings?.[0] ? (
                                                 <div className="space-y-10">
-                                                    <div className="bg-white border-2 border-slate-900 p-0 overflow-hidden mt-6">
+                                                    {/* Student Report Summary Section */}
+                                                    <div className="bg-slate-50 border-2 border-slate-900 overflow-hidden">
+                                                        <div className="bg-slate-900 text-white p-4 font-black uppercase text-xs tracking-widest">
+                                                            Student Training Summary
+                                                        </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-900">
+                                                            <div className="p-6 space-y-3">
+                                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-tighter">Overview & Goals</h4>
+                                                                <p className="text-sm text-slate-700 leading-relaxed italic">"{report.overviewGoals || "No overview provided."}"</p>
+                                                            </div>
+                                                            <div className="p-6 space-y-3">
+                                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-tighter">Key Training Contents</h4>
+                                                                <p className="text-sm text-slate-700 leading-relaxed font-medium">{report.contentsTraining || "No training details provided."}</p>
+                                                            </div>
+                                                            <div className="p-6 space-y-3 bg-white">
+                                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-tighter">Notable Achievements</h4>
+                                                                <div className="p-4 rounded-lg bg-green-50 border border-green-100">
+                                                                    <p className="text-sm text-green-800 font-bold leading-tight">{report.notableAchievements || "N/A"}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="bg-white border-2 border-slate-900 p-0 overflow-hidden">
                                                         {/* header */}
                                                         <div className="border-b-2 border-slate-900 p-6 flex flex-col items-center justify-center space-y-4">
                                                             <div className="w-full space-y-4 pt-4 px-4">
@@ -2071,4 +2083,4 @@ export default function StudentLogbookPage() {
             </main>
         </div>
     );
-}
+} 
