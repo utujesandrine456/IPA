@@ -18,14 +18,35 @@ export class IapReportsService {
 
         if (!sId) throw new BadRequestException('studentId is required');
 
+        // Clean data: only include fields that exist in the Prisma model
+        // and omit fields that should not be updated directly
+        const cleanData = {
+            nameOfUnit: rest.nameOfUnit,
+            overviewGoals: rest.overviewGoals,
+            contentsTraining: rest.contentsTraining,
+            loVisitCount: rest.loVisitCount,
+            isUseful: rest.isUseful,
+            improvedUnderstanding: rest.improvedUnderstanding,
+            providedExperiences: rest.providedExperiences,
+            programmeTypes: rest.programmeTypes,
+            otherProgrammeDetails: rest.otherProgrammeDetails,
+            futureCareerPlan: rest.futureCareerPlan,
+            notableAchievements: rest.notableAchievements,
+            satisfactionIndustry: rest.satisfactionIndustry,
+            satisfactionInstructors: rest.satisfactionInstructors,
+            satisfactionMajor: rest.satisfactionMajor,
+            satisfactionPractical: rest.satisfactionPractical,
+            suggestions: rest.suggestions,
+        };
+
         return this.prisma.iapReport.upsert({
             where: { studentId: sId },
             create: {
                 studentId: sId,
-                ...rest,
+                ...cleanData,
             },
             update: {
-                ...rest,
+                ...cleanData,
             },
         });
     }

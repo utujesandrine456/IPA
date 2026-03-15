@@ -7,7 +7,7 @@ import {
     Plus, Loader2, FileText, CheckSquare, MessageSquare,
     Star, Building2, User, Calendar, ChevronDown,
     ChevronUp, Download, CheckCircle2, AlertCircle,
-    ShieldCheck, LockKeyhole, Check
+    ShieldCheck, LockKeyhole, Check, Zap
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast, Toaster } from "react-hot-toast";
 import DOMPurify from "dompurify";
+import { jostregular } from "@/lib/fonts/jost-regular";
+import { jostbold } from "@/lib/fonts/jost-bold";
 
 const sanitize = (html: string) => ({ __html: DOMPurify.sanitize(html) });
 
@@ -30,7 +32,7 @@ const formatDate = (date: string | null | undefined) => {
     }
 };
 
-// Subcomponents
+
 function Field({ label, value }: { label: string; value: string }) {
     return (
         <div className="space-y-2 group">
@@ -158,7 +160,6 @@ interface WeeklyLog {
     supervisorSignature?: boolean;
     status: 'DRAFT' | 'SUBMITTED' | 'COMPLETED' | 'REJECTED';
 }
-
 interface IapReport {
     nameOfUnit?: string;
     overviewGoals?: string;
@@ -176,6 +177,9 @@ interface IapReport {
     notableAchievements?: string;
     futureCareerPlan?: string;
     suggestions?: string;
+    regNo?: string;
+    phoneNo?: string;
+    iapCompanyAttached?: string;
 }
 
 export default function StudentLogbookPage() {
@@ -185,10 +189,15 @@ export default function StudentLogbookPage() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [weeklyLogs, setWeeklyLogs] = useState<WeeklyLog[]>([]);
     const [report, setReport] = useState<IapReport>({
-        programmeTypes: [],
         nameOfUnit: "",
         overviewGoals: "",
-        contentsTraining: ""
+        contentsTraining: "",
+        programmeTypes: [],
+        regNo: "",
+        phoneNo: "",
+        iapCompanyAttached: "",
+        loVisitCount: 0,
+        otherProgrammeDetails: ""
     });
 
     const [loading, setLoading] = useState(true);
@@ -203,7 +212,6 @@ export default function StudentLogbookPage() {
         { id: 5, title: "Assessment Vault", icon: CheckSquare }
     ];
 
-    // FIX 2: explicit return type + fully-typed baseLog with all required fields
     const getSafeLog = (weekNum: number): WeeklyLog => {
         const weekData = generatedWeeksList.find(w => w.number === weekNum);
         const existing = weeklyLogs.find(l => l.weekNumber === weekNum);
@@ -247,6 +255,13 @@ export default function StudentLogbookPage() {
         fetchData();
     }, []);
 
+    // Auto-refresh ratings when entering Step 5 (Assessment Vault)
+    useEffect(() => {
+        if (currentStep === 5) {
+            fetchData();
+        }
+    }, [currentStep]);
+
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -263,7 +278,6 @@ export default function StudentLogbookPage() {
             }
 
             setUser(storedUser);
-
             console.log("Fetching data for studentId:", studentId);
 
             try {
@@ -308,7 +322,6 @@ export default function StudentLogbookPage() {
             } catch (e) {
                 console.warn("No prior report found or fetch failed");
             }
-
 
         } catch (error) {
             console.error("General sync error:", error);
@@ -469,13 +482,20 @@ export default function StudentLogbookPage() {
             setIsSaving(false);
         }
     };
-    const generatePDF = () => {
-        const doc = new jsPDF() as any;
-        const fontName = "helvetica";
-        const primaryColor: [number, number, number] = [26, 38, 74];
-        const slateColor: [number, number, number] = [241, 245, 249];
 
-        // ─── HELPERS ─────────────────────────────────────────────────────────────────
+    const generatePDF = () => {
+        let currentCoordinateY = 0;
+        const doc = new jsPDF();
+
+        // Add Jost Fonts
+        doc.addFileToVFS("Jost-Regular.ttf", jostregular);
+        doc.addFileToVFS("Jost-Bold.ttf", jostbold);
+        doc.addFont("Jost-Regular.ttf", "Jost", "normal");
+        doc.addFont("Jost-Bold.ttf", "Jost", "bold");
+
+        const fontName = "Jost";
+        const primaryColor: [number, number, number] = [26, 38, 74];
+
         const addHeader = (title: string, subtitle: string = "RCA Industrial Attachment Program") => {
             doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             doc.rect(0, 0, 210, 25, 'F');
@@ -490,278 +510,724 @@ export default function StudentLogbookPage() {
         };
 
         const drawCheckbox = (cx: number, cy: number, checked: boolean) => {
-            doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.setDrawColor(0, 0, 0);
             doc.setLineWidth(0.4);
             doc.rect(cx, cy - 3.5, 4, 4);
             if (checked) {
-                doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
                 doc.setLineWidth(0.6);
                 doc.line(cx + 0.8, cy - 1.5, cx + 1.8, cy - 0.5);
                 doc.line(cx + 1.8, cy - 0.5, cx + 3.2, cy - 3);
             }
         };
 
-        // ─── COVER PAGE ─────────────────────────────────────────────────────────────
-        doc.setFillColor(255, 255, 255);
-        doc.rect(0, 0, 210, 297, 'F');
-        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.rect(0, 0, 15, 297, 'F');
-
-        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setFont(fontName, "bold");
-        doc.setFontSize(10);
-        doc.text("RWANDA CODING ACADEMY", 30, 30);
-
-        doc.setFontSize(48);
-        doc.text("IAP", 30, 70);
-        doc.setFontSize(24);
-        doc.text("LOGBOOK", 30, 85);
-        doc.setLineWidth(2);
-        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.line(30, 95, 60, 95);
-
-        doc.setFontSize(11);
-        doc.setTextColor(100, 116, 139);
-        doc.setFont(fontName, "normal");
-        doc.text("Institutional record for Industrial Attachment Program tracking", 30, 105);
-
-        let y = 140;
-        const drawSection = (title: string, items: { label: string, value: string }[]) => {
-            doc.setFont(fontName, "bold");
-            doc.setFontSize(9);
-            doc.setTextColor(15, 23, 42);
-            doc.text(title.toUpperCase(), 30, y);
-            y += 8;
-            doc.setLineWidth(0.1);
-            doc.setDrawColor(226, 232, 240);
-            doc.line(30, y - 4, 180, y - 4);
-
+        const drawField = (label: string, value: string, x: number, y: number, fullWidth: boolean = false) => {
             doc.setFont(fontName, "normal");
             doc.setFontSize(10);
-            items.forEach(item => {
-                doc.setTextColor(100, 116, 139);
-                doc.text(item.label + ":", 35, y);
-                doc.setTextColor(15, 23, 42);
+            doc.setTextColor(0, 0, 0);
+            const labelWidth = doc.getTextWidth(label + " ");
+            doc.text(label, x, y);
+
+            const lineY = y + 1;
+            const lineXStart = x + labelWidth;
+            const lineXEnd = fullWidth ? 190 : (x < 100 ? 100 : 190);
+
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.1);
+            doc.line(lineXStart, lineY, lineXEnd, lineY);
+
+            if (value) {
                 doc.setFont(fontName, "bold");
-                doc.text(item.value || "N/A", 85, y);
-                doc.setFont(fontName, "normal");
-                y += 7;
-            });
-            y += 10;
+                doc.text(value, lineXStart + 2, y);
+            }
+            return lineXEnd;
         };
 
-        drawSection("Student Identity", [
-            { label: "Full Name", value: student?.fullName || "" },
-            { label: "Reg Number", value: student?.studentNumber || "" },
-            { label: "ID/Passport", value: student?.idOrPassport || "" },
-            { label: "Contact", value: student?.phone || "" }
-        ]);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont(fontName, "bold");
+        doc.setFontSize(18);
+        doc.text("RWANDA CODING ACADEMY", 105, 30, { align: "center" });
+        doc.setFontSize(28);
+        doc.text("IAP LOGBOOK", 105, 45, { align: "center" });
 
-        drawSection("Placement Details", [
-            { label: "Company", value: student?.companyName || "" },
-            { label: "Location", value: student?.companyAddress || "" },
-            { label: "Department", value: report.nameOfUnit || "" },
-            { label: "Duration", value: `${formatDate(student?.internshipStart)} — ${formatDate(student?.internshipEnd)}` }
-        ]);
+        let currentY = 65;
+        doc.setFontSize(12);
+        doc.setFont(fontName, "bold");
+        doc.text("Student details:", 20, currentY);
+        currentY += 10;
+        drawField("Name of Student", student?.fullName || "", 20, currentY, true);
+        currentY += 12;
+        drawField("Date of Birth", student?.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : "", 20, currentY);
+        drawField("ID/Passport No.", student?.idOrPassport || "", 110, currentY);
+        currentY += 12;
+        drawField("Reg No.", student?.studentNumber || "", 20, currentY);
+        drawField("Cell Phone No.", student?.phone || "", 110, currentY);
 
-        drawSection("Supervision", [
-            { label: "Industry Supervisor", value: student?.supervisorName || "" },
-            { label: "Designation", value: student?.supervisorDesignation || "" },
-            { label: "Liaison Officer", value: student?.liaisonOfficerName || "" }
-        ]);
+        currentY += 20;
+        doc.setFont(fontName, "bold");
+        doc.text("Company/Institution details:", 20, currentY);
+        currentY += 10;
+        drawField("Name", student?.companyName || "", 20, currentY, true);
+        currentY += 12;
+        drawField("Address/Location", student?.companyAddress || "", 20, currentY, true);
+        currentY += 12;
+        drawField("Tel No.", student?.companyPhone || "", 20, currentY);
+        drawField("Email", student?.companyEmail || "", 110, currentY);
+        currentY += 12;
+        drawField("P.O.Box", student?.companyPOBox || "", 20, currentY);
 
-        doc.setFontSize(8);
-        doc.setTextColor(148, 163, 184);
-        doc.text("Generated via IPA Digital System • Confidential Institutional Document", 105, 285, { align: "center" });
+        currentY += 20;
+        doc.setFont(fontName, "bold");
+        doc.text("Supervisor details:", 20, currentY);
+        currentY += 10;
+        drawField("IAP Company Supervisor Name", student?.supervisorName || "", 20, currentY, true);
+        currentY += 12;
+        drawField("Designation/Title", student?.supervisorDesignation || "", 20, currentY, true);
+        currentY += 12;
+        drawField("Tel No.", student?.supervisorPhone || "", 20, currentY);
+        drawField("Email", student?.supervisorEmail || "", 110, currentY);
 
-        // ─── PAGE 2: OBJECTIVES ────────────────────────────
         doc.addPage();
-        addHeader("IAP OBJECTIVES & GUIDELINES");
-        let yPos = 40;
+        addHeader("IAP OBJECTIVES");
+        currentCoordinateY = 40;
 
-        const renderTextSection = (title: string, text: string[], type: 'bullet' | 'para' = 'bullet') => {
+        const objectives = [
+            "To develop students and enhance their range of skills that are valuable for future careers, including technical skills and transferable skills such as communication, problem-solving, critical thinking, teamwork, adaptability, and time management.",
+            "To expose students to the industry they are interested in or studying, allowing them to gain a deeper understanding of industry practices, trends, challenges, and opportunities.",
+            "Opportunity for students to build professional networks and establish connections with industry professionals, facilitating future job opportunities, mentorship, and valuable industry contacts.",
+            "Students can explore their career interests and clarify their goals by experiencing a real work environment and gaining insights into different roles, industries, and work cultures.",
+            "To foster professional growth in students, challenging them, providing new experiences, and offering feedback to develop self-confidence, resilience, adaptability, and a growth mind-set.",
+            "To integrate academic learning with practical application, helping students understand how theoretical concepts and classroom learning align with real-world scenarios, enhancing their overall educational experience."
+        ];
+
+        objectives.forEach(obj => {
+            const lines = doc.splitTextToSize(obj, 160);
+            drawCheckbox(20, currentCoordinateY, true); // Objectives are implicitly "met" or just shown with a checkmark in the logbook
+            doc.text(lines, 27, currentCoordinateY);
+            currentCoordinateY += (lines.length * 6) + 4;
+        });
+
+        currentCoordinateY += 10;
+        doc.setFont(fontName, "bold");
+        doc.text("Key points to keep in mind on a daily basis (Compulsory by the student).", 20, currentCoordinateY);
+        currentCoordinateY += 8;
+        doc.setFont(fontName, "normal");
+
+        const keyPoints = [
+            { section: "Before IAP", points: ["1. Did you meet your IAP coordinator or any Liaison Officer (LO)?"] },
+            { section: "During IAP", points: ["2. Did your company supervisor assess you weekly and record on your Log Book?", "3. Did your LO assess your Log Book when you are visited?"] },
+            {
+                section: "After IAP", points: [
+                    "4. Did you send a Thank You letter to your IAP Company/Institution and give a copy to your LO with a reception stamp & signature? (Compulsory)",
+                    "5. Did you complete the Student's Report Form?",
+                    "6. Did you submit your Log Book plus your IAP-Report to your LO for grading within TWO weeks after the completion of IAP?",
+                    "7. Did the LO sign your Log Book pages?"
+                ]
+            }
+        ];
+
+        keyPoints.forEach(kp => {
+            doc.setFont(fontName, "bold");
+            doc.text(kp.section, 25, currentCoordinateY);
+            currentCoordinateY += 6;
+            doc.setFont(fontName, "normal");
+            kp.points.forEach(p => {
+                const lines = doc.splitTextToSize(p, 160);
+                doc.text(lines, 30, currentCoordinateY);
+                currentCoordinateY += (lines.length * 5) + 2;
+            });
+            currentCoordinateY += 3;
+        });
+
+        doc.addPage();
+        addHeader("IAP GUIDELINES");
+        currentCoordinateY = 40;
+
+        const guidelines = [
+            { title: "1. Introduction", content: "Preparing for an IAP is crucial to ensure a successful and enriching experience. This guide presents instructions to students on how to make the most out of their placement, starting from the preparation phase, during the placement itself, and concluding with the post placement phase. Follow these guidelines to maximize your learning, professional growth, and overall experience." },
+            {
+                title: "2. Prior to Placement", content: [
+                    "Research the Company/Institution where you will be placed and familiarize yourself with it by understand their mission, values, products/services, and any recent news or projects. This will help you align your expectations and demonstrate your interest during the placement.",
+                    "Review Placement Objectives and understand the objectives of your placement as communicated by RCA. Review the specific skills and knowledge you are expected to gain and consider how you can actively work towards achieving those objectives during your placement.",
+                    "Set personal goals that align with the placement objectives and always reflect on what you hope to achieve during the placement. This will provide a clear focus and direction for your efforts.",
+                    "Familiarize yourself with professional etiquette and workplace norms. This includes appropriate behaviour, respect for colleagues and supervisors, confidentiality, punctuality, and a positive attitude. Prepare a professional-looking resume, if required, and bring any necessary identification or documentation requested by the placement host."
+                ]
+            },
+            {
+                title: "3. During the Placement", content: [
+                    "Be proactive and eager to learn by taking initiative, ask questions, and seek opportunities to contribute to new tasks, projects, and responsibilities that align with your learning goals.",
+                    "Observe and learn from your colleagues and supervisors by paying attention to their work practices, communication styles, and problem-solving approaches. Actively seek feedback to improve your performance and demonstrate your commitment to growth.",
+                    "Take advantage of networking opportunities within the workplace by engaging with colleagues, attend company events, and seek mentorship from experienced professionals. Building relationships can open your doors for future opportunities and provide valuable guidance.",
+                    "Maintain a growth mind-set by embracing challenges and setbacks as learning opportunities. Be open to feedback, adapt to new situations, and continuously seek ways to improve your skills. Embody a growth mind-set that fosters resilience, adaptability, and a commitment to lifelong learning."
+                ]
+            },
+            {
+                title: "4. After the Placement", content: [
+                    "Take time to reflect on your placement experience by evaluating your accomplishments, challenges faced, and lessons learned. Consider how the experience has contributed to your personal and professional growth.",
+                    "Document your achievements, skills acquired, and projects completed during the placement. Update your resume or portfolio to reflect your new experiences and competencies. These will be valuable assets when pursuing future opportunities.",
+                    "Seek feedback and recommendations by approaching your supervisors or mentors. Request their insights on your performance and areas for further development. These testimonials can be valuable additions to your professional profile.",
+                    "Apply the knowledge, skills, and insights gained during the placement to your future academic pursuits or career endeavours. Leverage the experience to enhance your academic performance, shape your career path, and make informed decisions."
+                ]
+            }
+        ];
+
+        guidelines.forEach(g => {
+            if (currentCoordinateY > 260) { doc.addPage(); addHeader("IAP GUIDELINES (CONTINUED)"); currentCoordinateY = 40; }
             doc.setFont(fontName, "bold");
             doc.setFontSize(11);
-            doc.setTextColor(15, 23, 42);
-            doc.text(title, 20, yPos);
-            yPos += 8;
-
+            doc.text(g.title, 20, currentCoordinateY);
+            currentCoordinateY += 8;
             doc.setFont(fontName, "normal");
-            doc.setFontSize(9);
-            doc.setTextColor(71, 85, 105);
+            doc.setFontSize(10);
+            if (Array.isArray(g.content)) {
+                g.content.forEach(c => {
+                    const lines = doc.splitTextToSize(c, 165);
+                    if (currentCoordinateY + (lines.length * 5) > 280) { doc.addPage(); addHeader("IAP GUIDELINES (CONTINUED)"); currentCoordinateY = 40; }
 
-            text.forEach(item => {
-                const lines = doc.splitTextToSize(type === 'bullet' ? `\u2022  ${item}` : item, 170);
-                if (yPos + (lines.length * 5) > 280) {
-                    doc.addPage();
-                    addHeader("IAP OBJECTIVES & GUIDELINES (CONTINUED)");
-                    yPos = 40;
-                }
-                doc.text(lines, 25, yPos);
-                yPos += (lines.length * 5) + 3;
-            });
-            yPos += 5;
-        };
+                    // Small square bullet
+                    doc.setDrawColor(0, 0, 0);
+                    doc.rect(25, currentCoordinateY - 3, 2, 2, 'F');
 
-        renderTextSection("Program Objectives", [
-            "To develop students and enhance their range of technical and transferable skills.",
-            "To expose students to industry practices, trends, challenges, and opportunities.",
-            "To bridge the gap between academic theory and real-world implementation.",
-            "To foster professional networks and mentorship connections."
-        ]);
-
-        renderTextSection("Student Guidelines & Rules", [
-            "Maintain punctuality and professional etiquette at all times.",
-            "Complete logbook entries daily with detailed technical descriptions.",
-            "Adhere to company rules and safety protocols strictly.",
-            "Submit the finalized logbook within two weeks after IAP completion.",
-            "Harassment and misconduct will result in immediate disciplinary action."
-        ], 'para');
-
-        // ─── WEEKLY LOGS ───────────────────────────────────
-        generatedWeeksList.forEach((week) => {
-            const log = getSafeLog(week.number);
-            doc.addPage();
-            addHeader(`WEEKLY PROGRESS REPORT • WEEK ${week.number}`, `${formatDate(week.start)} — ${formatDate(week.end)}`);
-
-            doc.setFillColor(slateColor[0], slateColor[1], slateColor[2]);
-            doc.roundedRect(20, 35, 170, 20, 2, 2, 'F');
-            doc.setFont(fontName, "bold");
-            doc.setFontSize(9);
-            doc.setTextColor(71, 85, 105);
-            doc.text("TOTAL LOGGED HOURS", 35, 47);
-            doc.setFontSize(16);
-            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.text(`${log.totalHours || 0} Professional Hours`, 100, 48);
-
-            const days = [
-                { name: 'Monday', task: log.mondayTask, hours: log.mondayHours },
-                { name: 'Tuesday', task: log.tuesdayTask, hours: log.tuesdayHours },
-                { name: 'Wednesday', task: log.wednesdayTask, hours: log.wednesdayHours },
-                { name: 'Thursday', task: log.thursdayTask, hours: log.thursdayHours },
-                { name: 'Friday', task: log.fridayTask, hours: log.fridayHours },
-            ];
-
-            autoTable(doc, {
-                startY: 65,
-                head: [['DAY', 'TECHNICAL DESCRIPTION OF ACTIVITIES', 'HRS']],
-                body: days.map(d => [d.name.toUpperCase(), d.task?.trim() || 'No entry recorded.', d.hours || '0']),
-                theme: 'grid',
-                headStyles: { fillColor: primaryColor, fontSize: 8, fontStyle: 'bold', cellPadding: 4 },
-                styles: { fontSize: 8.5, cellPadding: 4, font: fontName, textColor: [51, 65, 85] },
-                columnStyles: {
-                    0: { fontStyle: 'bold', cellWidth: 30, fillColor: [248, 250, 252] },
-                    2: { halign: 'center', cellWidth: 15, fontStyle: 'bold' }
-                }
-            });
-
-            yPos = (doc as any).lastAutoTable.finalY + 12;
-
-            doc.setFillColor(252, 252, 253);
-            doc.setDrawColor(226, 232, 240);
-            const stmtText = log.generalStatement || "No weekly summary provided by student.";
-            const stmtLines = doc.splitTextToSize(stmtText, 160);
-            const boxH = (stmtLines.length * 5) + 15;
-            doc.roundedRect(20, yPos, 170, boxH, 1, 1, 'FD');
-            doc.setFont(fontName, "bold");
-            doc.setFontSize(8);
-            doc.setTextColor(100, 116, 139);
-            doc.text("STUDENT'S GENERAL STATEMENT", 25, yPos + 6);
-            doc.setFont(fontName, "normal");
-            doc.setFontSize(9);
-            doc.setTextColor(30, 41, 59);
-            doc.text(stmtLines, 25, yPos + 12);
-
-            yPos += boxH + 12;
-
-            doc.setFont(fontName, "bold");
-            doc.setFontSize(9);
-            doc.setTextColor(15, 23, 42);
-            doc.text("SUPERVISOR'S ASSESSMENT & SIGNATURE", 20, yPos);
-            yPos += 6;
-
-            const gradeScale = [
-                { id: 'A', label: 'A - Excellent' },
-                { id: 'B', label: 'B - Good' },
-                { id: 'C', label: 'C - Satisfactory' },
-                { id: 'D', label: 'D - Poor' },
-                { id: 'E', label: 'E - Fail' }
-            ];
-
-            gradeScale.forEach((g, i) => {
-                const xBase = 20 + (i * 35);
-                drawCheckbox(xBase, yPos, log.grade === g.id);
-                doc.setFont(fontName, log.grade === g.id ? "bold" : "normal");
-                doc.setFontSize(8);
-                doc.text(g.label, xBase + 6, yPos);
-            });
-
-            yPos += 15;
-            doc.setLineWidth(0.2);
-            doc.setDrawColor(203, 213, 225);
-            doc.line(20, yPos, 80, yPos);
-            doc.line(110, yPos, 145, yPos);
-            doc.line(155, yPos, 190, yPos);
-
-            doc.setFontSize(7);
-            doc.setFont(fontName, "normal");
-            doc.setTextColor(148, 163, 184);
-            doc.text("NAME OF SUPERVISOR", 20, yPos + 4);
-            doc.text("DATE", 110, yPos + 4);
-            doc.text("SIGNATURE / STAMP", 155, yPos + 4);
-
-            doc.setFont(fontName, "bold");
-            doc.setTextColor(15, 23, 42);
-            doc.text(log.supervisorName || "........................", 20, yPos - 2);
-            doc.text(log.supervisorDate ? new Date(log.supervisorDate).toLocaleDateString() : "..................", 110, yPos - 2);
-            if (log.supervisorSignature) {
-                doc.setTextColor(34, 197, 94);
-                doc.text("SIGNED DIGITALLY", 155, yPos - 2);
+                    doc.text(lines, 30, currentCoordinateY);
+                    currentCoordinateY += (lines.length * 6) + 3;
+                });
+            } else {
+                const lines = doc.splitTextToSize(g.content, 170);
+                doc.text(lines, 25, currentCoordinateY);
+                currentCoordinateY += (lines.length * 6) + 5;
             }
         });
 
-        // ─── FINAL RESULT REPORT ───────────────────────────
         doc.addPage();
-        addHeader("INDUSTRIAL ATTACHMENT RESULT REPORT", "Student Performance Summary");
+        addHeader("IAP INSTRUCTIONS");
+        currentCoordinateY = 40;
 
-        autoTable(doc, {
-            startY: 40,
-            body: [
-                ['Student Full Name', student?.fullName || 'N/A'],
-                ['Registration Number', student?.studentNumber || 'N/A'],
-                ['Placement Company', student?.companyName || 'N/A'],
-                ['Unit / Department', report.nameOfUnit || 'N/A'],
-                ['Internship Period', `${formatDate(student?.internshipStart)} to ${formatDate(student?.internshipEnd)}`],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 9, cellPadding: 4, font: fontName },
-            columnStyles: { 0: { fontStyle: 'bold', cellWidth: 60, fillColor: [248, 250, 252] } }
+        const instructions = [
+            { title: "Meet your LO", content: "It is very important that you obtain the contact number of your LO where they can be contacted outside office hours in case you may need it. Please consult him or her if you have any problems." },
+            {
+                title: "Rules and Regulations", content: [
+                    "Once your IAP placement has been confirmed, you are not permitted to change your attachment or withdraw from the program without obtaining approval from the RCA IAP coordinator.",
+                    "It is mandatory for you to adhere to the rules and regulations that govern employees of the IAP company or institution to which you are attached.",
+                    "Any instances of absenteeism, insubordination, tardiness, or misconduct reported against you will result in disciplinary action.",
+                    "Direct negotiation with the company regarding matters such as the duration of your attachment, allowance, working hours, leave of absence, working conditions, and rules is strictly prohibited.",
+                    "During your attachment, you are not entitled to any leave or days off, including returning to RCA or your home. However, in case of emergencies, please seek permission from your supervisor for a leave of absence. Your LO must also be notified.",
+                    "For non-emergency situations, you must apply for a leave of absence from the company or institution's supervision and inform your LO. Please contact them during regular working hours, excluding weekends.",
+                    "If you become ill, please inform your supervisor that you will be consulting a doctor. A Medical Certificate must be submitted to your supervisor on the day you return to work.",
+                    "As an intern, you do not possess the authority to negotiate or influence company-wide decisions, such as changes to the organizational structure, budget allocations, or major strategic initiatives.",
+                    "Harassment of any kind, including but not limited to sexual harassment, verbal abuse, or discrimination, will not be tolerated. If you experience or witness any form of harassment during your attachment, immediately report it to your supervisor or the designated authority within the company or institution. Confidentiality and appropriate action will be ensured in addressing such complaints."
+                ]
+            },
+            {
+                title: "Allowance", content: [
+                    "The provision of an allowance by the company you are attached to is not guaranteed, unless specifically mentioned in your Placement Notice.",
+                    "It is important to note that the allowance provided does not directly correspond to the productivity of your work. It is primarily intended as an out-of-pocket allowance.",
+                    "In the event that the company fails to fulfil any officially agreed-upon arrangements at the conclusion of your attachment, please contact the designated person-in-charge within the IAP company or institution to address and resolve such matters.",
+                    "If you encounter any difficulties or issues with your IAP company that you are unable to resolve independently, please consult your LO for assistance."
+                ]
+            },
+            {
+                title: "Accident", content: [
+                    "Ensuring safety for yourself and others involved is of utmost importance. In the event of any injuries or hazards, promptly seek medical assistance or contact emergency services.",
+                    "It is crucial to inform your supervisor at the IAP site about any accidents that occur, providing accurate details of the incident, including the date, time, location, and a description of what transpired.",
+                    "Please be aware that you are covered under the RCA student's Accident Insurance Policy. If you require any necessary assistance, consult your IAP coordinator to ensure that you receive the appropriate support."
+                ]
+            },
+            {
+                title: "Log book", content: [
+                    "Please read the instructions given in this Log Book as well as those written on the forms before completing them. If in doubt, please consult your LO.",
+                    "At the end of each day, take some time to reflect on your activities and write down a detailed account of what you worked on, including tasks, projects, meetings, and any notable accomplishments or challenges.",
+                    "Use clear and concise language when describing your activities, focusing on key points and outcomes rather than excessive detail.",
+                    "Treat your log book as a valuable resource for self-reflection and future reference, as it can help you track your progress, identify areas for growth, and serve as supporting evidence for any reports, presentations, or evaluations related to your IAP"
+                ]
+            }
+        ];
+
+        instructions.forEach(inst => {
+            if (currentCoordinateY > 260) { doc.addPage(); addHeader("IAP INSTRUCTIONS (CONTINUED)"); currentCoordinateY = 40; }
+            doc.setFont(fontName, "bold");
+            doc.setFontSize(11);
+            doc.text(inst.title, 20, currentCoordinateY);
+            currentCoordinateY += 8;
+            doc.setFont(fontName, "normal");
+            doc.setFontSize(10);
+            if (Array.isArray(inst.content)) {
+                inst.content.forEach(c => {
+                    const lines = doc.splitTextToSize(c, 165);
+                    if (currentCoordinateY + (lines.length * 5) > 280) { doc.addPage(); addHeader("IAP INSTRUCTIONS (CONTINUED)"); currentCoordinateY = 40; }
+
+                    // Small square bullet
+                    doc.setDrawColor(0, 0, 0);
+                    doc.rect(25, currentCoordinateY - 3, 2, 2, 'F');
+
+                    doc.text(lines, 30, currentCoordinateY);
+                    currentCoordinateY += (lines.length * 6) + 3;
+                });
+            } else {
+                const lines = doc.splitTextToSize(inst.content, 170);
+                doc.text(lines, 25, currentCoordinateY);
+                currentCoordinateY += (lines.length * 6) + 5;
+            }
         });
 
-        yPos = (doc as any).lastAutoTable.finalY + 10;
+        generatedWeeksList.forEach((week) => {
+            const log = getSafeLog(week.number);
+            doc.addPage();
 
-        autoTable(doc, {
-            startY: yPos,
-            body: [
-                [{ content: 'OVERVIEW & GOALS', styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } }, report.overviewGoals || 'N/A'],
-                [{ content: 'CONTENTS OF TRAINING', styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } }, report.contentsTraining || 'N/A'],
-                [{ content: 'NOTABLE ACHIEVEMENTS', styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } }, report.notableAchievements || 'N/A'],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 8.5, cellPadding: 5, font: fontName, textColor: [30, 41, 59] },
-            columnStyles: { 0: { cellWidth: 50 } }
+            doc.setFont(fontName, "normal");
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+
+            currentCoordinateY = 20;
+            const fromStr = formatDate(week.start).split('-').join(' / ');
+            const toStr = formatDate(week.end).split('-').join(' / ');
+
+            doc.text(`From  ${fromStr || '......... / ......... / ...........'}`, 15, currentCoordinateY);
+            doc.text(`To  ${toStr || '......... / ......... / ...........'}`, 75, currentCoordinateY);
+            doc.text(`Student signature: .......................................`, 140, currentCoordinateY);
+
+            currentCoordinateY += 10;
+
+            const daysData = [
+                ['MON', log.mondayTask || '', log.mondayHours || ''],
+                ['TUE', log.tuesdayTask || '', log.tuesdayHours || ''],
+                ['WED', log.wednesdayTask || '', log.wednesdayHours || ''],
+                ['THU', log.thursdayTask || '', log.thursdayHours || ''],
+                ['FRI', log.fridayTask || '', log.fridayHours || ''],
+            ];
+
+            autoTable(doc, {
+                startY: currentCoordinateY,
+                head: [['Days', 'Brief description of tasks', 'Working hours/day']],
+                body: daysData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [255, 255, 255],
+                    textColor: [0, 0, 0],
+                    font: fontName,
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    lineWidth: 0.1,
+                    lineColor: [0, 0, 0]
+                },
+                styles: {
+                    font: fontName,
+                    textColor: [0, 0, 0],
+                    fontSize: 10,
+                    cellPadding: 5,
+                    lineWidth: 0.1,
+                    lineColor: [0, 0, 0],
+                    minCellHeight: 20
+                },
+                columnStyles: {
+                    0: { halign: 'center', fontStyle: 'bold', cellWidth: 30 },
+                    2: { halign: 'center', cellWidth: 35 }
+                },
+                margin: { left: 15, right: 15 }
+            });
+
+            currentCoordinateY = (doc as any).lastAutoTable.finalY + 10;
+
+            doc.setFont(fontName, "bold");
+            doc.text(`Total hours per week: ...........................................................................................................................................................`, 15, currentCoordinateY);
+            doc.text(`${log.totalHours || 0}`, 57, currentCoordinateY);
+
+            currentCoordinateY += 10;
+
+            const stmtY = currentCoordinateY;
+            const stmtBoxH = 40;
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.1);
+            doc.rect(15, stmtY, 180, stmtBoxH);
+            doc.line(45, stmtY, 45, stmtY + stmtBoxH);
+
+            doc.setFontSize(9);
+            const labelLines = doc.splitTextToSize("Student's General Statement on Attachment", 25);
+            doc.text(labelLines, 30, stmtY + 12, { align: 'center' });
+
+            const stmtLines = doc.splitTextToSize(log.generalStatement || "", 140);
+            doc.setFont(fontName, "normal");
+            doc.text(stmtLines, 50, stmtY + 8);
+
+            currentCoordinateY += stmtBoxH + 10;
+
+            doc.rect(15, currentCoordinateY, 180, 50);
+
+            doc.setFontSize(9);
+            const gradingInstruction = doc.splitTextToSize("Indicate the appropriate grade by ticking the corresponding box based on the general observations of the student activities performance.", 170);
+            doc.text(gradingInstruction, 20, currentCoordinateY + 8);
+
+            const gradeOptions = [
+                { id: 'A', label: 'A (Excellent)' },
+                { id: 'B', label: 'B (Good)' },
+                { id: 'C', label: 'C (Average)' },
+                { id: 'D', label: 'D (Pass)' },
+                { id: 'E', label: 'E (Fail)' }
+            ];
+
+            gradeOptions.forEach((g, i) => {
+                const gx = 20 + (i * 35);
+                const gy = currentCoordinateY + 18;
+                doc.setFont(fontName, "bold");
+                doc.text(g.label, gx, gy);
+
+                if (log.grade === g.id) {
+                    doc.setFontSize(14);
+                    doc.text("✓", gx - 4, gy);
+                    doc.setFontSize(9);
+                }
+            });
+
+            doc.setFont(fontName, "bold");
+            doc.text(`Name of Supervisor .......................................................................................................................................................`, 20, currentCoordinateY + 28);
+            doc.text(log.supervisorName || "", 55, currentCoordinateY + 28);
+
+            doc.text(`Date: .......................................................................................................................................................................................`, 20, currentCoordinateY + 38);
+            doc.text(log.supervisorDate ? new Date(log.supervisorDate).toLocaleDateString() : "", 32, currentCoordinateY + 38);
+
+            doc.text(`Signature ...............................................................................................................................................................................`, 20, currentCoordinateY + 48);
+            if (log.supervisorSignature) {
+                doc.setFontSize(7);
+                doc.text("SIGNED DIGITALLY", 40, currentCoordinateY + 48);
+            }
         });
 
-        yPos = (doc as any).lastAutoTable.finalY + 15;
-        doc.setFont(fontName, "bold");
+        // INDUSTRIAL ATTACHMENT RESULT REPORT (for students)
+        doc.addPage();
+        addHeader("INDUSTRIAL ATTACHMENT RESULT REPORT", "(for students)");
+
+        currentCoordinateY = 35;
+        doc.setLineWidth(0.2);
+        doc.setDrawColor(0, 0, 0);
+
+        autoTable(doc, {
+            startY: currentCoordinateY,
+            body: [
+                ['Name', student?.fullName || '', 'Name of Unit', report.nameOfUnit || ''],
+            ],
+            theme: 'grid',
+            styles: { fontSize: 9, cellPadding: 4, font: fontName, lineColor: [0, 0, 0], lineWidth: 0.1 },
+            columnStyles: {
+                0: { font: fontName, fontStyle: 'bold', cellWidth: 35 },
+                2: { font: fontName, fontStyle: 'bold', cellWidth: 35 }
+            }
+        });
+
+        currentCoordinateY = (doc as any).lastAutoTable.finalY;
+
+        autoTable(doc, {
+            startY: currentCoordinateY,
+            body: [
+                [
+                    { content: 'Name of\nCompany/Institution', styles: { font: fontName, fontStyle: 'bold' } },
+                    student?.companyName || '',
+                    { content: 'Confirmation of\nPersonnel-in-Charge in\nCompany', rowSpan: 2, styles: { font: fontName, fontStyle: 'bold', halign: 'center' } },
+                    { content: '(signature)', rowSpan: 2, styles: { minCellHeight: 25 } }
+                ],
+                [
+                    { content: 'Training Period', styles: { font: fontName, fontStyle: 'bold' } },
+                    `${formatDate(student?.internshipStart)} — ${formatDate(student?.internshipEnd)}`,
+                ]
+            ],
+            theme: 'grid',
+            styles: { fontSize: 9, cellPadding: 4, font: fontName, lineColor: [0, 0, 0], lineWidth: 0.1 },
+            columnStyles: {
+                0: { cellWidth: 35 },
+                2: { cellWidth: 40 }
+            }
+        });
+
+        currentCoordinateY = (doc as any).lastAutoTable.finalY;
+
+        const renderSurveyRow = (label: string, value: string) => {
+            autoTable(doc, {
+                startY: currentCoordinateY,
+                body: [[{ content: label, styles: { font: fontName, fontStyle: 'bold', cellWidth: 35 } }, value || '']],
+                theme: 'grid',
+                styles: { font: fontName, fontSize: 9, cellPadding: 4, lineColor: [0, 0, 0], lineWidth: 0.1, minCellHeight: 25 },
+                margin: { left: 15, right: 15 }
+            });
+            currentCoordinateY = (doc as any).lastAutoTable.finalY;
+        };
+
+        renderSurveyRow('Overview and Goals of\nTraining', report.overviewGoals || '');
+        renderSurveyRow('Contents of Training', report.contentsTraining || '');
+
+        // Satisfaction Table
+        autoTable(doc, {
+            startY: currentCoordinateY,
+            body: [
+                [{ content: 'Satisfaction with\nIndustrial Attachment', rowSpan: 4, styles: { fontStyle: 'bold', halign: 'center', valign: 'middle', cellWidth: 35 } }, 'Satisfaction with industry', report.satisfactionIndustry || ''],
+                ['Satisfaction with relevant major', report.satisfactionMajor || ''],
+                ['Satisfaction with practical work', report.satisfactionPractical || ''],
+                ['Satisfaction with instructors', report.satisfactionInstructors || ''],
+            ],
+            theme: 'grid',
+            styles: { fontSize: 9, cellPadding: 4, font: fontName, lineColor: [0, 0, 0], lineWidth: 0.1 },
+        });
+        currentCoordinateY = (doc as any).lastAutoTable.finalY;
+
+        renderSurveyRow('Notable Achievements', report.notableAchievements || '');
+        renderSurveyRow('Future Career Plan', report.futureCareerPlan || '');
+        renderSurveyRow('Suggestions', report.suggestions || '');
+
+        // INDUSTRIAL ATTACHMENT ASSESSMENT (for Companies)
+        doc.addPage();
+        addHeader("INDUSTRIAL ATTACHMENT ASSESSMENT", "(for Companies)");
+
+        currentCoordinateY = 35;
         doc.setFontSize(10);
-        doc.text("Institutional Verification", 20, yPos);
-        yPos += 10;
-        doc.setFontSize(9);
         doc.setFont(fontName, "normal");
-        doc.text(`Date of Issue: ${new Date().toLocaleDateString()}`, 20, yPos);
-        doc.line(130, yPos, 180, yPos);
-        doc.text("Seal of RCA / LO Signature", 130, yPos + 5);
+        doc.text(`Student name: ${student?.fullName || '.........................................................................................'}`, 15, currentCoordinateY);
+        doc.text(`Department/Class: ${student?.year || '.........................................................................................'}`, 120, currentCoordinateY);
+
+        currentCoordinateY += 10;
+        doc.setFont(fontName, "bold");
+        doc.text("Marking Scheme", 15, currentCoordinateY);
+        currentCoordinateY += 5;
+
+        const ratings = student?.ratings?.[0] || {};
+
+        autoTable(doc, {
+            startY: currentCoordinateY,
+            head: [['Evaluation area', 'Evaluation item', 'Very High', 'High', 'Average', 'Low', 'Very Low', 'Score']],
+            body: [
+                [{ content: 'Assignments', rowSpan: 4, styles: { valign: 'middle', font: fontName, fontStyle: 'bold' } }, 'Related knowledge', '10', '9', '8', '7', '6', (ratings.knowledgeApplication || '').toString()],
+                ['Support for operation of wireless net', '10', '9', '8', '7', '6', (ratings.knowledgeWirelessOps || '').toString()],
+                ['Establishment of wireless network', '10', '9', '8', '7', '6', (ratings.knowledgeWirelessEst || '').toString()],
+                ['Maintenance of wireless room', '10', '9', '8', '7', '6', (ratings.knowledgeWirelessMaint || '').toString()],
+                [{ content: 'Attitude', rowSpan: 3, styles: { valign: 'middle', font: fontName, fontStyle: 'bold' } }, 'Responsibility', '10', '9', '8', '7', '6', (ratings.responsibility || '').toString()],
+                ['Cooperativeness', '10', '9', '8', '7', '6', (ratings.cooperativeness || '').toString()],
+                ['Compliance with rules & etiquette', '10', '9', '8', '7', '6', (ratings.complianceEtiquette || '').toString()],
+                [{ content: 'Safety Management', rowSpan: 3, styles: { valign: 'middle', font: fontName, fontStyle: 'bold' } }, 'Awareness of safety mgmt', '10', '9', '8', '7', '6', (ratings.safetyAwareness || '').toString()],
+                ['Compliance with safety rules', '10', '9', '8', '7', '6', (ratings.safetyCompliance || '').toString()],
+                ['Arrangement of safety instruments', '10', '9', '8', '7', '6', (ratings.safetyArrangement || '').toString()],
+            ],
+            theme: 'grid',
+            styles: { fontSize: 8, font: fontName, cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.1 },
+            headStyles: { font: fontName, fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+        });
+
+        currentCoordinateY = (doc as any).lastAutoTable.finalY + 5;
+
+        const assignmentsSum =
+            (ratings.knowledgeApplication || 0) +
+            (ratings.knowledgeWirelessOps || 0) +
+            (ratings.knowledgeWirelessEst || 0) +
+            (ratings.knowledgeWirelessMaint || 0) +
+            (ratings.responsibility || 0) +
+            (ratings.cooperativeness || 0) +
+            (ratings.complianceEtiquette || 0) +
+            (ratings.safetyAwareness || 0) +
+            (ratings.safetyCompliance || 0) +
+            (ratings.safetyArrangement || 0);
+
+        const safetySubtotal =
+            (ratings.safetyAwareness || 0) +
+            (ratings.safetyCompliance || 0) +
+            (ratings.safetyArrangement || 0);
+
+        const attendanceScore = 100 - ((student?.absentDays || 0) * 10);
+        const finalScore = (assignmentsSum * 0.8) + (attendanceScore * 0.2);
+
+        doc.setFontSize(9);
+        doc.text(`Safety Subtotal: ( ${safetySubtotal} )/30`, 15, currentCoordinateY);
+        doc.text(`Sum: ( ${assignmentsSum} )/100`, 160, currentCoordinateY);
+        currentCoordinateY += 8;
+
+        doc.setFont(fontName, "bold");
+        doc.text("Attendance", 15, currentCoordinateY);
+        currentCoordinateY += 5;
+        doc.setFont(fontName, "normal");
+        doc.text(`Days of Absence: ${student?.absentDays || 0}   / 100 Total Score: ${attendanceScore}/100`, 15, currentCoordinateY);
+        currentCoordinateY += 10;
+
+        doc.setFont(fontName, "bold");
+        doc.text(`Marking Scheme score: ( ${finalScore.toFixed(1)} )/100`, 15, currentCoordinateY);
+        currentCoordinateY += 10;
+
+        doc.text("Overall Review", 15, currentCoordinateY);
+        currentCoordinateY += 5;
+        doc.rect(15, currentCoordinateY, 180, 25);
+        doc.setFont(fontName, "normal");
+        doc.text(ratings.comment || "", 20, currentCoordinateY + 8);
+        currentCoordinateY += 35;
+
+        doc.text(`Company Name: ................................................................... Evaluator's Position: ...................................................................`, 15, currentCoordinateY);
+        doc.text(student?.companyName || "", 45, currentCoordinateY);
+        doc.text(ratings.evaluatorPosition || "", 145, currentCoordinateY);
+        currentCoordinateY += 10;
+        doc.text(`Name: ................................................................... (signature) ...................................................................`, 15, currentCoordinateY);
+        doc.text(ratings.evaluatorName || "", 30, currentCoordinateY);
+
+        doc.addPage();
+        addHeader("STUDENT ATTENDANCE SHEET");
+        currentCoordinateY = 35;
+        doc.text(`Student name: ${student?.fullName || '..........................................................................'}`, 15, currentCoordinateY);
+        doc.text(`Department/Class: ${student?.year || '..........................................................................'}`, 115, currentCoordinateY);
+
+        currentCoordinateY += 10;
+        const weeksGrid = [];
+        for (let i = 1; i <= 5; i++) {
+            weeksGrid.push([
+                `Week ${i}`, '', `Week ${i + 5}`, '', `Week ${i + 10}`, ''
+            ]);
+        }
+
+        autoTable(doc, {
+            startY: currentCoordinateY,
+            head: [['Date', 'Signature', 'Date', 'Signature', 'Date', 'Signature']],
+            body: weeksGrid,
+            theme: 'grid',
+            styles: { fontSize: 9, font: fontName, cellPadding: 5, lineColor: [0, 0, 0], lineWidth: 0.1 },
+            headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+        });
+
+        currentCoordinateY = (doc as any).lastAutoTable.finalY + 15;
+        doc.text(`Supervisor names: ................................................................... Signature: ...................................................................`, 15, currentCoordinateY);
+        doc.text(student?.supervisorName || "", 45, currentCoordinateY);
+
+        doc.addPage();
+        addHeader("INDUSTRIAL ATTACHMENT REPORT");
+        currentCoordinateY = 35;
+
+        doc.setFont(fontName, "bold");
+        doc.setFontSize(14);
+        doc.text("PART A: NARRATIVE SUMMARY", 15, currentCoordinateY);
+        currentCoordinateY += 10;
+
+        const narrativeFields = [
+            { label: "Overview and Goals of Training", value: report.overviewGoals },
+            { label: "Contents of Training", value: report.contentsTraining },
+            { label: "Notable Achievements", value: report.notableAchievements },
+            { label: "Future Career Plan", value: report.futureCareerPlan },
+            { label: "Suggestions", value: report.suggestions }
+        ];
+
+        narrativeFields.forEach(field => {
+            if (currentCoordinateY > 250) { doc.addPage(); addHeader("NARRATIVE SUMMARY (CONT.)"); currentCoordinateY = 35; }
+            doc.setFont(fontName, "bold");
+            doc.setFontSize(10);
+            doc.text(field.label, 15, currentCoordinateY);
+            currentCoordinateY += 6;
+            doc.setFont(fontName, "normal");
+            doc.setFontSize(9);
+            const lines = doc.splitTextToSize(field.value || "No information provided.", 180);
+            doc.text(lines, 15, currentCoordinateY);
+            currentCoordinateY += (lines.length * 5) + 8;
+        });
+
+        if (currentCoordinateY > 200) { doc.addPage(); addHeader("INDUSTRIAL ATTACHMENT REPORT"); currentCoordinateY = 35; }
+        doc.setFont(fontName, "bold");
+        doc.text("Satisfaction Evaluation", 15, currentCoordinateY);
+        currentCoordinateY += 6;
+
+        const satisfactionData = [
+            ['Category', 'Level'],
+            ['Industry', report.satisfactionIndustry || 'N/A'],
+            ['Relevant Major', report.satisfactionMajor || 'N/A'],
+            ['Practical Work', report.satisfactionPractical || 'N/A'],
+            ['Instructors', report.satisfactionInstructors || 'N/A']
+        ];
+
+        autoTable(doc, {
+            startY: currentCoordinateY,
+            body: satisfactionData,
+            theme: 'grid',
+            styles: { fontSize: 8, font: fontName, cellPadding: 3, lineColor: [0, 0, 0], lineWidth: 0.1 },
+            headStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' },
+        });
+
+        currentCoordinateY = (doc as any).lastAutoTable.finalY + 15;
+
+        // Student's report - PART B: FORMAL QUESTIONNAIRE
+        doc.addPage();
+        addHeader("STUDENT'S REPORT");
+        currentCoordinateY = 35;
+        doc.setFontSize(10);
+        doc.setFont(fontName, "bold");
+        doc.text("PART B: FORMAL PROGRAM EVALUATION", 15, currentCoordinateY);
+        currentCoordinateY += 8;
+
+        doc.setFont(fontName, "normal");
+        doc.setFontSize(9);
+        doc.text("Please return the filled Log book and IAP Report with this completed form to RCA within Two Weeks after the end of your industrial attachment", 15, currentCoordinateY, { maxWidth: 180 });
+        currentCoordinateY += 12;
+
+        const surveyFields = [
+            { label: "Name of Student", value: student?.fullName || "" },
+            { label: "Reg No.", value: report.regNo || "" },
+            { label: "Phone No", value: report.phoneNo || "" },
+            { label: "IAP Company attached to", value: student?.companyName || "" },
+            { label: "Number of times an LO visited you", value: (report.loVisitCount || 0).toString() },
+        ];
+
+        surveyFields.forEach(f => {
+            doc.text(`${f.label}: ...........................................................................................................................................................`, 15, currentCoordinateY);
+            doc.text(f.value, 65, currentCoordinateY);
+            currentCoordinateY += 8;
+        });
+
+        currentCoordinateY += 5;
+        const checkBoxes = [
+            { label: "Have the Programme been useful or relevant to you?", value: report.isUseful },
+            { label: "Have the Programme improved your understanding of subjects?", value: report.improvedUnderstanding },
+            { label: "Have the Programme provided you with experiences about working life?", value: report.providedExperiences },
+        ];
+
+        checkBoxes.forEach(cb => {
+            doc.text(cb.label, 15, currentCoordinateY);
+            drawCheckbox(160, currentCoordinateY - 3, cb.value === true);
+            doc.text("Yes", 165, currentCoordinateY);
+            drawCheckbox(175, currentCoordinateY - 3, cb.value === false);
+            doc.text("No", 180, currentCoordinateY);
+            currentCoordinateY += 8;
+        });
+
+        currentCoordinateY += 5;
+        doc.setFont(fontName, "bold");
+        doc.text("Please tick the type of Programme you have been put through (You can tick more than one box):", 15, currentCoordinateY);
+        currentCoordinateY += 8;
+        doc.setFont(fontName, "normal");
+
+        const progTypes = [
+            "Assisting in software development and coding tasks.",
+            "Participating in the design, implementation, and testing of SW systems.",
+            "Debugging and troubleshooting software issues.",
+            "Collaborating with the development team to enhance existing software applications.",
+            "Conducting research and feasibility studies for new SW features or technologies.",
+            "Writing and maintaining technical documentation and user manuals.",
+            "Participating in code reviews and providing feedback on code quality.",
+            "Assisting in the development of embedded systems firmware or software.",
+            "Testing and validating embedded systems functionality.",
+            "Collaborating with HW engineers in the integration of SW and HW components.",
+            "Conducting performance optimization and memory management for embedded systems.",
+            "Others (Please describe them below)"
+        ];
+
+        progTypes.forEach(pt => {
+            if (currentCoordinateY > 275) { doc.addPage(); addHeader("QUESTIONNAIRE (CONT.)"); currentCoordinateY = 35; }
+            drawCheckbox(15, currentCoordinateY - 3, (report.programmeTypes || []).includes(pt));
+            const lines = doc.splitTextToSize(pt, 170);
+            doc.text(lines, 22, currentCoordinateY);
+            currentCoordinateY += (lines.length * 5) + 3;
+        });
+
+        currentCoordinateY += 5;
+        doc.rect(15, currentCoordinateY, 180, 25);
+        if (report.otherProgrammeDetails) {
+            const lines = doc.splitTextToSize(report.otherProgrammeDetails, 175);
+            doc.text(lines, 18, currentCoordinateY + 8);
+        }
+        currentCoordinateY += 35;
+
+        doc.text(`Date: ......................................................................... Signature of Student: .........................................................................`, 15, currentCoordinateY);
+        doc.text(new Date().toLocaleDateString(), 25, currentCoordinateY);
+        doc.setFontSize(12);
+        doc.text(student?.fullName || "Digitally Verified", 145, currentCoordinateY - 1);
+        doc.setFontSize(9);
+
+        currentCoordinateY += 12;
+        doc.setFont(fontName, "italic");
+        doc.text("Please make a photocopy of this form for your own retention before submitting to IAP coordinator.", 105, currentCoordinateY, { align: "center" });
 
         doc.save(`Logbook_${student?.fullName || "Student"}.pdf`);
         toast.success("Professional Logbook Generated!");
@@ -852,8 +1318,6 @@ export default function StudentLogbookPage() {
                                     <p className="text-slate-500 text-sm mt-2">Please read the following rules and objectives carefully before proceeding.</p>
                                 </CardHeader>
                                 <CardContent className="p-8 space-y-10 text-slate-600 text-sm leading-relaxed">
-
-                                    {/* OBJECTIVES */}
                                     <div>
                                         <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                                             <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
@@ -869,7 +1333,6 @@ export default function StudentLogbookPage() {
                                         </ul>
                                     </div>
 
-                                    {/* KEY POINTS */}
                                     <div>
                                         <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                                             <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">2</span>
@@ -895,7 +1358,6 @@ export default function StudentLogbookPage() {
                                         </div>
                                     </div>
 
-                                    {/* IAP GUIDELINES */}
                                     <div>
                                         <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                                             <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
@@ -1018,7 +1480,6 @@ export default function StudentLogbookPage() {
                             </Card>
                         )}
 
-                        {/* STEP 2: DETAILS & ATTENDANCE */}
                         {currentStep === 2 && (
                             <div className="space-y-8">
                                 <Card className="rounded-2xl border border-slate-200 shadow-sm bg-white overflow-hidden">
@@ -1152,7 +1613,6 @@ export default function StudentLogbookPage() {
                             </div>
                         )}
 
-                        {/* STEP 3: WEEKLY LOGS */}
                         {currentStep === 3 && (
                             <div className="space-y-6">
                                 {generatedWeeksList.length === 0 ? (
@@ -1163,8 +1623,7 @@ export default function StudentLogbookPage() {
                                         <Button onClick={() => setCurrentStep(2)} className="mt-6">Go to Details</Button>
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col lg:flex-row gap-6">
-                                        {/* Sidebar: Week List */}
+                                    <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto">
                                         <div className="w-full lg:w-1/4 flex flex-col gap-3 max-h-[800px] overflow-y-auto pr-2 pb-4">
                                             {generatedWeeksList.map(w => {
                                                 const log = weeklyLogs.find(l => l.weekNumber === w.number);
@@ -1175,88 +1634,83 @@ export default function StudentLogbookPage() {
                                                     <button
                                                         key={w.number}
                                                         onClick={() => setExpandedWeek(w.number)}
-                                                        className={`flex items-center justify-between p-4 rounded-xl transition-all border text-left ${isSelected ? 'bg-primary border-primary text-white shadow-md' : isFilled ? 'bg-green-50/50 border-green-200 hover:bg-green-50' : 'bg-white border-slate-200 hover:border-primary/30 hover:bg-slate-50'}`}
+                                                        className={`flex items-center justify-between p-4 rounded-xl transition-all border text-left ${isSelected ? 'bg-slate-900 border-slate-900 text-white shadow-md' : isFilled ? 'bg-green-50/50 border-green-200 hover:bg-green-50' : 'bg-white border-slate-200 hover:border-slate-900/30 hover:bg-slate-50'}`}
                                                     >
                                                         <div>
                                                             <div className={`font-bold text-sm ${isSelected ? 'text-white' : 'text-slate-900'}`}>Week {w.number}</div>
                                                             <div className={`text-xs mt-1 ${isSelected ? 'text-white/70' : 'text-slate-500'}`}>
                                                                 {new Date(w.start).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - {new Date(w.end).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                             </div>
-                                                            <div className="flex flex-col items-end gap-1">
-                                                                {isFilled && <CheckCircle2 className={`h-4 w-4 ${isSelected ? 'text-white' : 'text-green-500'}`} />}
-                                                                {log?.status && log.status !== 'DRAFT' && (
-                                                                    <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${log.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
-                                                                        log.status === 'SUBMITTED' ? 'bg-blue-100 text-blue-700' :
-                                                                            'bg-red-100 text-red-700'
-                                                                        }`}>
-                                                                        {log.status}
-                                                                    </span>
-                                                                )}
-                                                            </div>
+                                                        </div>
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            {isFilled && <CheckCircle2 className={`h-4 w-4 ${isSelected ? 'text-white' : 'text-green-500'}`} />}
+                                                            {log?.status && log.status !== 'DRAFT' && (
+                                                                <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${log.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
+                                                                    log.status === 'SUBMITTED' ? 'bg-blue-100 text-blue-700' :
+                                                                        'bg-red-100 text-red-700'
+                                                                    }`}>
+                                                                    {log.status}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </button>
                                                 );
                                             })}
                                         </div>
 
-                                        {/* Main Area: Log Details */}
                                         <div className="w-full lg:w-3/4">
                                             {expandedWeek ? (
-                                                <Card className="rounded-2xl border border-slate-200 shadow-sm bg-white overflow-hidden">
-                                                    <CardHeader className="bg-slate-50 p-6 border-b border-slate-200">
-                                                        <div className="flex flex-row items-center justify-between">
-                                                            <div>
-                                                                <div className="flex items-center gap-3 mb-1">
-                                                                    <CardTitle className="text-xl font-bold text-slate-900">Week {expandedWeek} Log</CardTitle>
-                                                                    <span className="text-xs font-semibold text-slate-500 px-2 py-1 bg-slate-200 rounded-md">
-                                                                        {new Date(generatedWeeksList.find(w => w.number === expandedWeek)?.start || "").toLocaleDateString()} — {new Date(generatedWeeksList.find(w => w.number === expandedWeek)?.end || "").toLocaleDateString()}
-                                                                    </span>
-                                                                </div>
-                                                                <p className="text-slate-500 text-sm">Record your daily technical activities and hours below.</p>
-                                                            </div>
-                                                            <Button variant="ghost" size="sm" onClick={() => setExpandedWeek(null)} className="text-slate-500 hover:text-slate-900 lg:hidden">
-                                                                Close
-                                                            </Button>
-                                                        </div>
-                                                    </CardHeader>
+                                                (() => {
+                                                    const currentLog = getSafeLog(expandedWeek);
+                                                    const isLocked = currentLog.status === 'COMPLETED' || currentLog.status === 'SUBMITTED';
+                                                    const weekData = generatedWeeksList.find(w => w.number === expandedWeek);
 
-                                                    <CardContent className="p-0">
-                                                        {/* Daily Logs Table */}
-                                                        <div className="overflow-x-auto">
-                                                            <table className="w-full text-sm text-left">
-                                                                <thead className="bg-slate-50 border-b border-slate-200 text-slate-700">
+                                                    return (
+                                                        <div className="bg-white border-[1.5px] border-slate-900 text-sm overflow-hidden">
+                                                            <div className="bg-white p-6 border-b border-slate-900 flex flex-row items-center justify-between">
+                                                                <div>
+                                                                    <h3 className="text-xl font-bold text-slate-900">WEEK {expandedWeek}: DAILY TECHNICAL LOG</h3>
+                                                                    <p className="text-slate-500 text-xs mt-1 uppercase tracking-wider font-semibold">
+                                                                        Period: {weekData?.start ? new Date(weekData.start).toLocaleDateString() : "—"} — {weekData?.end ? new Date(weekData.end).toLocaleDateString() : "—"}
+                                                                    </p>
+                                                                </div>
+                                                                <Button variant="ghost" size="sm" onClick={() => setExpandedWeek(null)} className="text-slate-500 hover:text-slate-900 lg:hidden">
+                                                                    Close
+                                                                </Button>
+                                                            </div>
+
+                                                            <table className="w-full border-collapse">
+                                                                <thead className="bg-white border-b border-slate-900 text-slate-900">
                                                                     <tr>
-                                                                        <th className="p-4 font-semibold w-24">Day</th>
-                                                                        <th className="p-4 font-semibold">Description of Work / Activity</th>
-                                                                        <th className="p-4 font-semibold w-24 text-center">Hours</th>
+                                                                        <th className="p-4 font-bold border-r border-slate-900 w-24 text-center">DAY</th>
+                                                                        <th className="p-4 font-bold border-r border-slate-900">DESCRIPTION OF WORK / ACTIVITY</th>
+                                                                        <th className="p-4 font-bold w-24 text-center">HOURS</th>
                                                                     </tr>
                                                                 </thead>
-                                                                <tbody className="divide-y divide-slate-100">
+                                                                <tbody className="divide-y divide-slate-900">
                                                                     {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map(day => {
                                                                         const dayKey = day.toLowerCase();
-                                                                        const log = getSafeLog(expandedWeek);
-                                                                        const isLocked = log.status === 'COMPLETED' || log.status === 'SUBMITTED';
 
                                                                         return (
-                                                                            <tr key={day} className="hover:bg-slate-50/50 transition-colors">
-                                                                                <td className="p-4 font-medium text-slate-700">{day}</td>
-                                                                                <td className="p-4">
+                                                                            <tr key={day}>
+                                                                                <td className="p-4 font-bold text-slate-900 border-r border-slate-900 text-center bg-white">{day.toUpperCase().slice(0, 3)}</td>
+                                                                                <td className="p-0 border-r border-slate-900">
                                                                                     <textarea
                                                                                         disabled={isLocked}
-                                                                                        className={`w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-800 resize-none min-h-[80px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 ${isLocked ? 'bg-slate-50 opacity-60 cursor-not-allowed' : ''}`}
-                                                                                        placeholder={isLocked ? "Log is locked" : `Describe tasks performed on ${day}...`}
-                                                                                        value={log[`${dayKey}Task`] || ""}
+                                                                                        className={`w-full bg-white p-4 text-sm text-slate-800 resize-none min-h-[100px] outline-none transition-all placeholder:text-slate-300 ${isLocked ? 'bg-white opacity-60 cursor-not-allowed' : ''}`}
+                                                                                        placeholder={isLocked ? "Log is locked" : `Describe technical activities performed...`}
+                                                                                        value={currentLog[`${dayKey}Task` as keyof WeeklyLog] as string || ""}
                                                                                         onChange={(e) => updateLogField(expandedWeek, `${dayKey}Task`, e.target.value)}
                                                                                     />
                                                                                 </td>
-                                                                                <td className="p-4">
+                                                                                <td className="p-0">
                                                                                     <input
                                                                                         type="number"
                                                                                         min="0"
                                                                                         max="24"
                                                                                         disabled={isLocked}
-                                                                                        className={`w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-center text-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${isLocked ? 'bg-slate-50 opacity-60 cursor-not-allowed' : ''}`}
-                                                                                        value={log[`${dayKey}Hours`] || 8}
+                                                                                        className={`w-full h-full bg-white p-4 text-sm text-center text-slate-800 outline-none ${isLocked ? 'bg-white opacity-60 cursor-not-allowed' : ''}`}
+                                                                                        value={currentLog[`${dayKey}Hours` as keyof WeeklyLog] as number || 8}
                                                                                         onChange={(e) => updateLogField(expandedWeek, `${dayKey}Hours`, parseFloat(e.target.value) || 8)}
                                                                                     />
                                                                                 </td>
@@ -1264,142 +1718,89 @@ export default function StudentLogbookPage() {
                                                                         );
                                                                     })}
                                                                 </tbody>
-                                                                <tfoot className="bg-slate-50 border-t border-slate-200 font-semibold text-slate-900">
+                                                                <tfoot className="border-t border-slate-900 font-bold bg-white text-slate-900">
                                                                     <tr>
-                                                                        <td colSpan={2} className="p-4 text-right">Total Hours for the Week:</td>
-                                                                        <td className="p-4 text-center">{getSafeLog(expandedWeek).totalHours || 40}</td>
+                                                                        <td colSpan={2} className="p-4 text-right border-r border-slate-900">TOTAL HOURS FOR THE WEEK:</td>
+                                                                        <td className="p-4 text-center">{currentLog.totalHours || 40}</td>
                                                                     </tr>
                                                                 </tfoot>
                                                             </table>
-                                                        </div>
 
-                                                        {/* Summary & Supervisor Area */}
-                                                        <div className="p-6 border-t border-slate-200 bg-white grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                            <div className="space-y-4">
-                                                                <div>
-                                                                    <h4 className="font-bold text-slate-900 flex items-center gap-2">
-                                                                        <FileText className="h-4 w-4 text-primary" /> Student's General Statement on Attachment
-                                                                    </h4>
-                                                                </div>
-                                                                <textarea
-                                                                    disabled={getSafeLog(expandedWeek).status !== 'DRAFT' && getSafeLog(expandedWeek).status !== 'REJECTED'}
-                                                                    className={`w-full h-48 bg-white border border-slate-200 rounded-lg p-4 text-sm text-slate-800 resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 ${(getSafeLog(expandedWeek).status !== 'DRAFT' && getSafeLog(expandedWeek).status !== 'REJECTED') ? 'bg-slate-50 cursor-not-allowed opacity-75' : ''}`}
-                                                                    placeholder="(e.g. After learning the process of production along with an overview of the company's
-                                                                        products in the second week of practice, I was able to understand the characteristics of
-                                                                        company A's products anew. It was also a time to feel once again why production
-                                                                        management is important in product production.)"
-                                                                    value={getSafeLog(expandedWeek).generalStatement || ""}
-                                                                    onChange={(e) => updateLogField(expandedWeek, 'generalStatement', e.target.value)}
-                                                                />
-                                                            </div>
-
-                                                            {/* Supervisor Section */}
-                                                            <div className="space-y-4 bg-amber-50/60 p-6 rounded-xl border border-amber-200">
-                                                                <div className="flex items-center justify-between pb-2 border-b border-amber-200">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <ShieldCheck className="h-4 w-4 text-amber-600" />
-                                                                        <h4 className="font-bold text-slate-900 text-md">Supervisor&apos;s Grading</h4>
-                                                                    </div>
-                                                                </div>
-                                                                <p className="text-xs text-amber-700/80">This section is completed by your company supervisor after reviewing your weekly log.</p>
-                                                                <div className="grid grid-cols-2 gap-4">
-                                                                    <div className="space-y-2">
-                                                                        <label className="text-xs font-semibold text-slate-500">Grade Awarded</label>
-                                                                        <select
-                                                                            disabled={true}
-                                                                            className="w-full h-10 border border-amber-200 rounded-md px-3 text-sm bg-white/70 cursor-not-allowed text-slate-600"
-                                                                            value={getSafeLog(expandedWeek).grade || ""}
-                                                                        >
-                                                                            <option value="" disabled>Not yet graded</option>
-                                                                            <option value="A">A - Excellent</option>
-                                                                            <option value="B">B - Good</option>
-                                                                            <option value="C">C - Satisfactory</option>
-                                                                            <option value="D">D - Poor</option>
-                                                                            <option value="E">E - Unacceptable</option>
-                                                                        </select>
-                                                                    </div>
-                                                                    <div className="space-y-2">
-                                                                        <label className="text-xs font-semibold text-slate-500">Date Signed</label>
-                                                                        <input
-                                                                            type="date"
-                                                                            disabled={true}
-                                                                            className="w-full h-10 border border-amber-200 rounded-md px-3 text-sm bg-white/70 cursor-not-allowed"
-                                                                            value={formatDate(getSafeLog(expandedWeek).supervisorDate)}
-                                                                        />
-                                                                    </div>
-                                                                    <div className="col-span-2 space-y-2">
-                                                                        <label className="text-xs font-semibold text-slate-500">Supervisor Name</label>
-                                                                        <input
-                                                                            type="text"
-                                                                            disabled={true}
-                                                                            className="w-full h-10 border border-amber-200 rounded-md px-3 text-sm bg-white/70 cursor-not-allowed"
-                                                                            value={getSafeLog(expandedWeek).supervisorName || ""}
-                                                                        />
-                                                                    </div>
-                                                                    <div className="col-span-2 flex items-center justify-between mt-2 pt-4 border-t border-amber-200">
-                                                                        <label className="text-sm font-semibold text-slate-700">Digital Signature</label>
-                                                                        <button
-                                                                            disabled={true}
-                                                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-not-allowed ${getSafeLog(expandedWeek).supervisorSignature ? 'bg-green-500' : 'bg-slate-200'}`}
-                                                                        >
-                                                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${getSafeLog(expandedWeek).supervisorSignature ? 'translate-x-6' : 'translate-x-1'}`} />
-                                                                        </button>
-                                                                    </div>
+                                                            <div className="border-t border-slate-900 grid grid-cols-[1fr_3fr]">
+                                                                <div className="p-4 border-r border-slate-900 font-bold bg-white flex items-center justify-center text-center leading-tight uppercase">General<br />Statement</div>
+                                                                <div className="p-0 bg-white">
+                                                                    <textarea
+                                                                        disabled={currentLog.status !== 'DRAFT' && currentLog.status !== 'REJECTED'}
+                                                                        className={`w-full h-32 p-4 text-sm text-slate-800 outline-none resize-none ${(currentLog.status !== 'DRAFT' && currentLog.status !== 'REJECTED') ? 'bg-white cursor-not-allowed opacity-75' : ''}`}
+                                                                        placeholder="Student's general reflection on the week's attachment..."
+                                                                        value={currentLog.generalStatement || ""}
+                                                                        onChange={(e) => updateLogField(expandedWeek, 'generalStatement', e.target.value)}
+                                                                    />
                                                                 </div>
                                                             </div>
-                                                        </div>
 
-                                                        {/* Actions */}
-                                                        <div className="p-6 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-4">
-                                                            {getSafeLog(expandedWeek).status !== 'DRAFT' && (
-                                                                <div className="flex flex-col gap-2">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <StatusBadge status={getSafeLog(expandedWeek).status} />
-                                                                        <span className="text-xs text-slate-500 font-medium">
-                                                                            {getSafeLog(expandedWeek).status === 'COMPLETED'
-                                                                                ? "This log has been approved and is locked for editing."
-                                                                                : getSafeLog(expandedWeek).status === 'SUBMITTED'
-                                                                                    ? "This log has been submitted and is locked for editing."
-                                                                                    : "This log was rejected. Please address the feedback below and re-submit."}
-                                                                        </span>
+                                                            {/* Supervisor Section Area */}
+                                                            <div className="border-t border-slate-900 grid grid-cols-[1fr_3fr]">
+                                                                <div className="p-4 border-r border-slate-900 font-bold bg-white flex items-center justify-center text-center leading-tight uppercase">Supervisor<br />Grading</div>
+                                                                <div className="p-4 bg-white grid grid-cols-2 gap-4">
+                                                                    <div className="space-y-1">
+                                                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Grade Awarded</label>
+                                                                        <div className="font-bold text-slate-900">{currentLog.grade || "PENDING"}</div>
                                                                     </div>
-                                                                    {getSafeLog(expandedWeek).status === 'REJECTED' && getSafeLog(expandedWeek).supervisorNote && (
-                                                                        <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-3">
-                                                                            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-                                                                            <div className="space-y-1">
-                                                                                <p className="text-[10px] font-black uppercase text-red-400 tracking-wider">Supervisor Feedback</p>
-                                                                                <p className="text-xs text-red-700 font-medium leading-relaxed italic">&quot;{getSafeLog(expandedWeek).supervisorNote}&quot;</p>
-                                                                            </div>
+                                                                    <div className="space-y-1">
+                                                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Date Signed</label>
+                                                                        <div className="font-bold text-slate-900">{currentLog.supervisorDate ? new Date(currentLog.supervisorDate).toLocaleDateString() : "PENDING"}</div>
+                                                                    </div>
+                                                                    <div className="col-span-2 space-y-1 pt-2">
+                                                                        <label className="text-[10px] font-bold text-slate-500 uppercase">Supervisor Name / Digital Signature</label>
+                                                                        <div className="flex items-center justify-between border-b border-dotted border-slate-400 pb-1">
+                                                                            <span className="font-bold">{currentLog.supervisorName || "—"}</span>
+                                                                            {currentLog.supervisorSignature && (
+                                                                                <span className="text-xs font-bold text-green-600 uppercase tracking-widest px-2 py-1 bg-green-50">SIGNED</span>
+                                                                            )}
                                                                         </div>
-                                                                    )}
+                                                                    </div>
                                                                 </div>
-                                                            )}
-                                                            <div className="flex gap-4 ml-auto">
-                                                                <Button
-                                                                    variant="outline"
-                                                                    onClick={() => handleSaveWeeklyLog(getSafeLog(expandedWeek))}
-                                                                    disabled={isSaving || (getSafeLog(expandedWeek).status === 'COMPLETED' || getSafeLog(expandedWeek).status === 'SUBMITTED')}
-                                                                    className="h-12 px-8 rounded-lg border-primary text-primary hover:bg-primary/5 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                >
-                                                                    Save Draft
-                                                                </Button>
-                                                                <Button
-                                                                    onClick={() => handleSubmitWeeklyLog(getSafeLog(expandedWeek))}
-                                                                    disabled={isSaving || (getSafeLog(expandedWeek).status === 'COMPLETED' || getSafeLog(expandedWeek).status === 'SUBMITTED')}
-                                                                    className="h-12 px-8 rounded-lg bg-primary text-white font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                >
-                                                                    {isSaving ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <><CheckCircle2 className="h-4 w-4 mr-2" /> Submit</>}
-                                                                </Button>
+                                                            </div>
+
+                                                            <div className="p-6 bg-slate-50 border-t border-slate-900 flex items-center justify-between gap-4">
+                                                                {currentLog.status !== 'DRAFT' && (
+                                                                    <div className="flex flex-col gap-2">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <StatusBadge status={currentLog.status} />
+                                                                        </div>
+                                                                        {currentLog.status === 'REJECTED' && currentLog.supervisorNote && (
+                                                                            <p className="text-xs text-red-700 font-medium italic">&quot;{currentLog.supervisorNote}&quot;</p>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                <div className="flex gap-4 ml-auto">
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        onClick={() => handleSaveWeeklyLog(currentLog)}
+                                                                        disabled={isSaving || (currentLog.status === 'COMPLETED' || currentLog.status === 'SUBMITTED')}
+                                                                        className="h-10 px-6 rounded-lg border-slate-900 text-slate-900 hover:bg-slate-50 font-bold disabled:opacity-50"
+                                                                    >
+                                                                        Save Draft
+                                                                    </Button>
+                                                                    <Button
+                                                                        onClick={() => handleSubmitWeeklyLog(currentLog)}
+                                                                        disabled={isSaving || (currentLog.status === 'COMPLETED' || currentLog.status === 'SUBMITTED')}
+                                                                        className="h-10 px-6 rounded-lg bg-slate-900 text-white font-bold disabled:opacity-50"
+                                                                    >
+                                                                        {isSaving ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : "Submit Log"}
+                                                                    </Button>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </CardContent>
-                                                </Card>
+                                                    );
+                                                })()
                                             ) : (
-                                                <div className="h-full min-h-[400px] flex flex-col items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
+                                                <div className="h-full min-h-[400px] flex flex-col items-center justify-center bg-white rounded-xl border border-slate-200 p-12 text-center">
                                                     <FileText className="h-12 w-12 text-slate-300 mb-4" />
                                                     <h3 className="text-xl font-bold text-slate-700">Select a Week</h3>
                                                     <p className="text-slate-500 text-sm mt-2 max-w-sm mx-auto">
-                                                        Choose a week from the sidebar to view, edit, or submit your daily technical logs.
+                                                        Choose a week from the sidebar to view or edit your daily technical logs.
                                                     </p>
                                                 </div>
                                             )}
@@ -1409,208 +1810,280 @@ export default function StudentLogbookPage() {
                             </div>
                         )}
 
-                        {/* STEP 4: RESULT REPORT */}
                         {currentStep === 4 && (
-                            <Card className="rounded-2xl border border-slate-200 shadow-sm bg-white overflow-hidden">
-                                <CardHeader className="bg-white p-8 border-b border-slate-200">
-                                    <div className="flex flex-col gap-2">
-                                        <CardTitle className="text-2xl font-black text-slate-900 border-b-2 border-primary pb-2 w-fit">Industrial Attachment Result Report (for students)</CardTitle>
-                                        <p className="text-slate-500 text-sm font-medium italic">Complete all sections of this final outcome report professionally.</p>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="p-8 space-y-10">
-                                    {/* Identification Table */}
-                                    <div className="border-2 border-slate-900 overflow-hidden rounded-sm">
-                                        <div className="grid grid-cols-4 border-b border-slate-900">
-                                            <div className="p-4 bg-slate-50 border-r border-slate-900 font-bold text-xs uppercase flex items-center">Name</div>
-                                            <div className="p-4 border-r border-slate-900 text-sm font-medium flex items-center">{student?.fullName || "—"}</div>
-                                            <div className="p-4 bg-slate-50 border-r border-slate-900 font-bold text-xs uppercase flex items-center">Name of Unit</div>
-                                            <div className="p-4 flex items-center">
-                                                <input
-                                                    className="w-full bg-transparent border-b border-dashed border-slate-300 focus:border-primary outline-none py-1 text-sm"
-                                                    value={report.nameOfUnit || ""}
-                                                    onChange={(e) => setReport({ ...report, nameOfUnit: e.target.value })}
-                                                    placeholder="Specify Unit..."
-                                                />
-                                            </div>
+                            <div className="space-y-8">
+                                <div className="bg-white p-4 md:p-10 space-y-12 max-w-5xl mx-auto border border-slate-200 rounded-2xl shadow-xl">
+                                    <div className="space-y-10">
+                                        <div className="flex flex-col gap-2">
+                                            <h2 className="text-3xl font-semibold text-slate-900 tracking-tight">Industrial Attachment Result Report</h2>
+                                            <p className="text-slate-500 font-medium italic text-sm">Please complete both the narrative summary and the formal program evaluation questionnaire.</p>
                                         </div>
-                                        <div className="grid grid-cols-4 border-b border-slate-900">
-                                            <div className="p-4 bg-slate-50 border-r border-slate-900 font-bold text-xs uppercase flex items-center leading-tight">Name of<br />Company/Institution</div>
-                                            <div className="p-4 border-r border-slate-900 text-sm font-medium flex items-center">{student?.companyName || "—"}</div>
-                                            <div className="p-4 bg-slate-50 border-r border-slate-900 font-bold text-xs uppercase flex items-center text-center">Confirmation of Personnel-in-Charge in Company</div>
-                                            <div className="p-4 text-xs italic text-slate-400 flex items-end justify-center">(signature)</div>
-                                        </div>
-                                        <div className="grid grid-cols-4 whitespace-normal">
-                                            <div className="p-4 bg-slate-50 border-r border-slate-900 font-bold text-xs uppercase flex items-center">Training Period</div>
-                                            <div className="p-4 border-r border-slate-900 text-sm font-medium flex items-center">
-                                                {student?.internshipStart ? new Date(student.internshipStart).toLocaleDateString() : ""} ~ {student?.internshipEnd ? new Date(student.internshipEnd).toLocaleDateString() : ""}
-                                            </div>
-                                            <div className="col-span-2"></div>
-                                        </div>
-                                    </div>
 
-                                    {/* Overview and Contents */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="space-y-4">
-                                            <h3 className="text-sm font-black text-slate-900 uppercase flex items-center gap-3">
-                                                <div className="h-6 w-1.5 bg-primary"></div> Overview and Goals of Placement
-                                            </h3>
-                                            <textarea
-                                                className="w-full h-48 p-5 bg-white border-2 border-slate-900 rounded-sm text-sm resize-none focus:ring-0 focus:border-primary transition-colors"
-                                                value={report.overviewGoals || ""}
-                                                onChange={(e) => setReport({ ...report, overviewGoals: e.target.value })}
-                                                placeholder="What were the main objectives of your industrial attachment?"
-                                            />
-                                        </div>
-                                        <div className="space-y-4">
-                                            <h3 className="text-sm font-black text-slate-900 uppercase flex items-center gap-3">
-                                                <div className="h-6 w-1.5 bg-primary"></div> Contents of Training
-                                            </h3>
-                                            <textarea
-                                                className="w-full h-48 p-5 bg-white border-2 border-slate-900 rounded-sm text-sm resize-none focus:ring-0 focus:border-primary transition-colors"
-                                                value={report.contentsTraining || ""}
-                                                onChange={(e) => setReport({ ...report, contentsTraining: e.target.value })}
-                                                placeholder="Describe the technical workflows and systems you interacted with..."
-                                            />
-                                        </div>
-                                    </div>
+                                        <div className="space-y-6">
+                                            <div className="border-2 border-slate-900 rounded-2xl overflow-hidden shadow-sm">
+                                                <div className="grid grid-cols-1 md:grid-cols-4 border-b-2 border-slate-900">
+                                                    <div className="p-5 border-b-2 md:border-b-0 md:border-r-2 border-slate-900 font-bold bg-slate-50 flex items-center justify-center text-center">Name of Student</div>
+                                                    <div className="p-5 border-b-2 md:border-b-0 md:border-r-2 border-slate-900 bg-white flex items-center font-bold text-slate-700">{student?.fullName || "—"}</div>
+                                                    <div className="p-5 border-b-2 md:border-b-0 md:border-r-2 border-slate-900 font-bold bg-slate-50 flex items-center justify-center text-center leading-tight">Name of<br />Academic Unit</div>
+                                                    <div className="bg-white flex items-center">
+                                                        <input
+                                                            className="w-full h-full bg-transparent outline-none p-5 font-bold text-slate-700 focus:bg-slate-50 transition-colors"
+                                                            placeholder="Enter unit name..."
+                                                            value={report.nameOfUnit || ""}
+                                                            onChange={(e) => setReport({ ...report, nameOfUnit: e.target.value })}
+                                                        />
+                                                    </div>
+                                                </div>
 
-                                    {/* Satisfaction Matrix */}
-                                    <div className="space-y-4">
-                                        <h3 className="text-sm font-black text-slate-900 uppercase flex items-center gap-3">
-                                            <div className="h-6 w-1.5 bg-primary"></div> Satisfaction with Industrial Attachment
-                                        </h3>
-                                        <div className="border-2 border-slate-900">
-                                            <div className="grid grid-cols-[1fr_100px_100px_100px] bg-slate-50 border-b border-slate-900">
-                                                <div className="p-3 border-r border-slate-900"></div>
-                                                {['Excellent', 'Average', 'Poor'].map(level => (
-                                                    <div key={level} className="p-3 border-r last:border-0 border-slate-900 text-center font-bold text-[10px] uppercase tracking-wider">{level}</div>
-                                                ))}
-                                            </div>
-                                            {[
-                                                { label: 'Satisfaction with industry', key: 'satisfactionIndustry' },
-                                                { label: 'Satisfaction with relevant major', key: 'satisfactionMajor' },
-                                                { label: 'Satisfaction with practical work', key: 'satisfactionPractical' },
-                                                { label: 'Satisfaction with instructors', key: 'satisfactionInstructors' }
-                                            ].map(({ label, key }) => (
-                                                <div key={key} className="grid grid-cols-[1fr_100px_100px_100px] border-b last:border-0 border-slate-900 group">
-                                                    <div className="p-4 border-r border-slate-900 font-medium text-sm flex items-center group-hover:bg-slate-50 transition-colors">{label}</div>
-                                                    {['Excellent', 'Average', 'Poor'].map((level) => (
-                                                        <div
-                                                            key={level}
-                                                            onClick={() => setReport({ ...report, [key]: level })}
-                                                            className={`p-4 border-r last:border-0 border-slate-900 flex items-center justify-center cursor-pointer transition-all ${report[key as keyof IapReport] === level ? 'bg-primary/10 text-primary' : 'hover:bg-slate-50'}`}
-                                                        >
-                                                            <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center ${report[key as keyof IapReport] === level ? 'border-primary bg-primary shadow-sm' : 'border-slate-300'}`}>
-                                                                {report[key as keyof IapReport] === level && <Check className="h-4 w-4 text-white" />}
-                                                            </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-4">
+                                                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 border-r-2 border-slate-900">
+                                                        <div className="p-5 border-b-2 border-r-2 border-slate-900 font-bold bg-slate-50 flex items-center justify-center text-center leading-tight">Company /<br />Institution</div>
+                                                        <div className="p-5 border-b-2 border-slate-900 bg-white flex items-center font-bold text-slate-700">{student?.companyName || "—"}</div>
+                                                        <div className="p-5 border-r-2 border-slate-900 font-bold bg-slate-50 flex items-center justify-center text-center">Training Period</div>
+                                                        <div className="p-5 bg-white flex items-center font-bold text-slate-700">
+                                                            {student?.internshipStart ? new Date(student.internshipStart).toLocaleDateString() : ""} ~ {student?.internshipEnd ? new Date(student.internshipEnd).toLocaleDateString() : ""}
                                                         </div>
-                                                    ))}
+                                                    </div>
+                                                    <div className="md:col-span-2 flex flex-col border-slate-900">
+                                                        <div className="p-4 border-b-2 border-slate-900 font-bold bg-slate-50 flex items-center justify-center text-center leading-tight h-1/2">Company Confirmation</div>
+                                                        <div className="flex-1 bg-white flex items-center justify-center text-slate-300 italic text-[10px] uppercase font-semibold tracking-widest">(Official Signature and Stamp space)</div>
+                                                    </div>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </div>
 
-                                    {/* Notable Achievements and Career Plan */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-2 border-slate-900">
-                                        <div className="border-b md:border-b-0 md:border-r border-slate-900 flex flex-col min-h-[250px]">
-                                            <div className="p-3 bg-slate-50 border-b border-slate-900 font-bold text-[10px] uppercase tracking-widest text-center">Notable Achievements</div>
-                                            <textarea
-                                                className="flex-1 p-4 text-sm bg-transparent outline-none resize-none"
-                                                value={report.notableAchievements || ""}
-                                                onChange={(e) => setReport({ ...report, notableAchievements: e.target.value })}
-                                                placeholder="Key milestones during training..."
-                                            />
-                                        </div>
-                                        <div className="flex flex-col min-h-[250px]">
-                                            <div className="p-3 bg-slate-50 border-b border-slate-900 font-bold text-[10px] uppercase tracking-widest text-center">Future Career Plan</div>
-                                            <textarea
-                                                className="flex-1 p-4 text-sm bg-transparent outline-none resize-none"
-                                                value={report.futureCareerPlan || ""}
-                                                onChange={(e) => setReport({ ...report, futureCareerPlan: e.target.value })}
-                                                placeholder="Career trajectory and goals..."
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="border-2 border-slate-900">
-                                        <div className="p-3 bg-slate-50 border-b border-slate-900 font-bold text-[10px] uppercase tracking-widest text-center">Suggestions</div>
-                                        <textarea
-                                            className="w-full h-32 p-4 text-sm bg-transparent outline-none resize-none"
-                                            value={report.suggestions || ""}
-                                            onChange={(e) => setReport({ ...report, suggestions: e.target.value })}
-                                            placeholder="Feedback for the department or industry..."
-                                        />
-                                    </div>
-
-                                    {/* Form Feedback from Image 5 */}
-                                    <div className="pt-12 border-t-2 border-slate-900 space-y-8">
-                                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-6">
-                                            <h3 className="font-bold text-slate-800 border-b border-slate-200 pb-2">Programme Feedback Questions</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                <SurveCheckButton label="Have the Programme been useful or relevant to you?" active={report.isUseful} onClick={() => setReport({ ...report, isUseful: true })} onDecline={() => setReport({ ...report, isUseful: false })} />
-                                                <SurveCheckButton label="Have the Programme improved your understanding of your subjects of study?" active={report.improvedUnderstanding} onClick={() => setReport({ ...report, improvedUnderstanding: true })} onDecline={() => setReport({ ...report, improvedUnderstanding: false })} />
-                                                <SurveCheckButton label="Have the Programme provided you with experiences about working life?" active={report.providedExperiences} onClick={() => setReport({ ...report, providedExperiences: true })} onDecline={() => setReport({ ...report, providedExperiences: false })} />
-                                                <div className="space-y-4">
-                                                    <label className="text-sm font-bold text-slate-700 block">Number of times an LO visited you:</label>
-                                                    <input
-                                                        type="number"
-                                                        className="w-20 bg-white border border-slate-300 rounded-md p-2 text-sm focus:ring-1 focus:ring-primary outline-none"
-                                                        value={report.loVisitCount || 0}
-                                                        onChange={(e) => setReport({ ...report, loVisitCount: parseInt(e.target.value) || 0 })}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="mt-8">
-                                            <h3 className="text-xs font-black text-slate-900 border-l-4 border-primary pl-3 uppercase mb-6 whitespace-normal leading-relaxed">Please tick the type of Programme you have been put through. (You can tick more than one box)</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                 {[
-                                                    "Assisting in software development and coding tasks.",
-                                                    "Participating in the design, implementation, and testing of SW systems.",
-                                                    "Debugging and troubleshooting software issues.",
-                                                    "Collaborating with the development team to enhance existing software applications.",
-                                                    "Conducting research and feasibility studies for new SW features or technologies.",
-                                                    "Writing and maintaining technical documentation and user manuals.",
-                                                    "Participating in code reviews and providing feedback on code quality.",
-                                                    "Assisting in the development of embedded systems firmware or software.",
-                                                    "Testing and validating embedded systems functionality.",
-                                                    "Collaborating with HW engineers in the integration of SW and HW components.",
-                                                    "Conducting performance optimization and memory management for embedded systems."
-                                                ].map((activity) => (
-                                                    <label key={activity} className="flex items-start gap-3 p-4 rounded-xl border border-slate-200 bg-white hover:border-primary/30 transition-all cursor-pointer group shadow-sm">
-                                                        <div className="relative flex items-center h-5">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={report.programmeTypes?.includes(activity)}
-                                                                onChange={(e) => {
-                                                                    const types = report.programmeTypes || [];
-                                                                    if (e.target.checked) {
-                                                                        setReport({ ...report, programmeTypes: [...types, activity] });
-                                                                    } else {
-                                                                        setReport({ ...report, programmeTypes: types.filter(t => t !== activity) });
-                                                                    }
-                                                                }}
-                                                                className="h-5 w-5 rounded border-2 border-slate-300 text-primary accent-primary focus:ring-offset-0 focus:ring-primary/20 cursor-pointer"
+                                                    { label: "Overview and Goals of Training", key: "overviewGoals" },
+                                                    { label: "Contents of Training", key: "contentsTraining" }
+                                                ].map((field) => (
+                                                    <div key={field.key} className="grid grid-cols-1 md:grid-cols-[1fr_3fr] border-t-2 border-slate-900">
+                                                        <div className="p-5 border-b-2 md:border-b-0 md:border-r-2 border-slate-900 font-bold bg-slate-50 flex items-center justify-center text-center leading-tight">{field.label}</div>
+                                                        <div className="bg-white">
+                                                            <textarea
+                                                                className="w-full h-32 p-5 bg-transparent outline-none resize-none font-medium text-slate-700 focus:bg-slate-50 transition-colors"
+                                                                placeholder={`Describe ${field.label.toLowerCase()}...`}
+                                                                value={report[field.key as keyof IapReport] as string || ""}
+                                                                onChange={(e) => setReport({ ...report, [field.key]: e.target.value })}
                                                             />
                                                         </div>
-                                                        <span className="text-xs font-medium text-slate-600 group-hover:text-slate-900 leading-normal">{activity}</span>
-                                                    </label>
+                                                    </div>
+                                                ))}
+
+                                                {/* Satisfaction Table */}
+                                                <div className="grid grid-cols-1 md:grid-cols-[1fr_3fr] border-t-2 border-slate-900">
+                                                    <div className="p-5 border-b-2 md:border-b-0 md:border-r-2 border-slate-900 font-bold bg-slate-50 flex items-center justify-center text-center leading-tight">Satisfaction with<br />Industrial Attachment</div>
+                                                    <div className="p-0 bg-white overflow-x-auto">
+                                                        <table className="w-full text-center border-collapse">
+                                                            <tbody>
+                                                                {[
+                                                                    { label: 'Satisfaction with industry', key: 'satisfactionIndustry' },
+                                                                    { label: 'Satisfaction with relevant major', key: 'satisfactionMajor' },
+                                                                    { label: 'Satisfaction with practical work', key: 'satisfactionPractical' },
+                                                                    { label: 'Satisfaction with instructors', key: 'satisfactionInstructors' }
+                                                                ].map((item, idx) => (
+                                                                    <tr key={item.key} className={idx < 3 ? "border-b-2 border-slate-900" : ""}>
+                                                                        <td className="p-4 text-left border-r-2 border-slate-900 min-w-[200px] font-bold text-slate-700">{item.label}</td>
+                                                                        {['Excellent', 'Average', 'Poor'].map((level) => (
+                                                                            <td
+                                                                                key={level}
+                                                                                className="p-4 border-r-2 border-slate-900 last:border-r-0 cursor-pointer hover:bg-slate-50 min-w-[100px]"
+                                                                                onClick={() => setReport({ ...report, [item.key]: level as 'Excellent' | 'Average' | 'Poor' })}
+                                                                            >
+                                                                                <div className="flex flex-col items-center gap-2">
+                                                                                    <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-tighter">{level}</span>
+                                                                                    <div className={`h-6 w-6 rounded-full border-2 border-slate-900 flex items-center justify-center transition-all ${report[item.key as keyof IapReport] === level ? 'bg-slate-900 shadow-lg scale-110' : 'bg-white'}`}>
+                                                                                        {report[item.key as keyof IapReport] === level && <Check className="h-4 w-4 text-white" />}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </td>
+                                                                        ))}
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                                {[
+                                                    { label: "Notable Achievements", key: "notableAchievements" },
+                                                    { label: "Future Career Plan", key: "futureCareerPlan" },
+                                                    { label: "Suggestions", key: "suggestions" }
+                                                ].map((field) => (
+                                                    <div key={field.key} className="grid grid-cols-1 md:grid-cols-[1fr_3fr] border-t-2 border-slate-900">
+                                                        <div className="p-5 border-b-2 md:border-b-0 md:border-r-2 border-slate-900 font-bold bg-slate-50 flex items-center justify-center text-center leading-tight">{field.label}</div>
+                                                        <div className="bg-white">
+                                                            <textarea
+                                                                className="w-full h-32 p-5 bg-transparent outline-none resize-none font-medium text-slate-700 focus:bg-slate-50 transition-colors"
+                                                                placeholder={`Describe ${field.label.toLowerCase()}...`}
+                                                                value={report[field.key as keyof IapReport] as string || ""}
+                                                                onChange={(e) => setReport({ ...report, [field.key]: e.target.value })}
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 ))}
                                             </div>
-                                            <div className="mt-6">
-                                                <LogbookInput label="Others (Please describe them below)" value={report.otherProgrammeDetails} onChange={(v) => setReport({ ...report, otherProgrammeDetails: v })} />
+                                        </div>
+
+                                        {/* PART B: FORMAL QUESTIONNAIRE */}
+                                        <div className="space-y-10 pt-10 border-t-2 border-slate-900 border-dashed">
+                                            <div className="text-center space-y-2">
+                                                <h2 className="text-xl font-black uppercase tracking-tight text-slate-900">STUDENT'S REPORT</h2>
+                                                <p className="text-xs font-bold text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                                                    Please return the filled Log book and IAP Report with this completed form to RCA within Two Weeks after the end of your industrial attachment
+                                                </p>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 bg-white p-2">
+                                                {[
+                                                    { label: "Name of Student", value: student?.fullName || "", isControlled: false },
+                                                    { label: "Reg No.", value: report.regNo || "", key: "regNo", isControlled: true },
+                                                    { label: "Phone No", value: report.phoneNo || "", key: "phoneNo", isControlled: true },
+                                                    { label: "IAP Company attached to", value: student?.companyName || "", isControlled: false },
+                                                    { label: "Number of times an LO visited you", value: report.loVisitCount || 0, key: "loVisitCount", isControlled: true, isNumber: true }
+                                                ].map((f, i) => (
+                                                    <div key={i} className={`flex flex-col gap-1 ${f.label === "IAP Company attached to" ? "md:col-span-2" : ""}`}>
+                                                        <div className="flex items-end gap-2">
+                                                            <span className="text-sm font-bold text-slate-900 shrink-0">{f.label}:</span>
+                                                            <div className="flex-1 border-b-2 border-slate-900 border-dotted min-h-6 relative">
+                                                                {f.isControlled ? (
+                                                                    <input
+                                                                        type={f.isNumber ? "number" : "text"}
+                                                                        className="w-full bg-transparent outline-none font-bold text-slate-800 px-2"
+                                                                        value={f.value}
+                                                                        onChange={(e) => setReport({ ...report, [f.key!]: f.isNumber ? parseInt(e.target.value) || 0 : e.target.value })}
+                                                                    />
+                                                                ) : (
+                                                                    <span className="px-2 font-bold text-slate-800">{f.value}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                {[
+                                                    { label: "Have the Programme been useful or relevant to you?", key: "isUseful" },
+                                                    { label: "Have the Programme improved your understanding of you subjects of study?", key: "improvedUnderstanding" },
+                                                    { label: "Have the Programme provided you with experiences about working life, human relationship skills etc.", key: "providedExperiences" }
+                                                ].map((q) => (
+                                                    <div key={q.key} className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
+                                                        <span className="text-sm font-bold text-slate-800 leading-tight">{q.label}</span>
+                                                        <div className="flex gap-8 shrink-0">
+                                                            {['Yes', 'No'].map((opt) => {
+                                                                const val = opt === 'Yes';
+                                                                const isChecked = report[q.key as keyof IapReport] === val;
+                                                                return (
+                                                                    <label key={opt} className="flex items-center gap-3 cursor-pointer group">
+                                                                        <div
+                                                                            onClick={() => setReport({ ...report, [q.key]: val })}
+                                                                            className={`h-5 w-5 border-2 border-slate-900 flex items-center justify-center transition-all ${isChecked ? 'bg-slate-900' : 'bg-white'}`}
+                                                                        >
+                                                                            {isChecked && <Check className="h-4 w-4 text-white" />}
+                                                                        </div>
+                                                                        <span className="text-sm font-black text-slate-900">{opt}</span>
+                                                                    </label>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="space-y-6">
+                                                <div className="space-y-1">
+                                                    <h3 className="text-sm font-black text-slate-900 uppercase">Please tick the type of Programme you have been put through:</h3>
+                                                    <p className="text-[10px] font-bold text-slate-500 italic">(You can tick more than one box)</p>
+                                                </div>
+                                                <div className="grid grid-cols-1 gap-2">
+                                                    {[
+                                                        "Assisting in software development and coding tasks.",
+                                                        "Participating in the design, implementation, and testing of SW systems.",
+                                                        "Debugging and troubleshooting software issues.",
+                                                        "Collaborating with the development team to enhance existing software applications.",
+                                                        "Conducting research and feasibility studies for new SW features or technologies.",
+                                                        "Writing and maintaining technical documentation and user manuals.",
+                                                        "Participating in code reviews and providing feedback on code quality.",
+                                                        "Assisting in the development of embedded systems firmware or software.",
+                                                        "Testing and validating embedded systems functionality.",
+                                                        "Collaborating with HW engineers in the integration of SW and HW components.",
+                                                        "Conducting performance optimization and memory management for embedded systems.",
+                                                        "Others (Please describe them below)"
+                                                    ].map((type) => {
+                                                        const isActive = (report.programmeTypes || []).includes(type);
+                                                        return (
+                                                            <div
+                                                                key={type}
+                                                                className="flex items-start gap-4 py-1 cursor-pointer group"
+                                                                onClick={() => {
+                                                                    const newTypes = isActive
+                                                                        ? report.programmeTypes.filter(t => t !== type)
+                                                                        : [...(report.programmeTypes || []), type];
+                                                                    setReport({ ...report, programmeTypes: newTypes });
+                                                                }}
+                                                            >
+                                                                <div className={`mt-0.5 h-5 w-5 border-2 border-slate-900 flex items-center justify-center shrink-0 transition-all ${isActive ? 'bg-slate-900' : 'bg-white'}`}>
+                                                                    {isActive && <Check className="h-4 w-4 text-white" />}
+                                                                </div>
+                                                                <span className="text-xs font-bold text-slate-800 leading-relaxed">{type}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <label className="text-[11px] font-black uppercase text-slate-500">Other Details / Comments (Describe them below)</label>
+                                                    <div className="border-2 border-slate-900 p-1 bg-white">
+                                                        <textarea
+                                                            className="w-full h-32 p-4 bg-transparent outline-none resize-none font-bold text-slate-800 border-b border-slate-200 border-dotted"
+                                                            placeholder="..."
+                                                            value={report.otherProgrammeDetails || ""}
+                                                            onChange={(e) => setReport({ ...report, otherProgrammeDetails: e.target.value })}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-10 space-y-8">
+                                                <div className="flex flex-col md:flex-row justify-between items-end gap-10">
+                                                    <div className="flex-1 flex flex-col gap-1 w-full">
+                                                        <div className="flex items-end gap-2">
+                                                            <span className="text-sm font-bold text-slate-900 shrink-0">Date:</span>
+                                                            <div className="flex-1 border-b-2 border-slate-900 border-dotted h-8 px-4 font-black flex items-center">
+                                                                {new Date().toLocaleDateString()}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-2 flex flex-col gap-1 w-full">
+                                                        <div className="flex items-end gap-2">
+                                                            <span className="text-sm font-bold text-slate-900 shrink-0">Signature of Student:</span>
+                                                            <div className="flex-1 border-b-2 border-slate-900 border-dotted h-12 flex items-center justify-center relative">
+                                                                <span className="font-[signature] text-2xl text-slate-800 -rotate-2">{student?.fullName}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <p className="text-[10px] font-bold text-slate-400 italic text-center">
+                                                    Please make a photocopy of this form for your own retention before submitting to IAP coordinator.
+                                                </p>
                                             </div>
                                         </div>
+                                        <label className="text-[10px] font-semibold uppercase text-slate-400">Full Legal Signature of Student</label>
+                                        <div className="h-14 border-b-2 border-slate-900 flex items-center px-6 bg-slate-50/50 rounded-t-xl group">
+                                            <span className="font-[signature] text-3xl text-slate-900 select-none opacity-80 group-hover:opacity-100 transition-opacity -rotate-1">{student?.fullName || "Digitally Verified"}</span>
+                                        </div>
                                     </div>
+                                </div>
 
-                                    <div className="pt-8 border-t border-slate-200 flex justify-end">
-                                        <Button onClick={handleSaveReport} disabled={isSaving} className="h-12 px-8 rounded-lg bg-primary text-white font-bold shadow-sm hover:bg-primary/90">
-                                            {isSaving ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : "Save Final Report"}
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                {/* Action Buttons */}
+                                <div className="flex justify-end pt-8 border-t-2 border-slate-100">
+                                    <Button
+                                        onClick={handleSaveReport}
+                                        disabled={isSaving}
+                                        className="h-12 px-8 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-2xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100"
+                                    >
+                                        {isSaving ? <Loader2 className="animate-spin h-6 w-6 mr-3" /> : "Finalize & Seal Report"}
+                                    </Button>
+                                </div>
+                            </div>
                         )}
 
                         {currentStep === 5 && (
@@ -1625,7 +2098,17 @@ export default function StudentLogbookPage() {
                                                 <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                                                     <LockKeyhole className="h-6 w-6 text-white" />
                                                 </div>
-                                                <span className="text-primary-foreground/80 font-black uppercase tracking-[0.2em] text-[10px]">Secure Documentation Vault</span>
+                                                <span className="text-primary-foreground/80 font-black uppercase text-[10px]">Secure Documentation Vault</span>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => fetchData()}
+                                                    disabled={loading}
+                                                    className="h-6 px-2 bg-white/10 hover:bg-white/20 border-white/20 text-white rounded-md text-[9px] font-black uppercase inline-flex items-center gap-1.5 transition-all ml-2"
+                                                >
+                                                    <Zap className={cn("h-2.5 w-2.5", loading && "animate-spin")} />
+                                                    {loading ? "Syncing..." : "Check for Updates"}
+                                                </Button>
                                             </div>
                                             <CardTitle className="text-3xl md:text-4xl font-black text-white leading-tight">Industrial Attachment Assessment</CardTitle>
                                             <p className="text-primary-foreground/70 text-sm font-medium italic">Standardized evaluation and final marking scheme from your host company.</p>
@@ -1651,306 +2134,240 @@ export default function StudentLogbookPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <>
-                                            {student?.ratings?.[0] ? (
-                                                <div className="space-y-10">
-                                                    {/* Student Report Summary Section */}
-                                                    <div className="bg-slate-50 border-2 border-slate-900 overflow-hidden">
-                                                        <div className="bg-slate-900 text-white p-4 font-black uppercase text-xs tracking-widest">
-                                                            Student Training Summary
-                                                        </div>
-                                                        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-900">
-                                                            <div className="p-6 space-y-3">
-                                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-tighter">Overview & Goals</h4>
-                                                                <p className="text-sm text-slate-700 leading-relaxed italic">"{report.overviewGoals || "No overview provided."}"</p>
-                                                            </div>
-                                                            <div className="p-6 space-y-3">
-                                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-tighter">Key Training Contents</h4>
-                                                                <p className="text-sm text-slate-700 leading-relaxed font-medium">{report.contentsTraining || "No training details provided."}</p>
-                                                            </div>
-                                                            <div className="p-6 space-y-3 bg-white">
-                                                                <h4 className="text-[10px] font-black uppercase text-primary tracking-tighter">Notable Achievements</h4>
-                                                                <div className="p-4 rounded-lg bg-green-50 border border-green-100">
-                                                                    <p className="text-sm text-green-800 font-bold leading-tight">{report.notableAchievements || "N/A"}</p>
-                                                                </div>
-                                                            </div>
+                                        <div className="space-y-10">
+                                            {/* Student Report Summary Section */}
+                                            <div className="bg-slate-50 border-2 border-slate-900 overflow-hidden">
+                                                <div className="bg-slate-900 text-white p-4 font-black uppercase text-xs tracking-widest">
+                                                    Student Training Summary
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-900">
+                                                    <div className="p-6 space-y-3">
+                                                        <h4 className="text-[10px] font-black uppercase text-primary tracking-tighter">Overview & Goals</h4>
+                                                        <p className="text-sm text-slate-700 leading-relaxed italic">"{report.overviewGoals || "No overview provided."}"</p>
+                                                    </div>
+                                                    <div className="p-6 space-y-3">
+                                                        <h4 className="text-[10px] font-black uppercase text-primary tracking-tighter">Key Training Contents</h4>
+                                                        <p className="text-sm text-slate-700 leading-relaxed font-medium">{report.contentsTraining || "No training details provided."}</p>
+                                                    </div>
+                                                    <div className="p-6 space-y-3 bg-white">
+                                                        <h4 className="text-[10px] font-black uppercase text-primary tracking-tighter">Notable Achievements</h4>
+                                                        <div className="p-4 rounded-lg bg-green-50 border border-green-100">
+                                                            <p className="text-sm text-green-800 font-bold leading-tight">{report.notableAchievements || "N/A"}</p>
                                                         </div>
                                                     </div>
+                                                </div>
+                                            </div>
 
-                                                    <div className="bg-white border-2 border-slate-900 p-0 overflow-hidden">
-                                                        {/* header */}
-                                                        <div className="border-b-2 border-slate-900 p-6 flex flex-col items-center justify-center space-y-4">
-                                                            <div className="w-full space-y-4 pt-4 px-4">
-                                                                <div className="flex gap-2 items-end">
-                                                                    <span className="text-sm font-bold whitespace-nowrap">Student name:</span>
-                                                                    <div className="flex-1 border-b border-black border-dotted h-5 text-sm uppercase px-2">{student?.fullName || "................................................................................................................................................"}</div>
-                                                                </div>
-                                                                <div className="flex gap-2 items-end">
-                                                                    <span className="text-sm font-bold whitespace-nowrap">Department/Class:</span>
-                                                                    <div className="flex-1 border-b border-black border-dotted h-5 text-sm uppercase px-2">{student?.studentProfile?.department || "................................................................................................................................................"}</div>
-                                                                </div>
-                                                            </div>
+                                            <div className="bg-white border-2 border-slate-900 p-0 overflow-hidden">
+                                                {/* header */}
+                                                <div className="border-b-2 border-slate-900 p-6 flex flex-col items-center justify-center space-y-4">
+                                                    <div className="w-full space-y-4 pt-4 px-4">
+                                                        <div className="flex gap-2 items-end">
+                                                            <span className="text-sm font-bold whitespace-nowrap">Student name:</span>
+                                                            <div className="flex-1 border-b border-black border-dotted h-5 text-sm uppercase px-2">{student?.fullName || "................................................................................................................................................"}</div>
                                                         </div>
-
-                                                        {/* marking scheme title */}
-                                                        <div className="bg-slate-50 border-b-2 border-slate-900 py-3 text-center">
-                                                            <span className="text-sm font-black uppercase tracking-widest">Marking Scheme</span>
+                                                        <div className="flex gap-2 items-end">
+                                                            <span className="text-sm font-bold whitespace-nowrap">Department/Class:</span>
+                                                            <div className="flex-1 border-b border-black border-dotted h-5 text-sm uppercase px-2">{student?.studentProfile?.department || "................................................................................................................................................"}</div>
                                                         </div>
+                                                    </div>
+                                                </div>
 
-                                                        {/* main table */}
-                                                        <div className="relative overflow-x-auto">
-                                                            <table className="w-full border-collapse text-xs">
-                                                                <thead>
-                                                                    <tr className="border-b-2 border-slate-900">
-                                                                        <th className="border-r border-slate-400 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 py-4 h-32">Evaluation area</th>
-                                                                        <th className="border-r border-slate-400 p-1 font-black w-8"></th>
-                                                                        <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-48">Evaluation item</th>
-                                                                        <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">Very High</th>
-                                                                        <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">High</th>
-                                                                        <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">Average</th>
-                                                                        <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">Low</th>
-                                                                        <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">Very Low</th>
-                                                                        <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">Score</th>
-                                                                        <th className="p-4 text-[10px] w-48 align-top leading-relaxed italic bg-slate-50 font-medium">
-                                                                            * Mark the score for each evaluation item and add up the total score and record it in the score column.
-                                                                        </th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {(() => {
-                                                                        const assignmentRowConfig = [
-                                                                            { id: 'knowledgeWirelessOps', key: 0 },
-                                                                            { id: 'knowledgeWirelessEst', key: 1 },
-                                                                            { id: 'knowledgeWirelessMaint', key: 2 },
-                                                                            { id: 'knowledgeApplication', key: 3 },
-                                                                        ];
+                                                {/* marking scheme title */}
+                                                <div className="bg-slate-50 border-b-2 border-slate-900 py-3 text-center">
+                                                    <span className="text-sm font-black uppercase tracking-widest">Marking Scheme</span>
+                                                </div>
 
-                                                                        const displayRows = tasks.length > 0
-                                                                            ? assignmentRowConfig.slice(0, Math.min(tasks.length, 4))
-                                                                            : [assignmentRowConfig[0]];
+                                                {/* main table */}
+                                                <div className="relative overflow-x-auto">
+                                                    <table className="w-full border-collapse text-xs">
+                                                        <thead>
+                                                            <tr className="border-b-2 border-slate-900">
+                                                                <th className="border-r border-slate-400 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 py-4 h-32">Evaluation area</th>
+                                                                <th className="border-r border-slate-400 p-1 font-black w-8"></th>
+                                                                <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-48">Evaluation item</th>
+                                                                <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">Very High</th>
+                                                                <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">High</th>
+                                                                <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">Average</th>
+                                                                <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">Low</th>
+                                                                <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">Very Low</th>
+                                                                <th className="border-r border-slate-400 p-2 font-black uppercase text-center w-16">Score</th>
+                                                                <th className="p-4 text-[10px] w-48 align-top leading-relaxed italic bg-slate-50 font-medium">
+                                                                    * Mark the score for each evaluation item and add up the total score and record it in the score column.
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {(() => {
+                                                                const assignmentRowConfig = [
+                                                                    { id: 'knowledgeWirelessOps', label: 'Knowledge in Wireless Operations' },
+                                                                    { id: 'knowledgeWirelessEst', label: 'Knowledge in Wireless Establishment' },
+                                                                    { id: 'knowledgeWirelessMaint', label: 'Knowledge in Wireless Maintenance' },
+                                                                    { id: 'knowledgeApplication', label: 'Application of Knowledge' },
+                                                                ];
 
-                                                                        const assignmentsScore = displayRows.reduce((acc, row) => {
-                                                                            return acc + (student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] || 0);
-                                                                        }, 0);
+                                                                const assignmentsScore = assignmentRowConfig.reduce((acc, row) => {
+                                                                    return acc + (student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] || 0);
+                                                                }, 0);
 
-                                                                        return displayRows.map((item, i) => {
-                                                                            const task = tasks[item.key];
-                                                                            const label = task ? task.title : "Related Knowledge";
-                                                                            const savedScore = student?.ratings?.[0]?.[item.id as keyof typeof student.ratings[0]] as number;
+                                                                return assignmentRowConfig.map((item, i) => {
+                                                                    const savedScore = student?.ratings?.[0]?.[item.id as keyof typeof student.ratings[0]] as number;
 
-                                                                            return (
-                                                                                <tr key={item.id} className="border-b border-slate-300">
-                                                                                    {i === 0 && (
-                                                                                        <td rowSpan={displayRows.length} className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-50">
-                                                                                            Assignments
-                                                                                        </td>
-                                                                                    )}
-                                                                                    <td className="border-r border-slate-300 p-2 text-center font-bold">{i + 1}</td>
-                                                                                    <td className="border-r border-slate-300 p-3 leading-tight min-w-[200px]">
-                                                                                        {label}
-                                                                                    </td>
-                                                                                    {[10, 9, 8, 7, 6].map(val => (
-                                                                                        <td key={val} className="border-r border-slate-300 p-2 text-center">
-                                                                                            <div
-                                                                                                className={`h-8 w-8 mx-auto flex items-center justify-center rounded-lg border-2 ${savedScore === val ? "bg-slate-900 text-white border-slate-900 scale-110 shadow-md font-bold" : "border-transparent text-slate-300 font-bold"}`}
-                                                                                            >
-                                                                                                {val}
-                                                                                            </div>
-                                                                                        </td>
-                                                                                    ))}
-                                                                                    <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50">
-                                                                                        {i === 0 ? `/40` : ""}
-                                                                                    </td>
-                                                                                    {i === 0 && (
-                                                                                        <td rowSpan={displayRows.length} className="p-4 align-middle bg-white">
-                                                                                            <div className="h-20 w-full border-4 border-slate-200 rounded-2xl flex flex-col items-center justify-center">
-                                                                                                <span className="text-[10px] font-black uppercase text-slate-400">sum</span>
-                                                                                                <span className="text-2xl font-black text-slate-900">{assignmentsScore}</span>
-                                                                                            </div>
-                                                                                        </td>
-                                                                                    )}
-                                                                                </tr>
-                                                                            );
-                                                                        });
-                                                                    })()}
-
-                                                                    {/* Attitude Area */}
-                                                                    {[
-                                                                        { id: 'responsibility', label: 'Responsibility', index: 1 },
-                                                                        { id: 'cooperativeness', label: 'Cooperativeness', index: 2 },
-                                                                        { id: 'complianceEtiquette', label: 'Compliance with company rules and workplace etiquette', index: 3 },
-                                                                    ].map((item, i, arr) => {
-                                                                        const attitudeScore = arr.reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
-                                                                        const savedScore = student?.ratings?.[0]?.[item.id as keyof typeof student.ratings[0]] as number;
-
-                                                                        return (
-                                                                            <tr key={item.id} className="border-b border-slate-300">
-                                                                                {i === 0 && (
-                                                                                    <td rowSpan={3} className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-50">
-                                                                                        Attitude
-                                                                                    </td>
-                                                                                )}
-                                                                                <td className="border-r border-slate-300 p-2 text-center font-bold">{item.index}</td>
-                                                                                <td className="border-r border-slate-300 p-3 leading-tight">{item.label}</td>
-                                                                                {[10, 9, 8, 7, 6].map(val => (
-                                                                                    <td key={val} className="border-r border-slate-300 p-2 text-center">
-                                                                                        <div
-                                                                                            className={`h-8 w-8 mx-auto flex items-center justify-center rounded-lg border-2 ${savedScore === val ? "bg-slate-900 text-white border-slate-900 scale-110 shadow-md font-bold" : "border-transparent text-slate-300 font-bold"}`}
-                                                                                        >
-                                                                                            {val}
-                                                                                        </div>
-                                                                                    </td>
-                                                                                ))}
-                                                                                <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50">
-                                                                                    {i === 0 ? `/30` : ""}
+                                                                    return (
+                                                                        <tr key={item.id} className="border-b border-slate-300 hover:bg-slate-50/50 transition-colors">
+                                                                            {i === 0 && (
+                                                                                <td rowSpan={assignmentRowConfig.length} className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-100 text-slate-800">
+                                                                                    Related Knowledge
                                                                                 </td>
-                                                                                {i === 0 && (
-                                                                                    <td rowSpan={3} className="p-4 align-middle bg-white">
-                                                                                        <div className="h-20 w-full border-4 border-slate-200 rounded-2xl flex flex-col items-center justify-center">
-                                                                                            <span className="text-[10px] font-black uppercase text-slate-400">sum</span>
-                                                                                            <span className="text-2xl font-black text-slate-900">{attitudeScore}</span>
-                                                                                        </div>
-                                                                                    </td>
-                                                                                )}
-                                                                            </tr>
-                                                                        );
-                                                                    })}
-
-                                                                    {/* Safety Area */}
-                                                                    {(() => {
-                                                                        const assignmentsScore = [
-                                                                            { id: 'knowledgeWirelessOps', key: 0 },
-                                                                            { id: 'knowledgeWirelessEst', key: 1 },
-                                                                            { id: 'knowledgeWirelessMaint', key: 2 },
-                                                                            { id: 'knowledgeApplication', key: 3 },
-                                                                        ].reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
-
-                                                                        const attitudeScore = [
-                                                                            { id: 'responsibility' },
-                                                                            { id: 'cooperativeness' },
-                                                                            { id: 'complianceEtiquette' }
-                                                                        ].reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
-
-                                                                        const safetyItems = [
-                                                                            { id: 'safetyAwareness', label: 'Awareness of safety management', index: 1 },
-                                                                            { id: 'safetyCompliance', label: 'Compliance with safety rules', index: 2 },
-                                                                            { id: 'safetyArrangement', label: 'Arrangement of safety instruments', index: 3 },
-                                                                        ];
-
-                                                                        const safetyScore = safetyItems.reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
-
-                                                                        return safetyItems.map((item, i) => {
-                                                                            const savedScore = student?.ratings?.[0]?.[item.id as keyof typeof student.ratings[0]] as number;
-
-                                                                            return (
-                                                                                <tr key={item.id} className="border-b border-slate-300">
-                                                                                    {i === 0 && (
-                                                                                        <td rowSpan={3} className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-50">
-                                                                                            Safety Management
-                                                                                        </td>
-                                                                                    )}
-                                                                                    <td className="border-r border-slate-300 p-2 text-center font-bold">{item.index}</td>
-                                                                                    <td className="border-r border-slate-300 p-3 leading-tight">{item.label}</td>
-                                                                                    {[10, 9, 8, 7, 6].map(val => (
-                                                                                        <td key={val} className="border-r border-slate-300 p-2 text-center">
-                                                                                            <div className={`h-8 w-8 mx-auto flex items-center justify-center rounded-lg border-2 ${savedScore === val ? "bg-slate-900 text-white border-slate-900 scale-110 shadow-md font-bold" : "border-transparent text-slate-300 font-bold"}`}>
-                                                                                                {val}
-                                                                                            </div>
-                                                                                        </td>
-                                                                                    ))}
-                                                                                    <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50">
-                                                                                        {i === 0 ? `/30` : ""}
-                                                                                    </td>
-                                                                                    {i === 0 && (
-                                                                                        <td rowSpan={3} className="p-4 align-middle bg-slate-50 border-l-4 border-slate-900">
-                                                                                            <div className="text-center space-y-2">
-                                                                                                <span className="text-[10px] font-black uppercase block">Total Score</span>
-                                                                                                <div className="text-4xl font-black text-slate-900">{assignmentsScore + attitudeScore + safetyScore}/100</div>
-                                                                                            </div>
-                                                                                        </td>
-                                                                                    )}
-                                                                                </tr>
-                                                                            );
-                                                                        });
-                                                                    })()}
-
-                                                                    {/* Attendance Block */}
-                                                                    {(() => {
-                                                                        const absentDays = student?.absentDays || 0;
-                                                                        const attendanceRaw = Math.max(0, 100 - (absentDays * 10));
-
-                                                                        const assignmentsScore = [
-                                                                            { id: 'knowledgeWirelessOps', key: 0 },
-                                                                            { id: 'knowledgeWirelessEst', key: 1 },
-                                                                            { id: 'knowledgeWirelessMaint', key: 2 },
-                                                                            { id: 'knowledgeApplication', key: 3 },
-                                                                        ].reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
-
-                                                                        const attitudeScore = [
-                                                                            { id: 'responsibility' },
-                                                                            { id: 'cooperativeness' },
-                                                                            { id: 'complianceEtiquette' }
-                                                                        ].reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
-
-                                                                        const safetyScore = [
-                                                                            { id: 'safetyAwareness' },
-                                                                            { id: 'safetyCompliance' },
-                                                                            { id: 'safetyArrangement' }
-                                                                        ].reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
-
-                                                                        const rawScore = assignmentsScore + attitudeScore + safetyScore;
-                                                                        const weightedPerformance = rawScore * 0.8;
-                                                                        const attendanceWeighted = attendanceRaw * 0.2;
-                                                                        const finalTotal = Math.round((weightedPerformance + attendanceWeighted) * 10) / 10;
-
-                                                                        return (
-                                                                            <tr className="border-b-2 border-slate-900">
-                                                                                <td className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-900 text-white">
-                                                                                    Attendance
-                                                                                </td>
-                                                                                <td colSpan={7} className="p-8 space-y-4">
-                                                                                    <div className="flex items-center gap-4">
-                                                                                        <span className="text-sm font-black whitespace-nowrap uppercase">Days of Absence:</span>
-                                                                                        <div className="w-24 border-b-2 border-black border-dotted focus:outline-none text-center font-black text-lg h-10 flex items-end justify-center pb-1">
-                                                                                            {absentDays}
-                                                                                        </div>
-                                                                                        <span className="text-[11px] font-medium text-slate-400 italic leading-tight">
-                                                                                            * 10 points are deducted for each absence from work per day. However, points will not be deducted for sick leave with supporting documents attached.
-                                                                                            <br />
-                                                                                            * Unauthorised late arrival, early departure without notice, 3 times of unauthorised results are treated as 1 day of absence from work
-                                                                                        </span>
+                                                                            )}
+                                                                            <td className="border-r border-slate-300 p-2 text-center font-bold text-slate-500">{i + 1}</td>
+                                                                            <td className="border-r border-slate-300 p-3 leading-tight min-w-[200px] font-semibold text-slate-700">
+                                                                                {item.label}
+                                                                            </td>
+                                                                            {[10, 9, 8, 7, 6].map(val => (
+                                                                                <td key={val} className="border-r border-slate-300 p-2 text-center">
+                                                                                    <div
+                                                                                        className={cn(
+                                                                                            "h-8 w-8 mx-auto flex items-center justify-center rounded-lg border-2 transition-all duration-300",
+                                                                                            savedScore === val
+                                                                                                ? "bg-slate-900 text-white border-slate-900 scale-110 shadow-lg font-black ring-4 ring-slate-900/10"
+                                                                                                : "border-transparent text-slate-200 font-bold opacity-40"
+                                                                                        )}
+                                                                                    >
+                                                                                        {val}
                                                                                     </div>
                                                                                 </td>
-                                                                                <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-100">
-                                                                                    {attendanceRaw}/100
-                                                                                </td>
-                                                                                <td className="p-4 align-middle bg-slate-900 text-white">
-                                                                                    <div className="text-center space-y-1">
-                                                                                        <span className="text-[10px] font-black uppercase block opacity-60">Final weighted</span>
-                                                                                        <div className="text-5xl font-black tracking-tighter">{finalTotal}</div>
-                                                                                        <span className="text-[10px] font-bold opacity-60">/ 100</span>
+                                                                            ))}
+                                                                            <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50 text-slate-400">
+                                                                                {i === 0 ? `/40` : ""}
+                                                                            </td>
+                                                                            {i === 0 && (
+                                                                                <td rowSpan={assignmentRowConfig.length} className="p-4 align-middle bg-white group">
+                                                                                    <div className="h-24 w-full border-4 border-slate-100 group-hover:border-primary/20 rounded-2xl flex flex-col items-center justify-center transition-all bg-slate-50/30">
+                                                                                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter mb-1">Subtotal</span>
+                                                                                        <span className="text-3xl font-black text-slate-900">{assignmentsScore}</span>
                                                                                     </div>
                                                                                 </td>
-                                                                            </tr>
-                                                                        );
-                                                                    })()}
+                                                                            )}
+                                                                        </tr>
+                                                                    );
+                                                                });
+                                                            })()}
 
-                                                                    {/* Marking Formula Row */}
-                                                                    <tr className="bg-slate-50">
-                                                                        <td className="border-r-2 border-slate-900 p-3 font-black text-center text-[10px] uppercase">Marking</td>
-                                                                        <td colSpan={9} className="p-4 text-xs font-black text-center tracking-wide">
-                                                                            (Doing Training assignments + Attitude + Safety management) score × 80% + Attendance (20%)
+                                                            {/* Attitude Area */}
+                                                            {[
+                                                                { id: 'responsibility', label: 'Responsibility', index: 1 },
+                                                                { id: 'cooperativeness', label: 'Cooperativeness', index: 2 },
+                                                                { id: 'complianceEtiquette', label: 'Compliance with company rules and workplace etiquette', index: 3 },
+                                                            ].map((item, i, arr) => {
+                                                                const attitudeScore = arr.reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
+                                                                const savedScore = student?.ratings?.[0]?.[item.id as keyof typeof student.ratings[0]] as number;
+
+                                                                return (
+                                                                    <tr key={item.id} className="border-b border-slate-300 hover:bg-slate-50/50 transition-colors">
+                                                                        {i === 0 && (
+                                                                            <td rowSpan={3} className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-100 text-slate-800">
+                                                                                Attitude
+                                                                            </td>
+                                                                        )}
+                                                                        <td className="border-r border-slate-300 p-2 text-center font-bold text-slate-500">{item.index}</td>
+                                                                        <td className="border-r border-slate-300 p-3 leading-tight font-semibold text-slate-700">{item.label}</td>
+                                                                        {[10, 9, 8, 7, 6].map(val => (
+                                                                            <td key={val} className="border-r border-slate-300 p-2 text-center">
+                                                                                <div
+                                                                                    className={cn(
+                                                                                        "h-8 w-8 mx-auto flex items-center justify-center rounded-lg border-2 transition-all duration-300",
+                                                                                        savedScore === val
+                                                                                            ? "bg-slate-900 text-white border-slate-900 scale-110 shadow-lg font-black ring-4 ring-slate-900/10"
+                                                                                            : "border-transparent text-slate-200 font-bold opacity-40"
+                                                                                    )}
+                                                                                >
+                                                                                    {val}
+                                                                                </div>
+                                                                            </td>
+                                                                        ))}
+                                                                        <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50 text-slate-400">
+                                                                            {i === 0 ? `/30` : ""}
                                                                         </td>
+                                                                        {i === 0 && (
+                                                                            <td rowSpan={3} className="p-4 align-middle bg-white group">
+                                                                                <div className="h-24 w-full border-4 border-slate-100 group-hover:border-primary/20 rounded-2xl flex flex-col items-center justify-center transition-all bg-slate-50/30">
+                                                                                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter mb-1">Subtotal</span>
+                                                                                    <span className="text-3xl font-black text-slate-900">{attitudeScore}</span>
+                                                                                </div>
+                                                                            </td>
+                                                                        )}
                                                                     </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
+                                                                );
+                                                            })}
 
-                                                        {/* student attendance sheet footer */}
-                                                        <div className="bg-white border-none mt-8 overflow-hidden">
-                                                            <div className="p-3 bg-slate-50 border-y border-x-2 border-black">
-                                                                <span className="text-sm font-black uppercase tracking-widest pl-2">Student attendance sheet</span>
-                                                            </div>
+                                                            {/* Safety Area */}
+                                                            {(() => {
+                                                                const assignmentsScore = [
+                                                                    { id: 'knowledgeWirelessOps' },
+                                                                    { id: 'knowledgeWirelessEst' },
+                                                                    { id: 'knowledgeWirelessMaint' },
+                                                                    { id: 'knowledgeApplication' },
+                                                                ].reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
+
+                                                                const attitudeScore = [
+                                                                    { id: 'responsibility' },
+                                                                    { id: 'cooperativeness' },
+                                                                    { id: 'complianceEtiquette' }
+                                                                ].reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
+
+                                                                const safetyItems = [
+                                                                    { id: 'safetyAwareness', label: 'Awareness of safety management', index: 1 },
+                                                                    { id: 'safetyCompliance', label: 'Compliance with safety rules', index: 2 },
+                                                                    { id: 'safetyArrangement', label: 'Arrangement of safety instruments', index: 3 },
+                                                                ];
+
+                                                                const safetyScore = safetyItems.reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
+
+                                                                return safetyItems.map((item, i) => {
+                                                                    const savedScore = student?.ratings?.[0]?.[item.id as keyof typeof student.ratings[0]] as number;
+
+                                                                    return (
+                                                                        <tr key={item.id} className="border-b border-slate-300 hover:bg-slate-50/50 transition-colors">
+                                                                            {i === 0 && (
+                                                                                <td rowSpan={3} className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-100 text-slate-800">
+                                                                                    Safety
+                                                                                </td>
+                                                                            )}
+                                                                            <td className="border-r border-slate-300 p-2 text-center font-bold text-slate-500">{item.index}</td>
+                                                                            <td className="border-r border-slate-300 p-3 leading-tight font-semibold text-slate-700">{item.label}</td>
+                                                                            {[10, 9, 8, 7, 6].map(val => (
+                                                                                <td key={val} className="border-r border-slate-300 p-2 text-center">
+                                                                                    <div
+                                                                                        className={cn(
+                                                                                            "h-8 w-8 mx-auto flex items-center justify-center rounded-lg border-2 transition-all duration-300",
+                                                                                            savedScore === val
+                                                                                                ? "bg-slate-900 text-white border-slate-900 scale-110 shadow-lg font-black ring-4 ring-slate-900/10"
+                                                                                                : "border-transparent text-slate-200 font-bold opacity-40"
+                                                                                        )}
+                                                                                    >
+                                                                                        {val}
+                                                                                    </div>
+                                                                                </td>
+                                                                            ))}
+                                                                            <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50 text-slate-400">
+                                                                                {i === 0 ? `/30` : ""}
+                                                                            </td>
+                                                                            {i === 0 && (
+                                                                                <td rowSpan={3} className="p-4 align-middle bg-white group">
+                                                                                    <div className="h-24 w-full border-4 border-slate-100 group-hover:border-primary/20 rounded-2xl flex flex-col items-center justify-center transition-all bg-slate-50/30">
+                                                                                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter mb-1">Subtotal</span>
+                                                                                        <span className="text-3xl font-black text-slate-900">{safetyScore}</span>
+                                                                                    </div>
+                                                                                </td>
+                                                                            )}
+
+                                                                        </tr>
+                                                                    );
+                                                                });
+                                                            })()}
+
+                                                            {/* Attendance Block */}
                                                             {(() => {
                                                                 const absentDays = student?.absentDays || 0;
                                                                 const attendanceRaw = Math.max(0, 100 - (absentDays * 10));
@@ -1980,100 +2397,209 @@ export default function StudentLogbookPage() {
                                                                 const finalTotal = Math.round((weightedPerformance + attendanceWeighted) * 10) / 10;
 
                                                                 return (
-                                                                    <div className="grid grid-cols-1 md:grid-cols-4 border-b-2 border-x-2 border-slate-900">
-                                                                        <div className="border-r border-slate-900 p-6 flex items-center justify-center bg-slate-50">
-                                                                            <span className="text-sm font-black uppercase">Scheme</span>
-                                                                        </div>
-                                                                        <div className="col-span-3 p-6 flex flex-col gap-4">
-                                                                            {/* Performance component */}
-                                                                            <div className="flex items-center gap-2 text-sm flex-wrap">
-                                                                                <span className="font-bold text-slate-500 italic">performance score</span>
-                                                                                <div className="border-b-2 border-black w-12 text-center font-black text-slate-900">{rawScore}</div>
-                                                                                <span className="font-bold text-slate-500">× 80% =</span>
-                                                                                <div className="border-b-2 border-black border-dotted w-14 text-center font-black text-slate-900">{Math.round(weightedPerformance * 10) / 10}</div>
+                                                                    <tr className="border-b-2 border-slate-900 border-t-2">
+                                                                        <td className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-900 text-white">
+                                                                            Attendance
+                                                                        </td>
+                                                                        <td colSpan={7} className="p-10 space-y-6 bg-white">
+                                                                            <div className="flex items-center gap-6">
+                                                                                <div className="flex flex-col">
+                                                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Days of Absence</span>
+                                                                                    <div className="w-32 border-b-4 border-slate-900 text-center font-black text-3xl h-14 flex items-center justify-center bg-slate-50 rounded-t-xl">
+                                                                                        {absentDays}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="flex-1 space-y-2">
+                                                                                    <p className="text-[11px] font-bold text-slate-600 leading-relaxed max-w-xl">
+                                                                                        <span className="text-primary font-black">* DEDUCTION RULE:</span> 10 points are deducted for each unauthorized absence. Sick leave with documentation is exempt.
+                                                                                    </p>
+                                                                                    <p className="text-[11px] font-medium text-slate-400 italic leading-relaxed max-w-xl">
+                                                                                        * 3 instances of unauthorized late arrival or early departure equal 1 day of absence.
+                                                                                    </p>
+                                                                                </div>
                                                                             </div>
-                                                                            {/* Attendance component */}
-                                                                            <div className="flex items-center gap-2 text-sm flex-wrap">
-                                                                                <span className="font-bold text-slate-500 italic">attendance score</span>
-                                                                                <div className="border-b-2 border-black w-12 text-center font-black text-slate-900">{attendanceRaw}</div>
-                                                                                <span className="font-bold text-slate-500">× 20% =</span>
-                                                                                <div className="border-b-2 border-black border-dotted w-14 text-center font-black text-slate-900">{Math.round(attendanceWeighted * 10) / 10}</div>
+                                                                        </td>
+                                                                        <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50 text-slate-900">
+                                                                            <div className="flex flex-col items-center">
+                                                                                <span className="text-[9px] uppercase opacity-40 mb-1">Score</span>
+                                                                                <span className="text-xl">{attendanceRaw}</span>
+                                                                                <span className="text-[9px] opacity-40">/ 100</span>
                                                                             </div>
-                                                                            {/* Final total */}
-                                                                            <div className="flex items-center gap-2 text-base border-t border-slate-200 pt-4 flex-wrap">
-                                                                                <span className="font-black">Total</span>
-                                                                                <div className="border-b-2 border-black w-14 text-center font-black text-slate-900 text-lg">{finalTotal}</div>
-                                                                                <span className="font-black text-slate-500">/ 100</span>
+                                                                        </td>
+                                                                        <td className="p-6 align-middle bg-slate-900 text-white relative overflow-hidden group">
+                                                                            <div className="absolute top-0 right-0 p-2 opacity-10">
+                                                                                <Zap className="h-12 w-12 text-white" />
                                                                             </div>
-                                                                        </div>
-                                                                    </div>
+                                                                            <div className="text-center space-y-1 relative z-10">
+                                                                                <span className="text-[10px] font-black uppercase block opacity-60 tracking-widest">Final Weighted</span>
+                                                                                <div className="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-linear-to-br from-white to-white/70">{finalTotal}</div>
+                                                                                <div className="h-1 w-12 bg-primary mx-auto my-2" />
+                                                                                <span className="text-[10px] font-bold opacity-40">OVERALL GRADE</span>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
                                                                 );
                                                             })()}
-                                                            <div className="p-8 border-b-2 border-x-2 border-slate-900 text-center">
-                                                                {(() => {
-                                                                    const fmt = (dateStr: string | null | undefined, part: 'dd' | 'mm' | 'yyyy') => {
-                                                                        if (!dateStr) return part === 'yyyy' ? '202X' : part === 'mm' ? 'mm.' : 'dd.';
-                                                                        const d = new Date(dateStr);
-                                                                        if (isNaN(d.getTime())) return part === 'yyyy' ? '202X' : part === 'mm' ? 'mm.' : 'dd.';
-                                                                        if (part === 'dd') return String(d.getDate()).padStart(2, '0') + '.';
-                                                                        if (part === 'mm') return String(d.getMonth() + 1).padStart(2, '0') + '.';
-                                                                        return String(d.getFullYear());
-                                                                    };
-                                                                    const start = student?.internshipStart;
-                                                                    const end = student?.internshipEnd;
-                                                                    return (
-                                                                        <div className="flex items-center justify-center gap-3 text-sm font-bold flex-wrap">
-                                                                            <span>Period</span>
-                                                                            <div className={`border-b border-black border-dotted w-12 text-center ${start ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(start, 'dd')}</div>
-                                                                            <div className={`border-b border-black border-dotted w-12 text-center ${start ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(start, 'mm')}</div>
-                                                                            <div className={`border-b border-black border-dotted w-16 text-center ${start ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(start, 'yyyy')}</div>
-                                                                            <span>~</span>
-                                                                            <div className={`border-b border-black border-dotted w-12 text-center ${end ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(end, 'dd')}</div>
-                                                                            <div className={`border-b border-black border-dotted w-12 text-center ${end ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(end, 'mm')}</div>
-                                                                            <div className={`border-b border-black border-dotted w-16 text-center ${end ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(end, 'yyyy')}</div>
+
+                                                            {/* Marking Formula Row */}
+                                                            <tr className="bg-slate-50">
+                                                                <td className="border-r-2 border-slate-900 p-3 font-black text-center text-[10px] uppercase">Marking</td>
+                                                                <td colSpan={9} className="p-4 text-xs font-black text-center tracking-wide">
+                                                                    (Doing Training assignments + Attitude + Safety management) score × 80% + Attendance (20%)
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                {/* student attendance sheet footer */}
+                                                <div className="bg-white border-none mt-8 overflow-hidden">
+                                                    <div className="p-3 bg-slate-50 border-y border-x-2 border-black">
+                                                        <span className="text-sm font-black uppercase tracking-widest pl-2">Student attendance sheet</span>
+                                                    </div>
+                                                    {(() => {
+                                                        const absentDays = student?.absentDays || 0;
+                                                        const attendanceRaw = Math.max(0, 100 - (absentDays * 10));
+
+                                                        const assignmentsScore = [
+                                                            { id: 'knowledgeWirelessOps', key: 0 },
+                                                            { id: 'knowledgeWirelessEst', key: 1 },
+                                                            { id: 'knowledgeWirelessMaint', key: 2 },
+                                                            { id: 'knowledgeApplication', key: 3 },
+                                                        ].reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
+
+                                                        const attitudeScore = [
+                                                            { id: 'responsibility' },
+                                                            { id: 'cooperativeness' },
+                                                            { id: 'complianceEtiquette' }
+                                                        ].reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
+
+                                                        const safetyScore = [
+                                                            { id: 'safetyAwareness' },
+                                                            { id: 'safetyCompliance' },
+                                                            { id: 'safetyArrangement' }
+                                                        ].reduce((acc, row) => acc + ((student?.ratings?.[0]?.[row.id as keyof typeof student.ratings[0]] as number) || 0), 0);
+
+                                                        const rawScore = assignmentsScore + attitudeScore + safetyScore;
+                                                        const weightedPerformance = rawScore * 0.8;
+                                                        const attendanceWeighted = attendanceRaw * 0.2;
+                                                        const finalTotal = Math.round((weightedPerformance + attendanceWeighted) * 10) / 10;
+
+                                                        return (
+                                                            <div className="grid grid-cols-1 md:grid-cols-4 border-b-2 border-x-2 border-slate-900 bg-white">
+                                                                <div className="border-r border-slate-900 p-8 flex items-center justify-center bg-slate-50">
+                                                                    <span className="text-xs font-black uppercase tracking-widest text-slate-400 [writing-mode:vertical-rl] rotate-180">Summary Scheme</span>
+                                                                </div>
+                                                                <div className="col-span-3 p-10 flex flex-col gap-6">
+                                                                    {/* Performance component */}
+                                                                    <div className="flex items-center gap-4 text-sm flex-wrap">
+                                                                        <div className="h-10 px-4 rounded-full bg-slate-50 border border-slate-200 flex items-center gap-3">
+                                                                            <span className="font-bold text-slate-500 italic">performance score</span>
+                                                                            <div className="w-12 text-center font-black text-slate-900 text-lg">{rawScore}</div>
                                                                         </div>
-                                                                    );
-                                                                })()}
-                                                            </div>
-                                                            <div className="grid grid-cols-1 md:grid-cols-4 border-b-2 border-x-2 border-slate-900 min-h-[160px]">
-                                                                <div className="border-r border-slate-900 p-6 flex items-center justify-center bg-slate-50 text-center">
-                                                                    <span className="text-sm font-black uppercase">Overall<br />Review</span>
-                                                                </div>
-                                                                <div className="col-span-3 p-6 text-sm text-slate-700 whitespace-pre-wrap">
-                                                                    {student?.ratings?.[0]?.comment || "No review provided."}
-                                                                </div>
-                                                            </div>
-                                                            <div className="p-10 space-y-8 bg-slate-50 border-x-2 border-b-2 border-slate-900">
-                                                                <div className="flex gap-4 items-end">
-                                                                    <span className="text-sm font-bold uppercase w-48">Company Name:</span>
-                                                                    <div className="flex-1 h-6 font-semibold px-4 border-b-2 border-black border-dotted">{student?.companyName || "................................................................................................................................"}</div>
-                                                                </div>
-                                                                <div className="flex gap-4 items-end">
-                                                                    <span className="text-sm font-bold uppercase w-48">Evaluator's Position:</span>
-                                                                    <div className="flex-1 h-6 font-semibold px-4 border-b-2 border-black border-dotted">
-                                                                        {student?.supervisor?.role || "................................................................................................................................"}
+                                                                        <span className="font-black text-slate-300">×</span>
+                                                                        <div className="h-10 px-4 rounded-full bg-slate-50 border border-slate-200 flex items-center gap-3">
+                                                                            <span className="font-bold text-slate-500">80%</span>
+                                                                            <span className="text-slate-300">=</span>
+                                                                            <div className="w-16 text-center font-black text-primary text-lg">{Math.round(weightedPerformance * 10) / 10}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    {/* Attendance component */}
+                                                                    <div className="flex items-center gap-4 text-sm flex-wrap">
+                                                                        <div className="h-10 px-4 rounded-full bg-slate-50 border border-slate-200 flex items-center gap-3">
+                                                                            <span className="font-bold text-slate-500 italic">attendance score</span>
+                                                                            <div className="w-12 text-center font-black text-slate-900 text-lg">{attendanceRaw}</div>
+                                                                        </div>
+                                                                        <span className="font-black text-slate-300">×</span>
+                                                                        <div className="h-10 px-4 rounded-full bg-slate-50 border border-slate-200 flex items-center gap-3">
+                                                                            <span className="font-bold text-slate-500">20%</span>
+                                                                            <span className="text-slate-300">=</span>
+                                                                            <div className="w-16 text-center font-black text-primary text-lg">{Math.round(attendanceWeighted * 10) / 10}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    {/* Final total */}
+                                                                    <div className="flex items-center gap-6 border-t-2 border-slate-100 pt-8 mt-2 flex-wrap">
+                                                                        <div className="flex flex-col">
+                                                                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Final Result</span>
+                                                                            <div className="flex items-baseline gap-2">
+                                                                                <div className="text-5xl font-black text-slate-900 tracking-tighter">{finalTotal}</div>
+                                                                                <span className="text-sm font-bold text-slate-400">/ 100</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="hidden md:block h-12 w-px bg-slate-200 mx-4" />
+                                                                        <div className="flex flex-col">
+                                                                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Grade Status</span>
+                                                                            <span className={cn(
+                                                                                "text-sm font-black uppercase px-3 py-1 rounded-full border-2",
+                                                                                finalTotal >= 50 ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200"
+                                                                            )}>
+                                                                                {finalTotal >= 50 ? "PASSED" : "RE-EVALUATION REQUIRED"}
+                                                                            </span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                                <div className="flex gap-4 items-end">
-                                                                    <span className="text-sm font-bold uppercase w-48">Evaluator's Name / Sign:</span>
-                                                                    <div className="flex-1 h-6 font-semibold px-4 border-b-2 border-black border-dotted relative">
-                                                                        <div className="absolute inset-0 flex items-center justify-between px-4">
-                                                                            <span>{student?.supervisor?.user?.name || ""}</span>
-                                                                            {student?.ratings?.[0] && <span className="font-[signature] text-2xl text-slate-800 -rotate-3">{student?.supervisor?.user?.name}</span>}
-                                                                        </div>
-                                                                    </div>
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                    <div className="p-8 border-b-2 border-x-2 border-slate-900 text-center">
+                                                        {(() => {
+                                                            const fmt = (dateStr: string | null | undefined, part: 'dd' | 'mm' | 'yyyy') => {
+                                                                if (!dateStr) return part === 'yyyy' ? '202X' : part === 'mm' ? 'mm.' : 'dd.';
+                                                                const d = new Date(dateStr);
+                                                                if (isNaN(d.getTime())) return part === 'yyyy' ? '202X' : part === 'mm' ? 'mm.' : 'dd.';
+                                                                if (part === 'dd') return String(d.getDate()).padStart(2, '0') + '.';
+                                                                if (part === 'mm') return String(d.getMonth() + 1).padStart(2, '0') + '.';
+                                                                return String(d.getFullYear());
+                                                            };
+                                                            const start = student?.internshipStart;
+                                                            const end = student?.internshipEnd;
+                                                            return (
+                                                                <div className="flex items-center justify-center gap-3 text-sm font-bold flex-wrap">
+                                                                    <span>Period</span>
+                                                                    <div className={`border-b border-black border-dotted w-12 text-center ${start ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(start, 'dd')}</div>
+                                                                    <div className={`border-b border-black border-dotted w-12 text-center ${start ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(start, 'mm')}</div>
+                                                                    <div className={`border-b border-black border-dotted w-16 text-center ${start ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(start, 'yyyy')}</div>
+                                                                    <span>~</span>
+                                                                    <div className={`border-b border-black border-dotted w-12 text-center ${end ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(end, 'dd')}</div>
+                                                                    <div className={`border-b border-black border-dotted w-12 text-center ${end ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(end, 'mm')}</div>
+                                                                    <div className={`border-b border-black border-dotted w-16 text-center ${end ? 'text-slate-900' : 'text-slate-400'}`}>{fmt(end, 'yyyy')}</div>
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                    <div className="grid grid-cols-1 md:grid-cols-4 border-b-2 border-x-2 border-slate-900 min-h-[160px]">
+                                                        <div className="border-r border-slate-900 p-6 flex items-center justify-center bg-slate-50 text-center">
+                                                            <span className="text-sm font-black uppercase">Overall<br />Review</span>
+                                                        </div>
+                                                        <div className="col-span-3 p-6 text-sm text-slate-700 whitespace-pre-wrap">
+                                                            {student?.ratings?.[0]?.comment || "No review provided."}
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-10 space-y-8 bg-slate-50 border-x-2 border-b-2 border-slate-900">
+                                                        <div className="flex gap-4 items-end">
+                                                            <span className="text-sm font-bold uppercase w-48">Company Name:</span>
+                                                            <div className="flex-1 h-6 font-semibold px-4 border-b-2 border-black border-dotted">{student?.companyName || "................................................................................................................................"}</div>
+                                                        </div>
+                                                        <div className="flex gap-4 items-end">
+                                                            <span className="text-sm font-bold uppercase w-48">Evaluator's Position:</span>
+                                                            <div className="flex-1 h-6 font-semibold px-4 border-b-2 border-black border-dotted">
+                                                                {student?.supervisor?.role || "................................................................................................................................"}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-4 items-end">
+                                                            <span className="text-sm font-bold uppercase w-48">Evaluator's Name / Sign:</span>
+                                                            <div className="flex-1 h-6 font-semibold px-4 border-b-2 border-black border-dotted relative">
+                                                                <div className="absolute inset-0 flex items-center justify-between px-4">
+                                                                    <span>{student?.supervisor?.user?.name || ""}</span>
+                                                                    {student?.ratings?.[0] && <span className="font-[signature] text-2xl text-slate-800 -rotate-3">{student?.supervisor?.user?.name}</span>}
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
+                                                </div>
+                                            </div>
 
-                                                </div>
-                                            ) : (
-                                                <div className="p-6 text-center text-slate-500">
-                                                    No ratings available.
-                                                </div>
-                                            )}
-                                        </>
+                                        </div>
                                     )}
                                 </CardContent>
                             </Card>
@@ -2081,6 +2607,6 @@ export default function StudentLogbookPage() {
                     </motion.div>
                 </AnimatePresence>
             </main>
-        </div>
+        </div >
     );
-} 
+}
