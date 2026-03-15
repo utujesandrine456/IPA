@@ -1,9 +1,13 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { WeeklyLogsService } from '../weekly-logs/weekly-logs.service';
 
 @Injectable()
 export class RatingsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private weeklyLogsService: WeeklyLogsService
+    ) { }
 
     async create(data: {
         studentId: number;
@@ -20,6 +24,8 @@ export class RatingsService {
         safetyAwareness?: number;
         safetyCompliance?: number;
         safetyArrangement?: number;
+        evaluatorPosition?: string;
+        evaluatorName?: string;
     }) {
         const { studentId, supervisorId, rating, comment, ...scores } = data;
 
@@ -27,15 +33,24 @@ export class RatingsService {
             throw new BadRequestException('studentId, supervisorId and rating are required');
         }
 
-        return this.prisma.rating.create({
-            data: {
-                studentId: Number(studentId),
-                supervisorId: Number(supervisorId),
-                rating: Number(rating),
-                comment,
-                ...scores
-            },
+        const ratingData = {
+            studentId: Number(studentId),
+            supervisorId: Number(supervisorId),
+            rating: Number(rating),
+            comment,
+            ...scores
+        };
+
+        const result = await this.prisma.rating.upsert({
+            where: { studentId: Number(studentId) },
+            update: ratingData,
+            create: ratingData
         });
+
+        // After rating, auto-approve all weekly logs
+        await this.weeklyLogsService.approveAllForStudent(Number(studentId));
+
+        return result;
     }
 
     async findByStudent(studentId: number) {

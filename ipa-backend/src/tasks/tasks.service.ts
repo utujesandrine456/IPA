@@ -104,7 +104,7 @@ export class TasksService {
             updateData.submissionContent = submissionContent;
         }
 
-        if (status === 'COMPLETED' || status === 'APPROVED') {
+        if (status === 'COMPLETED') {
             updateData.completedAt = new Date();
         }
 
@@ -148,10 +148,11 @@ export class TasksService {
                     link: `/supervisor/${task.student.supervisor.id}`
                 }
             });
-        } else if ((status === 'COMPLETED' || status === 'PENDING') && task.student?.user?.id) {
-            const notifType = status === 'COMPLETED' ? 'SUCCESS' : 'WARNING';
-            const notifTitle = status === 'COMPLETED' ? 'Task Approved' : 'Task Revision Requested';
-            const notifMessage = status === 'COMPLETED'
+        } else if ((status === 'COMPLETED' || status === 'PENDING' || status === 'REJECTED') && task.student?.user?.id) {
+            const isApproved = status === 'COMPLETED';
+            const notifType = isApproved ? 'SUCCESS' : 'WARNING';
+            const notifTitle = isApproved ? 'Task Approved' : 'Task Revision Requested';
+            const notifMessage = isApproved
                 ? `Your work for "${task.title}" has been approved!`
                 : `Your work for "${task.title}" needs revision.`;
 

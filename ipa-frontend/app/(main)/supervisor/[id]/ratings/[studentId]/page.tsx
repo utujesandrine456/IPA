@@ -79,6 +79,28 @@ export default function StudentRatingPage() {
                 if (tasksRes.ok) {
                     setTasks(tasksRes.data.tasks || []);
                 }
+
+                // Fetch existing rating
+                const ratingRes = await apiFetch(`/ratings?studentId=${studentId}`);
+                if (ratingRes.ok && ratingRes.data.ratings && ratingRes.data.ratings.length > 0) {
+                    const latestRating = ratingRes.data.ratings[0];
+                    setRating(prev => ({
+                        ...prev,
+                        knowledgeWirelessOps: latestRating.knowledgeWirelessOps || 0,
+                        knowledgeWirelessEst: latestRating.knowledgeWirelessEst || 0,
+                        knowledgeWirelessMaint: latestRating.knowledgeWirelessMaint || 0,
+                        knowledgeApplication: latestRating.knowledgeApplication || 0,
+                        responsibility: latestRating.responsibility || 0,
+                        cooperativeness: latestRating.cooperativeness || 0,
+                        complianceEtiquette: latestRating.complianceEtiquette || 0,
+                        safetyAwareness: latestRating.safetyAwareness || 0,
+                        safetyCompliance: latestRating.safetyCompliance || 0,
+                        safetyArrangement: latestRating.safetyArrangement || 0,
+                        comment: latestRating.comment || "",
+                        evaluatorPosition: latestRating.evaluatorPosition || "",
+                        evaluatorName: latestRating.evaluatorName || ""
+                    }));
+                }
             } catch (error) {
                 console.error("error fetching data:", error);
                 toast.error("failed to load assessment data");
@@ -126,6 +148,8 @@ export default function StudentRatingPage() {
                     safetyAwareness: rating.safetyAwareness,
                     safetyCompliance: rating.safetyCompliance,
                     safetyArrangement: rating.safetyArrangement,
+                    evaluatorPosition: rating.evaluatorPosition,
+                    evaluatorName: rating.evaluatorName,
                 }),
             });
 
@@ -225,55 +249,47 @@ export default function StudentRatingPage() {
                             <tbody>
                                 {(() => {
                                     const assignmentRowConfig = [
-                                        { id: 'knowledgeWirelessOps', key: 0 },
-                                        { id: 'knowledgeWirelessEst', key: 1 },
-                                        { id: 'knowledgeWirelessMaint', key: 2 },
-                                        { id: 'knowledgeApplication', key: 3 },
+                                        { id: 'knowledgeApplication', label: 'Related knowledge' },
+                                        { id: 'knowledgeWirelessOps', label: 'Support for operation of wireless communication network' },
+                                        { id: 'knowledgeWirelessEst', label: 'Establishment of wireless communication network' },
+                                        { id: 'knowledgeWirelessMaint', label: 'Maintenance of wireless communication room' },
                                     ];
 
-                                    // show only as many rows as there are tasks, or at least 1 if none
-                                    const displayRows = tasks.length > 0
-                                        ? assignmentRowConfig.slice(0, Math.min(tasks.length, 4))
-                                        : [assignmentRowConfig[0]];
-
-                                    return displayRows.map((item, i) => {
-                                        const task = tasks[item.key];
-                                        const label = task ? task.title : "Related Knowledge";
-
+                                    return assignmentRowConfig.map((item, i) => {
                                         return (
                                             <tr key={item.id} className="border-b border-slate-300">
                                                 {i === 0 && (
-                                                    <td rowSpan={displayRows.length} className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-50">
+                                                    <td rowSpan={4} className="border-r-2 border-slate-900 p-2 font-black uppercase [writing-mode:vertical-rl] rotate-180 text-center w-12 tracking-widest bg-slate-50">
                                                         Assignments
                                                     </td>
                                                 )}
                                                 <td className="border-r border-slate-300 p-2 text-center font-bold">{i + 1}</td>
-                                                <td className="border-r border-slate-300 p-3 leading-tight min-w-[200px]">
-                                                    {label}
+                                                <td className="border-r border-slate-300 p-3 leading-snug min-w-[240px] font-medium text-slate-700">
+                                                    {item.label}
                                                 </td>
                                                 {[10, 9, 8, 7, 6].map(val => (
                                                     <td key={val} className="border-r border-slate-300 p-2 text-center">
                                                         <div
                                                             onClick={() => setRating(prev => ({ ...prev, [item.id]: val }))}
                                                             className={cn(
-                                                                "h-8 w-8 mx-auto flex items-center justify-center rounded-lg cursor-pointer transition-all border-2",
+                                                                "h-9 w-9 mx-auto flex items-center justify-center rounded-lg cursor-pointer transition-all ",
                                                                 rating[item.id as keyof RatingData] === val
-                                                                    ? "bg-slate-900 text-white border-slate-900 scale-110 shadow-md"
-                                                                    : "border-transparent text-slate-400 hover:border-slate-200 hover:text-slate-600 font-bold"
+                                                                    ? "bg-slate-900 text-white scale-110 shadow-md font-black"
+                                                                    : " text-slate-400  hover:text-slate-600 font-bold bg-slate-50/50"
                                                             )}
                                                         >
                                                             {val}
                                                         </div>
                                                     </td>
                                                 ))}
-                                                <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50">
+                                                <td className="border-r-2 border-slate-900 p-2 text-center font-black bg-slate-50 text-slate-900">
                                                     {i === 0 ? `/40` : ""}
                                                 </td>
                                                 {i === 0 && (
-                                                    <td rowSpan={displayRows.length} className="p-4 align-middle bg-white">
-                                                        <div className="h-20 w-full border-4 border-slate-200 rounded-2xl flex flex-col items-center justify-center">
-                                                            <span className="text-[10px] font-black uppercase text-slate-400">sum</span>
-                                                            <span className="text-2xl font-black text-slate-900">{assignmentsScore}</span>
+                                                    <td rowSpan={4} className="p-4 align-middle bg-white">
+                                                        <div className="h-24 w-full border-4 border-slate-900/10 rounded-3xl flex flex-col items-center justify-center bg-slate-50 shadow-inner">
+                                                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider">sum</span>
+                                                            <span className="text-3xl font-black text-slate-900">{assignmentsScore}</span>
                                                         </div>
                                                     </td>
                                                 )}

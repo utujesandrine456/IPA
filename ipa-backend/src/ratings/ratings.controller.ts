@@ -18,6 +18,7 @@ export class RatingsController {
     @Get()
     @ApiOperation({ summary: 'Get student ratings', description: 'Retrieve ratings for a specific student' })
     async findByStudent(@Query('studentId') studentId: number) {
-        return this.ratingsService.findByStudent(studentId);
+        const ratings = await this.ratingsService.findByStudent(studentId);
+        return { ratings };
     }
 }

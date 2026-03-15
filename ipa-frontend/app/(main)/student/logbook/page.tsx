@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -10,6 +10,7 @@ import {
     ShieldCheck, LockKeyhole, Check
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -56,14 +57,29 @@ function LogbookInput({ label, value, onChange, type = "text" }: { label: string
 }
 
 function StatusBadge({ status }: { status: string }) {
-    const isApproved = status === "APPROVED";
+    const isCompleted = status === "COMPLETED";
+    const isRejected = status === "REJECTED";
+    const isSubmitted = status === "SUBMITTED";
+    
     return (
-        <div className={`px-4 py-1.5 rounded-full text-xs font-bold shadow-sm flex items-center gap-2 transition-all ${isApproved ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
-            <div className={`h-1.5 w-1.5 rounded-full ${isApproved ? 'bg-green-500' : 'bg-amber-500 animate-pulse'}`} />
-            {status}
+        <div className={cn(
+            "px-4 py-1.5 rounded-full text-xs font-bold shadow-sm flex items-center gap-2 transition-all border",
+            isCompleted ? "bg-green-50 text-green-700 border-green-200" :
+            isRejected ? "bg-red-50 text-red-700 border-red-200" :
+            isSubmitted ? "bg-amber-50 text-amber-700 border-amber-200" :
+            "bg-slate-50 text-slate-700 border-slate-200"
+        )}>
+            <div className={cn(
+                "h-1.5 w-1.5 rounded-full",
+                isCompleted ? "bg-green-500" :
+                isRejected ? "bg-red-500" :
+                "bg-amber-500 animate-pulse"
+            )} />
+            {status === "COMPLETED" ? "APPROVED" : status}
         </div>
     );
 }
+
 
 function SurveCheckButton({ label, active, onClick, onDecline }: { label: string; active?: boolean; onClick: () => void; onDecline: () => void }) {
     return (
@@ -140,7 +156,7 @@ interface WeeklyLog {
     supervisorName?: string;
     supervisorDate?: string;
     supervisorSignature?: boolean;
-    status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+    status: 'DRAFT' | 'SUBMITTED' | 'COMPLETED' | 'REJECTED';
 }
 
 interface IapReport {
@@ -335,6 +351,12 @@ export default function StudentLogbookPage() {
 
     const handleSaveStudentInfo = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!student?.internshipStart || !student?.internshipEnd) {
+            toast.error("Please provide both start and end dates");
+            return;
+        }
+
         setIsSaving(true);
         try {
             const result = await apiFetch(`/students/${student.id}`, {
@@ -342,13 +364,29 @@ export default function StudentLogbookPage() {
                 body: JSON.stringify(student)
             });
             if (result.ok) {
-                toast.success("Profile records updated");
+                toast.success("Profile details saved to database");
+                
+                // Update local storage to reflect completed profile
+                try {
+                    const storedUserRaw = localStorage.getItem("user");
+                    if (storedUserRaw) {
+                        const storedUser = JSON.parse(storedUserRaw);
+                        storedUser.profileCompleted = true;
+                        if (storedUser.studentProfile) {
+                            storedUser.studentProfile.profileCompleted = true;
+                        }
+                        localStorage.setItem("user", JSON.stringify(storedUser));
+                    }
+                } catch (err) {
+                    console.error("Local storage update failed", err);
+                }
+
                 fetchData();
             } else {
-                toast.error(result.error || "Update failed");
+                toast.error(result.error || "Failed to save details");
             }
         } catch (error) {
-            toast.error("Update failed");
+            toast.error("An error occurred during save");
         } finally {
             setIsSaving(false);
         }
@@ -434,247 +472,174 @@ export default function StudentLogbookPage() {
 
     const generatePDF = () => {
         const doc = new jsPDF() as any;
-        const fontName = "helvetica";
+        const fontName = "helvetica"; // Falls back to helvetica, but styled to look like Outfit
         const primaryColor: [number, number, number] = [26, 38, 74];
+        const slateColor: [number, number, number] = [241, 245, 249];
 
-        // ─── PAGE 1: COVER ───────────────────────────────────────────────────────────
-        doc.setFillColor(255, 255, 255);
-        doc.rect(0, 0, 210, 297, 'F');
-        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setLineWidth(1);
-        doc.rect(10, 10, 190, 277);
-
-        doc.setFontSize(22);
-        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setFont(fontName, "bold");
-        doc.text("INDUSTRIAL ATTACHMENT", 105, 50, { align: "center" });
-        doc.setFontSize(30);
-        doc.text("LOGBOOK", 105, 65, { align: "center" });
-
-        doc.setFontSize(12);
-        doc.setTextColor(0, 0, 0);
-        doc.setFont(fontName, "normal");
-
-        let y = 100;
-        doc.setFont(fontName, "bold");
-        doc.text("Student details:", 20, y);
-        doc.setFont(fontName, "normal");
-        y += 10;
-        doc.text(`Name of Student: ${student?.fullName || ""}`, 25, y); y += 8;
-        doc.text(`Date of Birth: ${student?.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : ""}`, 25, y); y += 8;
-        doc.text(`ID/Passport No.: ${student?.idOrPassport || ""}`, 25, y); y += 8;
-        doc.text(`Reg No.: ${student?.studentNumber || ""}`, 25, y); y += 8;
-        doc.text(`Cell Phone No.: ${student?.phone || ""}`, 25, y);
-
-        y += 18;
-        doc.setFont(fontName, "bold");
-        doc.text("Company/Institution details:", 20, y);
-        doc.setFont(fontName, "normal");
-        y += 10;
-        doc.text(`Name: ${student?.companyName || ""}`, 25, y); y += 8;
-        doc.text(`Address/Location: ${student?.companyAddress || ""}`, 25, y); y += 8;
-        doc.text(`Tel No.: ${student?.companyPhone || ""}`, 25, y); y += 8;
-        doc.text(`Email: ${student?.companyEmail || ""}`, 25, y); y += 8;
-        doc.text(`P.O.Box: ${student?.companyPOBox || ""}`, 25, y);
-
-        y += 18;
-        doc.setFont(fontName, "bold");
-        doc.text("Supervisor details:", 20, y);
-        doc.setFont(fontName, "normal");
-        y += 10;
-        doc.text(`IAP Company Supervisor Name: ${student?.supervisorName || ""}`, 25, y); y += 8;
-        doc.text(`Designation/Title: ${student?.supervisorDesignation || ""}`, 25, y); y += 8;
-        doc.text(`Department: ${student?.supervisorDepartment || ""}`, 25, y); y += 8;
-        doc.text(`Tel No.: ${student?.supervisorPhone || ""}`, 25, y); y += 8;
-        doc.text(`Email: ${student?.supervisorEmail || ""}`, 25, y);
-
-        // ─── HELPERS FOR PAGINATED TEXT ───────────────────────────────────────────────
+        // ─── HELPERS ─────────────────────────────────────────────────────────────────
         const PAGE_BOTTOM = 275;
-        const LINE_H = 5.5;
+        const LINE_H = 6;
         const CONTENT_W = 170;
 
-        const addGuidelinesHeader = (subtitle: string) => {
+        const addHeader = (title: string, subtitle: string = "RCA Industrial Attachment Program") => {
             doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.rect(0, 0, 210, 20, 'F');
-            doc.setFontSize(13);
+            doc.rect(0, 0, 210, 25, 'F');
             doc.setTextColor(255, 255, 255);
             doc.setFont(fontName, "bold");
-            doc.text(subtitle, 105, 13, { align: "center" });
+            doc.setFontSize(14);
+            doc.text(title, 105, 12, { align: "center" });
+            doc.setFontSize(8);
+            doc.setFont(fontName, "normal");
+            doc.text(subtitle, 105, 18, { align: "center" });
             doc.setTextColor(0, 0, 0);
         };
 
-        const checkPage = (cy: number, need: number): number => {
-            if (cy + need > PAGE_BOTTOM) {
-                doc.addPage();
-                addGuidelinesHeader("IAP OBJECTIVES & GUIDELINES (CONTINUED)");
-                return 28;
-            }
-            return cy;
-        };
-
-        const pBullet = (text: string, cy: number, indent = 25): number => {
-            const lines = doc.splitTextToSize(`\u2022  ${text}`, CONTENT_W - (indent - 20));
-            cy = checkPage(cy, lines.length * LINE_H + 2);
-            doc.setFont(fontName, "normal");
-            doc.text(lines, indent, cy);
-            return cy + lines.length * LINE_H + 2;
-        };
-
-        const pNumbered = (num: string, text: string, cy: number, indent = 25): number => {
-            const lines = doc.splitTextToSize(`${num}. ${text}`, CONTENT_W - (indent - 20));
-            cy = checkPage(cy, lines.length * LINE_H + 2);
-            doc.setFont(fontName, "normal");
-            doc.text(lines, indent, cy);
-            return cy + lines.length * LINE_H + 2;
-        };
-
-        const pHeader = (text: string, cy: number, bold = true): number => {
-            cy = checkPage(cy, 10);
-            doc.setFont(fontName, bold ? "bold" : "normalitalic");
-            doc.text(text, 20, cy);
-            doc.setFont(fontName, "normal");
-            return cy + 8;
-        };
-
-        const pPara = (text: string, cy: number, indent = 25): number => {
-            const lines = doc.splitTextToSize(text, CONTENT_W - (indent - 20));
-            cy = checkPage(cy, lines.length * LINE_H + 2);
-            doc.setFont(fontName, "normal");
-            doc.text(lines, indent, cy);
-            return cy + lines.length * LINE_H + 4;
-        };
-
-        // ─── PAGES 2+: FULL IAP OBJECTIVES & GUIDELINES ────────────────────────────
-        doc.addPage();
-        addGuidelinesHeader("IAP OBJECTIVES & GUIDELINES");
-        doc.setFontSize(10);
-        let yPos = 28;
-
-        yPos = pHeader("IAP Objectives", yPos);
-        yPos = pBullet("To develop students and enhance their range of skills that are valuable for future careers, including technical skills and transferable skills such as communication, problem-solving, critical thinking, teamwork, adaptability, and time management.", yPos);
-        yPos = pBullet("To expose students to the industry they are interested in or studying, allowing them to gain a deeper understanding of industry practices, trends, challenges, and opportunities.", yPos);
-        yPos = pBullet("Opportunity for students to build professional networks and establish connections with industry professionals, facilitating future job opportunities, mentorship, and valuable industry contacts.", yPos);
-        yPos = pBullet("Students can explore their career interests and clarify their goals by experiencing a real work environment and gaining insights into different roles, industries, and work cultures.", yPos);
-        yPos = pBullet("To foster professional growth in students, challenging them, providing new experiences, and offering feedback to develop self-confidence, resilience, adaptability, and a growth mind-set.", yPos);
-        yPos = pBullet("To integrate academic learning with practical application, helping students understand how theoretical concepts and classroom learning align with real-world scenarios, enhancing their overall educational experience.", yPos);
-        yPos += 4;
-
-        yPos = pHeader("Key points to keep in mind on a daily basis (Compulsory by the student).", yPos);
-        doc.setFont(fontName, "italic"); doc.text("Before IAP", 20, yPos); doc.setFont(fontName, "normal"); yPos += 7;
-        yPos = pNumbered("1", "Did you meet your IAP coordinator or any Liaison Officer (LO)?", yPos);
-        yPos += 2;
-        doc.setFont(fontName, "italic"); doc.text("During IAP", 20, yPos); doc.setFont(fontName, "normal"); yPos += 7;
-        yPos = pNumbered("2", "Did your company supervisor assess you weekly and record on your Log Book?", yPos);
-        yPos = pNumbered("3", "Did your LO assess your Log Book when you are visited?", yPos);
-        yPos += 2;
-        doc.setFont(fontName, "italic"); doc.text("After IAP", 20, yPos); doc.setFont(fontName, "normal"); yPos += 7;
-        yPos = pNumbered("4", "Did you send a Thank You letter to your IAP Company/Institution and give a copy to your LO with a reception stamp & signature? (Compulsory)", yPos);
-        yPos = pNumbered("5", "Did you complete the Student's Report Form?", yPos);
-        yPos = pNumbered("6", "Did you submit your Log Book plus your IAP-Report to your LO for grading within TWO weeks after the completion of IAP?", yPos);
-        yPos = pNumbered("7", "Did the LO sign your Log Book pages?", yPos);
-        yPos += 4;
-
-        yPos = pHeader("IAP Guidelines", yPos);
-        yPos = pHeader("1. Introduction", yPos, false);
-        yPos = pPara("Preparing for an IAP is crucial to ensure a successful and enriching experience. This guide presents instructions to students on how to make the most out of their placement, starting from the preparation phase, during the placement itself, and concluding with the post placement phase. Follow these guidelines to maximize your learning, professional growth, and overall experience.", yPos);
-
-        yPos = pHeader("2. Prior to Placement", yPos, false);
-        yPos = pBullet("Research the Company/Institution where you will be placed and familiarize yourself with it by understanding their mission, values, products/services, and any recent news or projects. This will help you align your expectations and demonstrate your interest during the placement.", yPos);
-        yPos = pBullet("Review Placement Objectives and understand the objectives of your placement as communicated by RCA. Review the specific skills and knowledge you are expected to gain and consider how you can actively work towards achieving those objectives during your placement.", yPos);
-        yPos = pBullet("Set personal goals that align with the placement objectives and always reflect on what you hope to achieve during the placement. This will provide a clear focus and direction for your efforts.", yPos);
-        yPos = pBullet("Familiarize yourself with professional etiquette and workplace norms. This includes appropriate behaviour, respect for colleagues and supervisors, confidentiality, punctuality, and a positive attitude. Prepare a professional-looking resume, if required, and bring any necessary identification or documentation requested by the placement host.", yPos);
-
-        yPos = pHeader("3. During the Placement", yPos, false);
-        yPos = pBullet("Be proactive and eager to learn by taking initiative, ask questions, and seek opportunities to contribute to new tasks, projects, and responsibilities that align with your learning goals.", yPos);
-        yPos = pBullet("Observe and learn from your colleagues and supervisors by paying attention to their work practices, communication styles, and problem-solving approaches. Actively seek feedback to improve your performance and demonstrate your commitment to growth.", yPos);
-        yPos = pBullet("Take advantage of networking opportunities within the workplace by engaging with colleagues, attend company events, and seek mentorship from experienced professionals. Building relationships can open your doors for future opportunities and provide valuable guidance.", yPos);
-        yPos = pBullet("Maintain a growth mind-set by embracing challenges and setbacks as learning opportunities. Be open to feedback, adapt to new situations, and continuously seek ways to improve your skills. Embody a growth mind-set that fosters resilience, adaptability, and a commitment to lifelong learning.", yPos);
-
-        yPos = pHeader("4. After the Placement", yPos, false);
-        yPos = pBullet("Take time to reflect on your placement experience by evaluating your accomplishments, challenges faced, and lessons learned. Consider how the experience has contributed to your personal and professional growth.", yPos);
-        yPos = pBullet("Document your achievements, skills acquired, and projects completed during the placement. Update your resume or portfolio to reflect your new experiences and competencies. These will be valuable assets when pursuing future opportunities.", yPos);
-        yPos = pBullet("Seek feedback and recommendations by approaching your supervisors or mentors. Request their insights on your performance and areas for further development. These testimonials can be valuable additions to your professional profile.", yPos);
-        yPos = pBullet("Apply the knowledge, skills, and insights gained during the placement to your future academic pursuits or career endeavours. Leverage the experience to enhance your academic performance, shape your career path, and make informed decisions.", yPos);
-        yPos += 4;
-
-        yPos = pHeader("IAP Instructions", yPos);
-
-        yPos = pHeader("Meet your LO", yPos, false);
-        yPos = pPara("It is very important that you obtain the contact number of your LO where they can be contacted outside office hours in case you may need it. Please consult him or her if you have any problems.", yPos);
-
-        yPos = pHeader("Rules and Regulations", yPos, false);
-        yPos = pPara("Please note the following instructions for students participating in the IAP:", yPos);
-        yPos = pBullet("Once your IAP placement has been confirmed, you are not permitted to change your attachment or withdraw from the program without obtaining approval from the RCA IAP coordinator.", yPos);
-        yPos = pBullet("It is mandatory for you to adhere to the rules and regulations that govern employees of the IAP company or institution to which you are attached.", yPos);
-        yPos = pBullet("Any instances of absenteeism, insubordination, tardiness, or misconduct reported against you will result in disciplinary action.", yPos);
-        yPos = pBullet("Direct negotiation with the company regarding matters such as the duration of your attachment, allowance, working hours, leave of absence, working conditions, and rules is strictly prohibited.", yPos);
-        yPos = pBullet("During your attachment, you are not entitled to any leave or days off, including returning to RCA or your home. However, in case of emergencies, please seek permission from your supervisor for a leave of absence. Your LO must also be notified.", yPos);
-        yPos = pBullet("For non-emergency situations, you must apply for a leave of absence from the company or institution's supervision and inform your LO. Please contact them during regular working hours, excluding weekends.", yPos);
-        yPos = pBullet("If you become ill, please inform your supervisor that you will be consulting a doctor. A Medical Certificate must be submitted to your supervisor on the day you return to work.", yPos);
-        yPos = pBullet("As an intern, you do not possess the authority to negotiate or influence company-wide decisions, such as changes to the organizational structure, budget allocations, or major strategic initiatives.", yPos);
-        yPos = pBullet("Harassment of any kind, including but not limited to sexual harassment, verbal abuse, or discrimination, will not be tolerated. If you experience or witness any form of harassment, immediately report it to your supervisor or the designated authority. Confidentiality and appropriate action will be ensured.", yPos);
-
-        yPos = pHeader("Allowance", yPos, false);
-        yPos = pBullet("The provision of an allowance by the company you are attached to is not guaranteed, unless specifically mentioned in your Placement Notice.", yPos);
-        yPos = pBullet("It is important to note that the allowance provided does not directly correspond to the productivity of your work. It is primarily intended as an out-of-pocket allowance.", yPos);
-        yPos = pBullet("In the event that the company fails to fulfil any officially agreed-upon arrangements at the conclusion of your attachment, please contact the designated person-in-charge within the IAP company or institution.", yPos);
-        yPos = pBullet("If you encounter any difficulties or issues with your IAP company that you are unable to resolve independently, please consult your LO for assistance.", yPos);
-
-        yPos = pHeader("Accident", yPos, false);
-        yPos = pBullet("Ensuring safety for yourself and others involved is of utmost importance. In the event of any injuries or hazards, promptly seek medical assistance or contact emergency services.", yPos);
-        yPos = pBullet("It is crucial to inform your supervisor at the IAP site about any accidents that occur, providing accurate details of the incident, including the date, time, location, and a description of what transpired.", yPos);
-        yPos = pBullet("Please be aware that you are covered under the RCA student's Accident Insurance Policy. If you require any necessary assistance, consult your IAP coordinator to ensure that you receive the appropriate support.", yPos);
-
-        yPos = pHeader("Logbook", yPos, false);
-        yPos = pBullet("Please read the instructions given in this Log Book as well as those written on the forms before completing them. If in doubt, please consult your LO.", yPos);
-        yPos = pBullet("At the end of each day, take some time to reflect on your activities and write down a detailed account of what you worked on, including tasks, projects, meetings, and any notable accomplishments or challenges.", yPos);
-        yPos = pBullet("Use clear and concise language when describing your activities, focusing on key points and outcomes rather than excessive detail.", yPos);
-        yPos = pBullet("Treat your log book as a valuable resource for self-reflection and future reference, as it can help you track your progress, identify areas for growth, and serve as supporting evidence for any reports, presentations, or evaluations related to your IAP.", yPos);
-
-        // ─── WEEKLY LOGS ────────────────────────────────────────────────────────────
         const drawCheckbox = (cx: number, cy: number, checked: boolean) => {
             doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             doc.setLineWidth(0.4);
-            doc.rect(cx, cy - 3.5, 5, 5);
+            doc.rect(cx, cy - 3.5, 4, 4);
             if (checked) {
+                doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
                 doc.setLineWidth(0.6);
-                doc.line(cx + 1, cy - 1, cx + 2.2, cy + 0.5);
-                doc.line(cx + 2.2, cy + 0.5, cx + 4.5, cy - 3);
-                doc.setLineWidth(0.1);
+                doc.line(cx + 0.8, cy - 1.5, cx + 1.8, cy - 0.5);
+                doc.line(cx + 1.8, cy - 0.5, cx + 3.2, cy - 3);
             }
         };
 
-        const gradeLabels: Record<string, string> = {
-            A: 'A - Excellent',
-            B: 'B - Good',
-            C: 'C - Satisfactory',
-            D: 'D - Needs Improvement',
-            E: 'E - Unsatisfactory',
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, 210, 297, 'F');
+        
+        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.rect(0, 0, 15, 297, 'F');
+
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.setFont(fontName, "bold");
+        doc.setFontSize(10);
+        doc.text("RWANDA CODING ACADEMY", 30, 30);
+        
+        doc.setFontSize(48);
+        doc.text("IAP", 30, 70);
+        doc.setFontSize(24);
+        doc.text("LOGBOOK", 30, 85);
+        doc.setLineWidth(2);
+        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.line(30, 95, 60, 95);
+
+        doc.setFontSize(11);
+        doc.setTextColor(100, 116, 139);
+        doc.setFont(fontName, "normal");
+        doc.text("Institutional record for Industrial Attachment Program tracking", 30, 105);
+
+        let y = 140;
+        const drawSection = (title: string, items: { label: string, value: string }[]) => {
+            doc.setFont(fontName, "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(15, 23, 42);
+            doc.text(title.toUpperCase(), 30, y);
+            y += 8;
+            doc.setLineWidth(0.1);
+            doc.setDrawColor(226, 232, 240);
+            doc.line(30, y - 4, 180, y - 4);
+
+            doc.setFont(fontName, "normal");
+            doc.setFontSize(10);
+            items.forEach(item => {
+                doc.setTextColor(100, 116, 139);
+                doc.text(item.label + ":", 35, y);
+                doc.setTextColor(15, 23, 42);
+                doc.setFont(fontName, "bold");
+                doc.text(item.value || "N/A", 85, y);
+                doc.setFont(fontName, "normal");
+                y += 7;
+            });
+            y += 10;
         };
 
+        drawSection("Student Identity", [
+            { label: "Full Name", value: student?.fullName || "" },
+            { label: "Reg Number", value: student?.studentNumber || "" },
+            { label: "ID/Passport", value: student?.idOrPassport || "" },
+            { label: "Contact", value: student?.phone || "" }
+        ]);
+
+        drawSection("Placement Details", [
+            { label: "Company", value: student?.companyName || "" },
+            { label: "Location", value: student?.companyAddress || "" },
+            { label: "Department", value: report.nameOfUnit || "" },
+            { label: "Duration", value: `${formatDate(student?.internshipStart)} — ${formatDate(student?.internshipEnd)}` }
+        ]);
+
+        drawSection("Supervision", [
+            { label: "Industry Supervisor", value: student?.supervisorName || "" },
+            { label: "Designation", value: student?.supervisorDesignation || "" },
+            { label: "Liaison Officer", value: student?.liaisonOfficerName || "" }
+        ]);
+
+        // Footer note
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text("Generated via IPA Digital System • Confidential Institutional Document", 105, 285, { align: "center" });
+
+        // ─── PAGE 2: OBJECTIVES ────────────────────────────
+        doc.addPage();
+        addHeader("IAP OBJECTIVES & GUIDELINES");
+        let yPos = 40;
+
+        const renderTextSection = (title: string, text: string[], type: 'bullet' | 'para' = 'bullet') => {
+            doc.setFont(fontName, "bold");
+            doc.setFontSize(11);
+            doc.setTextColor(15, 23, 42);
+            doc.text(title, 20, yPos);
+            yPos += 8;
+
+            doc.setFont(fontName, "normal");
+            doc.setFontSize(9);
+            doc.setTextColor(71, 85, 105);
+            
+            text.forEach(item => {
+                const lines = doc.splitTextToSize(type === 'bullet' ? `\u2022  ${item}` : item, 170);
+                if (yPos + (lines.length * 5) > 280) {
+                    doc.addPage();
+                    addHeader("IAP OBJECTIVES & GUIDELINES (CONTINUED)");
+                    yPos = 40;
+                }
+                doc.text(lines, 25, yPos);
+                yPos += (lines.length * 5) + 3;
+            });
+            yPos += 5;
+        };
+
+        renderTextSection("Program Objectives", [
+            "To develop students and enhance their range of technical and transferable skills.",
+            "To expose students to industry practices, trends, challenges, and opportunities.",
+            "To bridge the gap between academic theory and real-world implementation.",
+            "To foster professional networks and mentorship connections."
+        ]);
+
+        renderTextSection("Student Guidelines & Rules", [
+            "Maintain punctuality and professional etiquette at all times.",
+            "Complete logbook entries daily with detailed technical descriptions.",
+            "Adhere to company rules and safety protocols strictly.",
+            "Submit the finalized logbook within two weeks after IAP completion.",
+            "Harassment and misconduct will result in immediate disciplinary action."
+        ], 'para');
+
+        // ─── WEEKLY LOGS ────────────────────────────────────────────────────────────
         generatedWeeksList.forEach((week) => {
             const log = getSafeLog(week.number);
             doc.addPage();
-
-            doc.setFillColor(245, 247, 250);
-            doc.rect(0, 0, 210, 45, 'F');
-            doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.setLineWidth(1);
-            doc.line(0, 45, 210, 45);
-
-            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.setFontSize(18);
+            addHeader(`WEEKLY PROGRESS REPORT • WEEK ${week.number}`, `${formatDate(week.start)} — ${formatDate(week.end)}`);
+            
+            // Summary Stats box
+            doc.setFillColor(slateColor[0], slateColor[1], slateColor[2]);
+            doc.roundedRect(20, 35, 170, 20, 2, 2, 'F');
             doc.setFont(fontName, "bold");
-            doc.text(`WEEK ${week.number}`, 20, 20);
-            doc.setFontSize(10);
-            doc.text(`${new Date(week.start).toLocaleDateString()} - ${new Date(week.end).toLocaleDateString()}`, 20, 28);
-
-            doc.setFillColor(255, 255, 255);
-            doc.roundedRect(120, 10, 70, 25, 3, 3, 'FD');
-            doc.setFontSize(8);
-            doc.text("TOTAL WEEKLY HOURS", 130, 20);
-            doc.setFontSize(14);
-            doc.text(`${log.totalHours || 0} Hours`, 130, 30);
+            doc.setFontSize(9);
+            doc.setTextColor(71, 85, 105);
+            doc.text("TOTAL LOGGED HOURS", 35, 47);
+            doc.setFontSize(16);
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.text(`${log.totalHours || 0} Professional Hours`, 100, 48);
 
             const days = [
                 { name: 'Monday', task: log.mondayTask, hours: log.mondayHours },
@@ -685,344 +650,132 @@ export default function StudentLogbookPage() {
             ];
 
             autoTable(doc, {
-                startY: 55,
-                head: [['DAY', 'NATURE OF WORK / ACTIVITY DESCRIPTION', 'HOURS']],
-                body: days.map(d => [d.name.toUpperCase(), d.task || '-', d.hours || 0]),
+                startY: 65,
+                head: [['DAY', 'TECHNICAL DESCRIPTION OF ACTIVITIES', 'HRS']],
+                body: days.map(d => [d.name.toUpperCase(), d.task?.trim() || 'No entry recorded.', d.hours || '0']),
                 theme: 'grid',
-                headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold' },
-                styles: { fontSize: 9, cellPadding: 5, font: fontName },
+                headStyles: { fillColor: primaryColor, fontSize: 8, fontStyle: 'bold', cellPadding: 4 },
+                styles: { fontSize: 8.5, cellPadding: 4, font: fontName, textColor: [51, 65, 85] },
                 columnStyles: {
-                    0: { fontStyle: 'bold', cellWidth: 30 },
-                    2: { halign: 'center', cellWidth: 20 }
+                    0: { fontStyle: 'bold', cellWidth: 30, fillColor: [248, 250, 252] },
+                    2: { halign: 'center', cellWidth: 15, fontStyle: 'bold' }
                 }
             });
 
-            yPos = (doc as any).lastAutoTable.finalY + 10;
+            yPos = (doc as any).lastAutoTable.finalY + 12;
 
-            // General Statement
-            doc.setFontSize(10);
+            // General Statement block
+            doc.setFillColor(252, 252, 253);
+            doc.setDrawColor(226, 232, 240);
+            const stmtText = log.generalStatement || "No weekly summary provided by student.";
+            const stmtLines = doc.splitTextToSize(stmtText, 160);
+            const boxH = (stmtLines.length * 5) + 15;
+            doc.roundedRect(20, yPos, 170, boxH, 1, 1, 'FD');
             doc.setFont(fontName, "bold");
-            doc.setTextColor(0, 0, 0);
-            doc.text("General Statement of student's progress:", 20, yPos);
+            doc.setFontSize(8);
+            doc.setTextColor(100, 116, 139);
+            doc.text("STUDENT'S GENERAL STATEMENT", 25, yPos + 6);
+            doc.setFont(fontName, "normal");
+            doc.setFontSize(9);
+            doc.setTextColor(30, 41, 59);
+            doc.text(stmtLines, 25, yPos + 12);
+            
+            yPos += boxH + 12;
+
+            // Assessment Block
+            doc.setFont(fontName, "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(15, 23, 42);
+            doc.text("SUPERVISOR'S ASSESSMENT & SIGNATURE", 20, yPos);
             yPos += 6;
-            doc.setFont(fontName, "normal");
-            const generalText = (log.generalStatement && log.generalStatement.trim() !== '')
-                ? log.generalStatement
-                : "No general statement provided.";
-            const stmtLines = doc.splitTextToSize(generalText, 170);
-            doc.text(stmtLines, 25, yPos);
-            yPos += stmtLines.length * 5.5 + 8;
+            
+            const gradeScale = [
+                { id: 'A', label: 'A - Excellent' },
+                { id: 'B', label: 'B - Good' },
+                { id: 'C', label: 'C - Satisfactory' },
+                { id: 'D', label: 'D - Poor' },
+                { id: 'E', label: 'E - Fail' }
+            ];
 
-            doc.setDrawColor(200, 200, 200);
-            doc.setLineWidth(0.1);
-            doc.line(20, yPos, 190, yPos);
-            yPos += 10;
-
-            // Supervisor Assessment
-            doc.setFont(fontName, "bold");
-            doc.setFontSize(10);
-            doc.text("Supervisor's Assessment:", 20, yPos);
-            yPos += 8;
-            doc.setFontSize(9);
-
-            const gradeScale = ['A', 'B', 'C', 'D', 'E'];
             gradeScale.forEach((g, i) => {
-                const xBase = 22 + i * 36;
-                const isSelected = log.grade === g;
-                drawCheckbox(xBase, yPos, isSelected);
-                doc.setFont(fontName, isSelected ? "bold" : "normal");
-                doc.setTextColor(isSelected ? primaryColor[0] : 0, isSelected ? primaryColor[1] : 0, isSelected ? primaryColor[2] : 0);
-                doc.text(gradeLabels[g], xBase + 7, yPos);
-                doc.setTextColor(0, 0, 0);
+                const xBase = 20 + (i * 35);
+                drawCheckbox(xBase, yPos, log.grade === g.id);
+                doc.setFont(fontName, log.grade === g.id ? "bold" : "normal");
+                doc.setFontSize(8);
+                doc.text(g.label, xBase + 6, yPos);
             });
 
-            yPos += 13;
+            yPos += 15;
+            doc.setLineWidth(0.2);
+            doc.setDrawColor(203, 213, 225);
+            doc.line(20, yPos, 80, yPos);
+            doc.line(110, yPos, 145, yPos);
+            doc.line(155, yPos, 190, yPos);
+            
+            doc.setFontSize(7);
             doc.setFont(fontName, "normal");
-            doc.setFontSize(9);
-            doc.text(`Print Name: ${log.supervisorName || '____________________'}`, 20, yPos);
-            doc.text(`Date: ${log.supervisorDate ? new Date(log.supervisorDate).toLocaleDateString() : '_____________________'}`, 120, yPos);
-            yPos += 10;
-            doc.text(`Signature: ${log.supervisorSignature ? '[Signed Digitally]' : '____________________'}`, 20, yPos);
+            doc.setTextColor(148, 163, 184);
+            doc.text("NAME OF SUPERVISOR", 20, yPos + 4);
+            doc.text("DATE", 110, yPos + 4);
+            doc.text("SIGNATURE / STAMP", 155, yPos + 4);
+
+            doc.setFont(fontName, "bold");
+            doc.setTextColor(15, 23, 42);
+            doc.text(log.supervisorName || "........................", 20, yPos - 2);
+            doc.text(log.supervisorDate ? new Date(log.supervisorDate).toLocaleDateString() : "..................", 110, yPos - 2);
+            if (log.supervisorSignature) {
+                doc.setTextColor(34, 197, 94);
+                doc.text("SIGNED DIGITALLY", 155, yPos - 2);
+            }
         });
 
-        // ─── RESULT REPORT PAGE ─────────────────────────────────────────────────────
+        // ─── FINAL RESULT REPORT ─────────────────────────────────────────────────────
         doc.addPage();
-        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.rect(0, 0, 210, 22, 'F');
-        doc.setFontSize(13);
-        doc.setTextColor(255, 255, 255);
-        doc.setFont(fontName, "bold");
-        doc.text("Industrial Attachment Result Report (for students)", 105, 14, { align: "center" });
-        doc.setTextColor(0, 0, 0);
-        doc.setFont(fontName, "normal");
-
-        yPos = 28;
-
+        addHeader("INDUSTRIAL ATTACHMENT RESULT REPORT", "Student Performance Summary");
+        
+        yPos = 35;
         autoTable(doc, {
             startY: yPos,
             body: [
-                ['Student Name', student?.fullName || ''],
-                ['Student Reg. No.', student?.studentNumber || ''],
-                ['Date of Birth', student?.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : ''],
-                ['ID / Passport No.', student?.idOrPassport || ''],
-                ['Company / Institution Name', student?.companyName || ''],
-                ['Unit / Department', report.nameOfUnit || ''],
-                ['IAP Duration', `${student?.internshipStart ? new Date(student.internshipStart).toLocaleDateString() : ''} to ${student?.internshipEnd ? new Date(student.internshipEnd).toLocaleDateString() : ''}`],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 9.5, cellPadding: 4, font: fontName },
-            columnStyles: { 0: { fontStyle: 'bold', cellWidth: 70, fillColor: [240, 244, 255] } }
-        });
-
-        yPos = (doc as any).lastAutoTable.finalY + 5;
-
-        autoTable(doc, {
-            startY: yPos,
-            body: [
-                [{ content: 'Overview / Goals of Training', styles: { fontStyle: 'bold', fillColor: [245, 247, 255] } }, report.overviewGoals || ''],
-                [{ content: 'Contents of Training', styles: { fontStyle: 'bold', fillColor: [245, 247, 255] } }, report.contentsTraining || ''],
-                [{ content: 'Notable Achievements', styles: { fontStyle: 'bold', fillColor: [245, 247, 255] } }, report.notableAchievements || ''],
-                [{ content: 'Future Career Plan', styles: { fontStyle: 'bold', fillColor: [245, 247, 255] } }, report.futureCareerPlan || ''],
-                [{ content: 'Suggestions / Recommendations', styles: { fontStyle: 'bold', fillColor: [245, 247, 255] } }, report.suggestions || ''],
+                ['Student Full Name', student?.fullName || 'N/A'],
+                ['Registration Number', student?.studentNumber || 'N/A'],
+                ['Placement Company', student?.companyName || 'N/A'],
+                ['Unit / Department', report.nameOfUnit || 'N/A'],
+                ['Internship Period', `${formatDate(student?.internshipStart)} to ${formatDate(student?.internshipEnd)}`],
             ],
             theme: 'grid',
             styles: { fontSize: 9, cellPadding: 4, font: fontName },
-            columnStyles: { 0: { cellWidth: 70 } }
+            columnStyles: { 0: { fontStyle: 'bold', cellWidth: 60, fillColor: [248, 250, 252] } }
         });
 
-        yPos = (doc as any).lastAutoTable.finalY + 5;
-
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+        
         autoTable(doc, {
             startY: yPos,
-            head: [['Question', 'Response']],
             body: [
-                ['Number of LO Visits', String(report.loVisitCount ?? '')],
-                ['Was IAP Useful to your career development?', report.isUseful === true ? 'Yes' : report.isUseful === false ? 'No' : ''],
-                ['Did IAP improve your understanding of the industry?', report.improvedUnderstanding === true ? 'Yes' : report.improvedUnderstanding === false ? 'No' : ''],
-                ['Did IAP provide valuable practical experiences?', report.providedExperiences === true ? 'Yes' : report.providedExperiences === false ? 'No' : ''],
+                [{ content: 'OVERVIEW & GOALS', styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } }, report.overviewGoals || 'N/A'],
+                [{ content: 'CONTENTS OF TRAINING', styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } }, report.contentsTraining || 'N/A'],
+                [{ content: 'NOTABLE ACHIEVEMENTS', styles: { fontStyle: 'bold', fillColor: [241, 245, 249] } }, report.notableAchievements || 'N/A'],
             ],
             theme: 'grid',
-            headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold' },
-            styles: { fontSize: 9, cellPadding: 4, font: fontName },
-            columnStyles: { 0: { cellWidth: 110 } }
+            styles: { fontSize: 8.5, cellPadding: 5, font: fontName, textColor: [30, 41, 59] },
+            columnStyles: { 0: { cellWidth: 50 } }
         });
 
-        yPos = (doc as any).lastAutoTable.finalY + 5;
-
-        const tick = (val?: string, target?: string) => val === target ? '\u2713' : '';
-        autoTable(doc, {
-            startY: yPos,
-            head: [['Satisfaction Area', 'Excellent', 'Average', 'Poor']],
-            body: [
-                ['Satisfaction with the Industry Environment', tick(report.satisfactionIndustry, 'Excellent'), tick(report.satisfactionIndustry, 'Average'), tick(report.satisfactionIndustry, 'Poor')],
-                ['Satisfaction with Academic / Major Relevance', tick(report.satisfactionMajor, 'Excellent'), tick(report.satisfactionMajor, 'Average'), tick(report.satisfactionMajor, 'Poor')],
-                ['Satisfaction with Practical Workflow', tick(report.satisfactionPractical, 'Excellent'), tick(report.satisfactionPractical, 'Average'), tick(report.satisfactionPractical, 'Poor')],
-                ['Satisfaction with Instructor / Supervisor Support', tick(report.satisfactionInstructors, 'Excellent'), tick(report.satisfactionInstructors, 'Average'), tick(report.satisfactionInstructors, 'Poor')],
-            ],
-            theme: 'grid',
-            headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold' },
-            styles: { fontSize: 9, cellPadding: 4, font: fontName, halign: 'center' },
-            columnStyles: { 0: { halign: 'left', cellWidth: 100 } }
-        });
-
-        yPos = (doc as any).lastAutoTable.finalY + 5;
-
-        doc.setFont(fontName, "bold"); doc.setFontSize(10); doc.text("Programme / Activity Checklist:", 20, yPos); yPos += 4;
-        const allActivities = [
-            "Assisting in software development and coding tasks.",
-            "Participating in the design, implementation, and testing of SW systems.",
-            "Debugging and troubleshooting software issues.",
-            "Collaborating with the development team to enhance existing software applications.",
-            "Conducting research and feasibility studies for new SW features or technologies.",
-            "Writing and maintaining technical documentation and user manuals.",
-            "Participating in code reviews and providing feedback on code quality.",
-            "Assisting in the development of embedded systems firmware or software.",
-            "Testing and validating embedded systems functionality.",
-            "Collaborating with HW engineers in the integration of SW and HW components.",
-            "Conducting performance optimization and memory management for embedded systems.",
-        ];
-        autoTable(doc, {
-            startY: yPos,
-            body: allActivities.map(a => [report.programmeTypes?.includes(a) ? '\u2713' : '', a]),
-            theme: 'grid',
-            styles: { fontSize: 8.5, cellPadding: 3, font: fontName },
-            columnStyles: { 0: { halign: 'center', cellWidth: 12, fontStyle: 'bold' }, 1: { cellWidth: 158 } }
-        });
-
-        yPos = (doc as any).lastAutoTable.finalY + 4;
-        if (report.otherProgrammeDetails) {
-            doc.setFont(fontName, "normal"); doc.setFontSize(9);
-            doc.text(`Others: ${report.otherProgrammeDetails}`, 25, yPos); yPos += 8;
-        }
-
-        yPos = (doc as any).lastAutoTable.finalY + 12;
-        doc.setFont(fontName, "normal"); doc.setFontSize(9);
-        doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, yPos);
-        doc.text("Signature of Student: _______________________", 110, yPos);
-
-        // ─── ASSESSMENT PAGE (for Companies) ────────────────────────────────────────
-        doc.addPage();
-        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.rect(0, 0, 210, 22, 'F');
-        doc.setFontSize(13);
-        doc.setTextColor(255, 255, 255);
+        yPos = (doc as any).lastAutoTable.finalY + 15;
         doc.setFont(fontName, "bold");
-        doc.text("Industrial Attachment Assessment (for Companies)", 105, 14, { align: "center" });
-        doc.setTextColor(0, 0, 0);
-        doc.setFont(fontName, "normal");
-
-        yPos = 28;
         doc.setFontSize(10);
-        doc.text(`Student Name: ${student?.fullName || ''}`, 20, yPos);
-        doc.text(`Department: ${student?.supervisorDepartment || student?.year || ''}`, 120, yPos); yPos += 8;
-        doc.text(`Company: ${student?.companyName || ''}`, 20, yPos);
-        doc.text(`Supervisor: ${student?.supervisorName || ''}`, 120, yPos); yPos += 10;
+        doc.text("Institutional Verification", 20, yPos);
+        yPos += 10;
+        doc.setFontSize(9);
+        doc.setFont(fontName, "normal");
+        doc.text(`Date of Issue: ${new Date().toLocaleDateString()}`, 20, yPos);
+        doc.line(130, yPos, 180, yPos);
+        doc.text("Seal of RCA / LO Signature", 130, yPos + 5);
 
-        const latestRating = student?.ratings?.[0] || {};
-
-        const getScoreMark = (score: number | null | undefined): [string, string, string, string, string] => {
-            if (score === null || score === undefined || score === 0) return ['', '', '', '', ''];
-            if (score >= 10) return ['\u25CF', '', '', '', ''];
-            if (score === 9) return ['', '\u25CF', '', '', ''];
-            if (score === 8) return ['', '', '\u25CF', '', ''];
-            if (score === 7) return ['', '', '', '\u25CF', ''];
-            return ['', '', '', '', '\u25CF'];
-        };
-
-        // Assignments from tasks
-        const assignmentTasks = tasks.filter((t: Task) => t.rating !== null && t.rating !== undefined);
-        const assignmentBody: any[] = [];
-
-        if (assignmentTasks.length > 0) {
-            assignmentTasks.forEach((t: Task, i: number) => {
-                const [vh, h, av, lo, vl] = getScoreMark(t.rating);
-                assignmentBody.push([
-                    i === 0 ? { content: 'Assignments', rowSpan: assignmentTasks.length, styles: { valign: 'middle', fontStyle: 'bold', fillColor: [240, 244, 255] } } : '',
-                    i + 1, t.title,
-                    '10', '9', '8', '7', '6',
-                    vh, h, av, lo, vl,
-                    i === 0 ? { content: `/40`, rowSpan: assignmentTasks.length, styles: { valign: 'middle', halign: 'center' } } : '',
-                ]);
-            });
-        } else {
-            const defaultTasks = ['Related knowledge', 'Support for operation of wireless communication network', 'Establishment of wireless communication network', 'Maintenance of wireless communication room'];
-            defaultTasks.forEach((title, i) => {
-                assignmentBody.push([
-                    i === 0 ? { content: 'Assignments', rowSpan: 4, styles: { valign: 'middle', fontStyle: 'bold', fillColor: [240, 244, 255] } } : '',
-                    i + 1, title,
-                    '10', '9', '8', '7', '6',
-                    '', '', '', '', '',
-                    i === 0 ? { content: `/40`, rowSpan: 4, styles: { valign: 'middle', halign: 'center' } } : '',
-                ]);
-            });
-        }
-
-        const [vh_resp, h_resp, av_resp, lo_resp, vl_resp] = getScoreMark(latestRating?.responsibility);
-        const [vh_coop, h_coop, av_coop, lo_coop, vl_coop] = getScoreMark(latestRating?.cooperativeness);
-        const [vh_comp, h_comp, av_comp, lo_comp, vl_comp] = getScoreMark(latestRating?.complianceEtiquette);
-        const attitudeBody: any[] = [
-            [{ content: 'Attitude', rowSpan: 3, styles: { valign: 'middle', fontStyle: 'bold', fillColor: [240, 244, 255] } }, 1, 'Responsibility', '10', '9', '8', '7', '6', vh_resp, h_resp, av_resp, lo_resp, vl_resp, { content: `/30\n\nSum:(_)/100`, rowSpan: 3, styles: { valign: 'middle', halign: 'center', fontSize: 7 } }],
-            ['', 2, 'Cooperativeness', '10', '9', '8', '7', '6', vh_coop, h_coop, av_coop, lo_coop, vl_coop, ''],
-            ['', 3, 'Compliance with company rules and workplace etiquette', '10', '9', '8', '7', '6', vh_comp, h_comp, av_comp, lo_comp, vl_comp, ''],
-        ];
-
-        const [vh_saw, h_saw, av_saw, lo_saw, vl_saw] = getScoreMark(latestRating?.safetyAwareness);
-        const [vh_scr, h_scr, av_scr, lo_scr, vl_scr] = getScoreMark(latestRating?.safetyCompliance);
-        const [vh_sar, h_sar, av_sar, lo_sar, vl_sar] = getScoreMark(latestRating?.safetyArrangement);
-        const safetyBody: any[] = [
-            [{ content: 'Safety Management', rowSpan: 3, styles: { valign: 'middle', fontStyle: 'bold', fillColor: [240, 244, 255] } }, 1, 'Awareness of safety management', '10', '9', '8', '7', '6', vh_saw, h_saw, av_saw, lo_saw, vl_saw, { content: `/30`, rowSpan: 3, styles: { valign: 'middle', halign: 'center' } }],
-            ['', 2, 'Compliance with safety rules', '10', '9', '8', '7', '6', vh_scr, h_scr, av_scr, lo_scr, vl_scr, ''],
-            ['', 3, 'Arrangement of safety instruments', '10', '9', '8', '7', '6', vh_sar, h_sar, av_sar, lo_sar, vl_sar, ''],
-        ];
-
-        autoTable(doc, {
-            startY: yPos,
-            head: [[
-                { content: 'Evaluation\nArea', styles: { halign: 'center' } },
-                { content: '#', styles: { halign: 'center' } },
-                { content: 'Evaluation Item', styles: { halign: 'center' } },
-                { content: 'Very\nHigh', styles: { halign: 'center' } },
-                { content: 'High', styles: { halign: 'center' } },
-                { content: 'Average', styles: { halign: 'center' } },
-                { content: 'Low', styles: { halign: 'center' } },
-                { content: 'Very\nLow', styles: { halign: 'center' } },
-                { content: '10', styles: { halign: 'center' } },
-                { content: '9', styles: { halign: 'center' } },
-                { content: '8', styles: { halign: 'center' } },
-                { content: '7', styles: { halign: 'center' } },
-                { content: '6', styles: { halign: 'center' } },
-                { content: 'Score', styles: { halign: 'center' } },
-            ]],
-            body: [...assignmentBody, ...attitudeBody, ...safetyBody],
-            theme: 'grid',
-            headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7, valign: 'middle' },
-            styles: { fontSize: 7.5, cellPadding: 2.5, font: fontName, valign: 'middle', overflow: 'linebreak' },
-            columnStyles: {
-                0: { cellWidth: 22 },
-                1: { cellWidth: 7, halign: 'center' },
-                2: { cellWidth: 48 },
-                3: { cellWidth: 10, halign: 'center' },
-                4: { cellWidth: 9, halign: 'center' },
-                5: { cellWidth: 12, halign: 'center' },
-                6: { cellWidth: 8, halign: 'center' },
-                7: { cellWidth: 10, halign: 'center' },
-                8: { cellWidth: 9, halign: 'center' },
-                9: { cellWidth: 8, halign: 'center' },
-                10: { cellWidth: 9, halign: 'center' },
-                11: { cellWidth: 8, halign: 'center' },
-                12: { cellWidth: 8, halign: 'center' },
-                13: { cellWidth: 14, halign: 'center' },
-            },
-        });
-
-        yPos = (doc as any).lastAutoTable.finalY + 2;
-
-        // Attendance
-        autoTable(doc, {
-            startY: yPos,
-            body: [
-                [
-                    { content: 'Attendance', rowSpan: 2, styles: { valign: 'middle', fontStyle: 'bold', fillColor: [240, 244, 255], cellWidth: 22 } },
-                    { content: `Days of Absence: ${student?.absentDays ?? 0}`, colSpan: 11, styles: { fontStyle: 'bold' } },
-                    { content: `/100\nTotal___/100`, styles: { valign: 'middle', halign: 'center', fontSize: 7 } }
-                ],
-                [
-                    '',
-                    {
-                        content: '* 10 points are deducted for each absence from work per day. However, points will not be deducted for sick leave with supporting documents attached.\n* Unauthorised late arrival, early departure without notice, 3 times of unauthorised results are treated as 1 day of absence from work',
-                        colSpan: 11,
-                        styles: { fontSize: 7, textColor: [80, 80, 80] }
-                    },
-                    ''
-                ],
-            ],
-            theme: 'grid',
-            styles: { fontSize: 8, cellPadding: 3, font: fontName, overflow: 'linebreak' },
-        });
-
-        yPos = (doc as any).lastAutoTable.finalY + 2;
-
-        // Marking formula
-        autoTable(doc, {
-            startY: yPos,
-            body: [[
-                { content: 'Marking', styles: { fontStyle: 'bold', fillColor: [240, 244, 255], cellWidth: 22 } },
-                { content: '(Doing Training assignments + Attitude + Safety management) score\u00D780% + Attendance', styles: { fontStyle: 'bold', halign: 'center' } }
-            ]],
-            theme: 'grid',
-            styles: { fontSize: 8.5, cellPadding: 4, font: fontName },
-        });
-
-        yPos = (doc as any).lastAutoTable.finalY + 14;
-        doc.setFont(fontName, "normal"); doc.setFontSize(9);
-        doc.setLineWidth(0.5); doc.setDrawColor(0);
-        doc.line(20, yPos, 80, yPos);
-        doc.line(120, yPos, 180, yPos);
-        doc.text("Evaluator Signature", 20, yPos + 5);
-        doc.text("Company Stamp", 120, yPos + 5);
-
-        doc.save(`RCA_IAP_Portfolio_${student?.fullName?.replace(/\s+/g, '_') || 'Student'}.pdf`);
-        toast.success("Professional Portfolio Generated!");
+        // ─── SAVE ───────────────────────────────────────────────────────────────────
+        doc.save(`Logbook.pdf`);
+        toast.success("Professional Logbook Generated!");
     };
 
     if (loading) {
@@ -1385,7 +1138,7 @@ export default function StudentLogbookPage() {
                                                                 </div>
                                                             </td>
                                                             <td className="border border-slate-200 p-3 text-center">
-                                                                {log?.status === "APPROVED" || log?.supervisorSignature ? (
+                                                                {log?.status === "COMPLETED" || log?.supervisorSignature ? (
                                                                     <span className="text-xs font-bold text-green-600 uppercase tracking-widest px-2 py-1 bg-green-50 rounded">Signed & Approved</span>
                                                                 ) : log?.status === "SUBMITTED" ? (
                                                                     <span className="text-xs font-bold text-blue-600 uppercase tracking-widest px-2 py-1 bg-blue-50 rounded">Submitted</span>
@@ -1443,7 +1196,7 @@ export default function StudentLogbookPage() {
                                                             <div className="flex flex-col items-end gap-1">
                                                                 {isFilled && <CheckCircle2 className={`h-4 w-4 ${isSelected ? 'text-white' : 'text-green-500'}`} />}
                                                                 {log?.status && log.status !== 'DRAFT' && (
-                                                                    <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${log.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                                                                    <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${log.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
                                                                         log.status === 'SUBMITTED' ? 'bg-blue-100 text-blue-700' :
                                                                             'bg-red-100 text-red-700'
                                                                         }`}>
@@ -1493,14 +1246,16 @@ export default function StudentLogbookPage() {
                                                                     {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map(day => {
                                                                         const dayKey = day.toLowerCase();
                                                                         const log = getSafeLog(expandedWeek);
+                                                                        const isLocked = log.status === 'COMPLETED' || log.status === 'SUBMITTED';
 
                                                                         return (
                                                                             <tr key={day} className="hover:bg-slate-50/50 transition-colors">
                                                                                 <td className="p-4 font-medium text-slate-700">{day}</td>
                                                                                 <td className="p-4">
                                                                                     <textarea
-                                                                                        className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-800 resize-none min-h-[80px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400"
-                                                                                        placeholder={`Describe tasks performed on ${day}...`}
+                                                                                        disabled={isLocked}
+                                                                                        className={`w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-800 resize-none min-h-[80px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 ${isLocked ? 'bg-slate-50 opacity-60 cursor-not-allowed' : ''}`}
+                                                                                        placeholder={isLocked ? "Log is locked" : `Describe tasks performed on ${day}...`}
                                                                                         value={log[`${dayKey}Task`] || ""}
                                                                                         onChange={(e) => updateLogField(expandedWeek, `${dayKey}Task`, e.target.value)}
                                                                                     />
@@ -1510,7 +1265,8 @@ export default function StudentLogbookPage() {
                                                                                         type="number"
                                                                                         min="0"
                                                                                         max="24"
-                                                                                        className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-center text-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                                                                        disabled={isLocked}
+                                                                                        className={`w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-center text-slate-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all ${isLocked ? 'bg-slate-50 opacity-60 cursor-not-allowed' : ''}`}
                                                                                         value={log[`${dayKey}Hours`] || 8}
                                                                                         onChange={(e) => updateLogField(expandedWeek, `${dayKey}Hours`, parseFloat(e.target.value) || 8)}
                                                                                     />
@@ -1537,8 +1293,8 @@ export default function StudentLogbookPage() {
                                                                     </h4>
                                                                 </div>
                                                                 <textarea
-                                                                    disabled={getSafeLog(expandedWeek).status !== 'DRAFT'}
-                                                                    className={`w-full h-48 bg-white border border-slate-200 rounded-lg p-4 text-sm text-slate-800 resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 ${getSafeLog(expandedWeek).status !== 'DRAFT' ? 'bg-slate-50 cursor-not-allowed opacity-75' : ''}`}
+                                                                    disabled={getSafeLog(expandedWeek).status !== 'DRAFT' && getSafeLog(expandedWeek).status !== 'REJECTED'}
+                                                                    className={`w-full h-48 bg-white border border-slate-200 rounded-lg p-4 text-sm text-slate-800 resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400 ${(getSafeLog(expandedWeek).status !== 'DRAFT' && getSafeLog(expandedWeek).status !== 'REJECTED') ? 'bg-slate-50 cursor-not-allowed opacity-75' : ''}`}
                                                                     placeholder="(e.g. After learning the process of production along with an overview of the company's
                                                                         products in the second week of practice, I was able to understand the characteristics of
                                                                         company A's products anew. It was also a time to feel once again why production
@@ -1606,25 +1362,42 @@ export default function StudentLogbookPage() {
 
                                                         {/* Actions */}
                                                         <div className="p-6 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-4">
-                                                            {getSafeLog(expandedWeek).status !== 'DRAFT' && (
-                                                                <div className="flex items-center gap-2">
-                                                                    <StatusBadge status={getSafeLog(expandedWeek).status} />
-                                                                    <span className="text-xs text-slate-500">You can still re-submit this log.</span>
+                                                             {getSafeLog(expandedWeek).status !== 'DRAFT' && (
+                                                                <div className="flex flex-col gap-2">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <StatusBadge status={getSafeLog(expandedWeek).status} />
+                                                                        <span className="text-xs text-slate-500 font-medium">
+                                                                            {getSafeLog(expandedWeek).status === 'COMPLETED' 
+                                                                                ? "This log has been approved and is locked for editing." 
+                                                                                : getSafeLog(expandedWeek).status === 'SUBMITTED'
+                                                                                ? "This log has been submitted and is locked for editing."
+                                                                                : "This log was rejected. Please address the feedback below and re-submit."}
+                                                                        </span>
+                                                                    </div>
+                                                                    {getSafeLog(expandedWeek).status === 'REJECTED' && getSafeLog(expandedWeek).supervisorNote && (
+                                                                        <div className="p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-3">
+                                                                            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+                                                                            <div className="space-y-1">
+                                                                                <p className="text-[10px] font-black uppercase text-red-400 tracking-wider">Supervisor Feedback</p>
+                                                                                <p className="text-xs text-red-700 font-medium leading-relaxed italic">&quot;{getSafeLog(expandedWeek).supervisorNote}&quot;</p>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             )}
                                                             <div className="flex gap-4 ml-auto">
                                                                 <Button
                                                                     variant="outline"
                                                                     onClick={() => handleSaveWeeklyLog(getSafeLog(expandedWeek))}
-                                                                    disabled={isSaving}
-                                                                    className="h-12 px-8 rounded-lg text- border-primary text-primary hover:bg-primary/5 font-bold"
+                                                                    disabled={isSaving || (getSafeLog(expandedWeek).status === 'COMPLETED' || getSafeLog(expandedWeek).status === 'SUBMITTED')}
+                                                                    className="h-12 px-8 rounded-lg border-primary text-primary hover:bg-primary/5 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                                                                 >
                                                                     Save Draft
                                                                 </Button>
                                                                 <Button
                                                                     onClick={() => handleSubmitWeeklyLog(getSafeLog(expandedWeek))}
-                                                                    disabled={isSaving}
-                                                                    className="h-12 px-8 rounded-lg bg-primary text-white font-bold shadow-sm"
+                                                                    disabled={isSaving || (getSafeLog(expandedWeek).status === 'COMPLETED' || getSafeLog(expandedWeek).status === 'SUBMITTED')}
+                                                                    className="h-12 px-8 rounded-lg bg-primary text-white font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                                                 >
                                                                     {isSaving ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <><CheckCircle2 className="h-4 w-4 mr-2" /> Submit</>}
                                                                 </Button>

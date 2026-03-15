@@ -9,7 +9,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 
 const PDFDocument = require('pdfkit');
 
-export type WeeklyLogStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+export type WeeklyLogStatus = 'DRAFT' | 'SUBMITTED' | 'COMPLETED' | 'REJECTED';
 
 @Injectable()
 export class WeeklyLogsService {
@@ -134,9 +134,29 @@ export class WeeklyLogsService {
         id: number,
         data: { generalStatement?: string },
     ) {
-        const updateData: any = { status: 'SUBMITTED' as WeeklyLogStatus };
+        const log = await this.prisma.weeklyLog.findUnique({
+            where: { id },
+            select: { studentId: true, weekNumber: true }
+        });
+
+        if (!log) throw new NotFoundException('Weekly log not found');
+
+        // Check if student is already rated
+        const rating = await this.prisma.rating.findUnique({
+            where: { studentId: log.studentId }
+        });
+
+        const status = rating ? 'COMPLETED' : 'SUBMITTED';
+
+        const updateData: any = { status: status as WeeklyLogStatus };
         if (data.generalStatement !== undefined) {
             updateData.generalStatement = data.generalStatement;
+        }
+
+        if (rating) {
+            updateData.approvedAt = new Date();
+            updateData.supervisorSignature = true;
+            updateData.supervisorDate = new Date();
         }
 
         const weeklyLog = await this.prisma.weeklyLog.update({
@@ -151,16 +171,57 @@ export class WeeklyLogsService {
             },
         });
 
-        if (weeklyLog.student?.supervisor?.userId) {
+        if (status === 'SUBMITTED' && weeklyLog.student?.supervisor?.userId) {
             await this.notificationsService.createNotification({
                 userId: weeklyLog.student.supervisor.userId,
                 title: 'Weekly Log Submitted',
                 message: `${weeklyLog.student.fullName} submitted Week ${weeklyLog.weekNumber}`,
                 type: 'INFO',
             });
+        } else if (status === 'COMPLETED') {
+            await this.notificationsService.createNotification({
+                userId: weeklyLog.student.userId,
+                title: 'Weekly Log Auto-Approved',
+                message: `Your Weekly Log for Week ${weeklyLog.weekNumber} has been automatically approved.`,
+                type: 'SUCCESS',
+                link: '/student/logbook',
+            });
         }
 
         return weeklyLog;
+    }
+
+    async approveAllForStudent(studentId: number) {
+        const result = await this.prisma.weeklyLog.updateMany({
+            where: {
+                studentId: studentId,
+                status: { not: 'COMPLETED' }
+            },
+            data: {
+                status: 'COMPLETED' as WeeklyLogStatus,
+                supervisorSignature: true,
+                approvedAt: new Date(),
+                supervisorDate: new Date()
+            }
+        });
+
+        // Optional: Send a single notification to the student
+        const student = await this.prisma.student.findUnique({
+            where: { id: studentId },
+            select: { userId: true }
+        });
+
+        if (student && result.count > 0) {
+            await this.notificationsService.createNotification({
+                userId: student.userId,
+                title: 'Assigned Logs Approved',
+                message: `All your pending weekly logs have been approved following your assessment.`,
+                type: 'SUCCESS',
+                link: '/student/logbook',
+            });
+        }
+
+        return result;
     }
 
     async approveWeek(
@@ -184,7 +245,7 @@ export class WeeklyLogsService {
         const updatedLog = await (this.prisma.weeklyLog.update as any)({
             where: { id },
             data: {
-                status: 'APPROVED' as WeeklyLogStatus,
+                status: 'COMPLETED' as WeeklyLogStatus,
                 supervisorNote: data.note,
                 supervisorName: data.supervisorName,
                 supervisorDate: data.supervisorDate ? new Date(data.supervisorDate) : new Date(),

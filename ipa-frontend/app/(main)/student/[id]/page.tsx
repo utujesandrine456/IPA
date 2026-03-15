@@ -16,7 +16,7 @@ interface Task {
     id: number;
     title: string;
     description: string;
-    status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
+    status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "SUBMITTED" | "REJECTED";
     date: string;
     category?: string;
     estimatedHours?: number;
@@ -292,7 +292,15 @@ export default function StudentDashboard() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
-                                            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-lg border border-amber-100">{task.status}</span>
+                                            <span className={cn(
+                                                "text-[10px] font-bold px-3 py-1 rounded-lg border",
+                                                task.status === 'COMPLETED' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                                                task.status === 'REJECTED' ? "bg-red-50 text-red-600 border-red-100" :
+                                                task.status === 'SUBMITTED' ? "bg-amber-50 text-amber-600 border-amber-100" :
+                                                "bg-slate-50 text-slate-500 border-slate-100"
+                                            )}>
+                                                {task.status}
+                                            </span>
                                             <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-colors" />
                                         </div>
                                     </div>

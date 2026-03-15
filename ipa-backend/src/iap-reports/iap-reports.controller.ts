@@ -7,7 +7,8 @@ export class IapReportsController {
 
     @Get()
     async getReport(@Query('studentId') studentId: string) {
-        return this.iapReportsService.findByStudent(Number(studentId));
+        const iapReports = await this.iapReportsService.findByStudent(Number(studentId));
+        return { iapReports };
     }
 
     @Post()

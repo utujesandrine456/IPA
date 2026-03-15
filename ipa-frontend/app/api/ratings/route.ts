@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma  from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     if (studentId) {
       const ratings = await prisma.rating.findMany({
-        where: { studentId },
+        where: { studentId: Number(studentId) },
         include: {
           supervisor: {
             include: {
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     if (supervisorId) {
       const ratings = await prisma.rating.findMany({
-        where: { supervisorId },
+        where: { supervisorId: Number(supervisorId) },
         include: {
           student: {
             include: {
@@ -59,75 +59,58 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { studentId, supervisorId, rating, comment } = body;
+    const {
+      studentId,
+      supervisorId,
+      rating,
+      comment,
+      knowledgeWirelessOps,
+      knowledgeWirelessEst,
+      knowledgeWirelessMaint,
+      knowledgeApplication,
+      responsibility,
+      cooperativeness,
+      complianceEtiquette,
+      safetyAwareness,
+      safetyCompliance,
+      safetyArrangement,
+      evaluatorPosition,
+      evaluatorName
+    } = body;
 
-    if (!studentId || !supervisorId || !rating) {
+    if (!studentId || !supervisorId || rating === undefined) {
       return NextResponse.json(
         { error: 'studentId, supervisorId, and rating are required' },
         { status: 400 }
       );
     }
 
-    if (rating < 1 || rating > 5) {
-      return NextResponse.json(
-        { error: 'Rating must be between 1 and 5' },
-        { status: 400 }
-      );
-    }
+    const ratingData = {
+      studentId: Number(studentId),
+      supervisorId: Number(supervisorId),
+      rating: Number(rating),
+      comment,
+      knowledgeWirelessOps: Number(knowledgeWirelessOps || 0),
+      knowledgeWirelessEst: Number(knowledgeWirelessEst || 0),
+      knowledgeWirelessMaint: Number(knowledgeWirelessMaint || 0),
+      knowledgeApplication: Number(knowledgeApplication || 0),
+      responsibility: Number(responsibility || 0),
+      cooperativeness: Number(cooperativeness || 0),
+      complianceEtiquette: Number(complianceEtiquette || 0),
+      safetyAwareness: Number(safetyAwareness || 0),
+      safetyCompliance: Number(safetyCompliance || 0),
+      safetyArrangement: Number(safetyArrangement || 0),
+      evaluatorPosition: evaluatorPosition || "",
+      evaluatorName: evaluatorName || ""
+    };
 
-    // Check if rating already exists for this student-supervisor pair
-    const existingRating = await prisma.rating.findFirst({
+    const result = await prisma.rating.upsert({
       where: {
-        studentId,
-        supervisorId,
+        studentId: Number(studentId),
       },
+      update: ratingData,
+      create: ratingData,
     });
-
-    let result;
-    if (existingRating) {
-      // Update existing rating
-      result = await prisma.rating.update({
-        where: { id: existingRating.id },
-        data: {
-          rating,
-          comment,
-        },
-        include: {
-          student: {
-            include: {
-              user: true,
-            },
-          },
-          supervisor: {
-            include: {
-              user: true,
-            },
-          },
-        },
-      });
-    } else {
-      // Create new rating
-      result = await prisma.rating.create({
-        data: {
-          studentId,
-          supervisorId,
-          rating,
-          comment,
-        },
-        include: {
-          student: {
-            include: {
-              user: true,
-            },
-          },
-          supervisor: {
-            include: {
-              user: true,
-            },
-          },
-        },
-      });
-    }
 
     return NextResponse.json(
       { message: 'Rating saved successfully', rating: result },

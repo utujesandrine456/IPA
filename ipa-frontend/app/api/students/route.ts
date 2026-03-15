@@ -1,3 +1,4 @@
+// Prisma type re-index
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
@@ -29,7 +30,9 @@ export async function GET(request: NextRequest) {
             include: {
               user: true
             }
-          }
+          },
+          ratings: true,
+          iapReport: true
         },
       });
 
@@ -69,6 +72,8 @@ export async function GET(request: NextRequest) {
             user: true,
           },
         },
+        ratings: true,
+        iapReport: true,
       },
       orderBy: {
         createdAt: 'desc',

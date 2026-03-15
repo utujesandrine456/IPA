@@ -60,7 +60,7 @@ interface WeeklyLog {
     fridayHours?: number;
     totalHours?: number;
     generalStatement?: string;
-    status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+    status: 'DRAFT' | 'SUBMITTED' | 'COMPLETED' | 'REJECTED';
     student?: { user: { name: string } };
     grade?: string;
     supervisorName?: string;
@@ -198,7 +198,7 @@ export default function SupervisorLogbookPage() {
                 <div className="relative w-full md:w-80">
                     <Users className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
-                        className="pl-11 pr-10 h-12 rounded-2xl border-2 border-slate-50 bg-slate-50/50 text-sm font-bold text-slate-700 focus:bg-white focus:ring-primary/20 transition-all placeholder:lowercase"
+                        className="pl-11 pr-10 h-12 rounded-2xl border-2 border-slate-50 bg-slate-50/50 text-sm font-medium text-slate-700 focus:bg-white focus:ring-primary/20 transition-all placeholder:lowercase"
                         placeholder="search student identity..."
                         value={studentSearch}
                         onChange={(e) => setStudentSearch(e.target.value)}
@@ -262,20 +262,17 @@ export default function SupervisorLogbookPage() {
                                         )}>
                                             <div className="flex justify-between items-start">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shadow-sm border border-primary/10">
-                                                        {log.student?.user.name.split(" ").map(n => n[0]).join("") || "ST"}
-                                                    </div>
                                                     <div>
-                                                        <CardTitle className="text-base font-black text-slate-900 lowercase">{log.student?.user.name.toLowerCase()}</CardTitle>
-                                                        <CardDescription className="text-[10px] font-black tracking-wider text-slate-400 lowercase italic">
+                                                        <CardTitle className="text-sm font-semibold text-slate-900 ">{log.student?.user.name}</CardTitle>
+                                                        <CardDescription className="text-[14px] font-medium text-slate-400 italic">
                                                             week {log.weekNumber} • {log.status.toLowerCase()}
                                                         </CardDescription>
                                                     </div>
                                                 </div>
                                                 <span className={cn(
-                                                    "text-[10px] font-black px-3 py-1.5 rounded-xl border lowercase",
+                                                    "text-[12px] font-medium px-3 py-1 rounded-md border ",
                                                     log.status === 'SUBMITTED' ? "bg-amber-100 text-amber-700 border-amber-200 animate-pulse" :
-                                                        log.status === 'APPROVED' ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
+                                                    log.status === 'COMPLETED' ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
                                                             "bg-red-100 text-red-700 border-red-200"
                                                 )}>
                                                     {log.status === 'SUBMITTED' ? 'review needed' : log.status.toLowerCase()}
@@ -379,7 +376,7 @@ export default function SupervisorLogbookPage() {
                                                         id="review-grade"
                                                         className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-slate-50 disabled:text-slate-400"
                                                         defaultValue={selectedWeeklyLog.grade || ""}
-                                                        disabled={selectedWeeklyLog.status === 'APPROVED' || isSaving}
+                                                        disabled={selectedWeeklyLog.status === 'COMPLETED' || isSaving}
                                                     >
                                                         <option value="" disabled>Select...</option>
                                                         <option value="A">A - Excellent</option>
@@ -396,7 +393,7 @@ export default function SupervisorLogbookPage() {
                                                         id="review-date"
                                                         className="w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-slate-50 disabled:text-slate-400"
                                                         defaultValue={formatDate(selectedWeeklyLog.supervisorDate) || new Date().toISOString().split('T')[0]}
-                                                        disabled={selectedWeeklyLog.status === 'APPROVED' || isSaving}
+                                                        disabled={selectedWeeklyLog.status === 'COMPLETED' || isSaving}
                                                     />
                                                 </div>
                                                 <div className="col-span-2 space-y-2">
@@ -407,7 +404,7 @@ export default function SupervisorLogbookPage() {
                                                         className="w-full h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-slate-50 disabled:text-slate-400"
                                                         placeholder="Your Full Name"
                                                         defaultValue={selectedWeeklyLog.supervisorName || ""}
-                                                        disabled={selectedWeeklyLog.status === 'APPROVED' || isSaving}
+                                                        disabled={selectedWeeklyLog.status === 'COMPLETED' || isSaving}
                                                     />
                                                 </div>
                                                 <div className="col-span-2 space-y-2">
@@ -416,7 +413,7 @@ export default function SupervisorLogbookPage() {
                                                         id="review-note"
                                                         className="w-full h-24 rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium text-slate-800 focus:ring-2 focus:ring-primary/20 outline-none resize-none disabled:bg-slate-50 disabled:text-slate-400"
                                                         placeholder="Add comments for the student..."
-                                                        disabled={selectedWeeklyLog.status === 'APPROVED' || isSaving}
+                                                        disabled={selectedWeeklyLog.status === 'COMPLETED' || isSaving}
                                                     />
                                                 </div>
                                             </div>
@@ -431,7 +428,7 @@ export default function SupervisorLogbookPage() {
                                     <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Awaiting Verification</span>
                                 </div>
                                 <div className="flex gap-4 w-full md:w-auto">
-                                    {selectedWeeklyLog.status !== 'APPROVED' ? (
+                                    {selectedWeeklyLog.status !== 'COMPLETED' ? (
                                         <>
                                             <Button
                                                 variant="ghost"

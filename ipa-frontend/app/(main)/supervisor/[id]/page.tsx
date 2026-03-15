@@ -58,7 +58,7 @@ interface Task {
   id: number;
   title: string;
   description: string;
-  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "SUBMITTED" | "APPROVED" | "REJECTED";
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "SUBMITTED" | "REJECTED";
   date: string;
   studentId: number;
   student?: { user: { name: string } };
@@ -166,6 +166,10 @@ export default function SupervisorDashboard() {
   const [deleteTaskId, setDeleteTaskId] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [expandedTaskId, setExpandedTaskId] = useState<number | null>(null);
+  const [taskActionId, setTaskActionId] = useState<number | null>(null);
+  const [taskActionType, setTaskActionType] = useState<'APPROVE' | 'REJECT' | null>(null);
+  const [taskRating, setTaskRating] = useState(10);
+  const [taskComment, setTaskComment] = useState("");
 
   const router = useRouter();
   useEffect(() => {
@@ -387,6 +391,62 @@ export default function SupervisorDashboard() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to update assignment");
+    }
+  };
+
+  const handleApproveTask = async (task: Task) => {
+    setIsSaving(true);
+    try {
+      await apiFetch("/tasks", {
+        method: "PATCH",
+        body: JSON.stringify({
+          taskId: task.id,
+          status: "COMPLETED", // Changed from APPROVED per user request
+          rating: taskRating,
+          comment: taskComment || "Approved by supervisor",
+          supervisorId: supervisorId,
+        }),
+      });
+      setTaskActionId(null);
+      setTaskActionType(null);
+      setTaskRating(10);
+      setTaskComment("");
+      setExpandedTaskId(null); // Collapse after approval
+      fetchTasks();
+      toast.success("Assignment approved");
+    } catch (error) {
+      toast.error("Approval failed");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleRejectTask = async (task: Task) => {
+    if (!taskComment.trim()) {
+      toast.error("Please provide feedback for rejection");
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await apiFetch("/tasks", {
+        method: "PATCH",
+        body: JSON.stringify({
+          taskId: task.id,
+          status: "REJECTED", // Set to REJECTED for clear visibility
+          comment: taskComment,
+          supervisorId: supervisorId,
+        }),
+      });
+      setTaskActionId(null);
+      setTaskActionType(null);
+      setTaskComment("");
+      setExpandedTaskId(null); // Collapse after rejection
+      fetchTasks();
+      toast.success("Assignment sent back for repeat");
+    } catch (error) {
+      toast.error("Rejection failed");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -806,20 +866,22 @@ export default function SupervisorDashboard() {
                           IN_PROGRESS: "bg-blue-100 text-blue-700",
                           SUBMITTED: "bg-amber-100 text-amber-700",
                           COMPLETED: "bg-emerald-100 text-emerald-700",
-                          APPROVED: "bg-green-100 text-green-700",
                           REJECTED: "bg-red-100 text-red-700",
                         };
                         const isExpanded = expandedTaskId === task.id;
                         return (
                           <div key={task.id} className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden transition-all hover:border-slate-200">
-                            <div className="p-5 flex items-center justify-between gap-3">
+                             <div 
+                               className="p-5 flex items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                               onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
+                             >
                               <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0",
-                                  task.status === 'COMPLETED' || task.status === 'APPROVED' ? "bg-emerald-50 text-emerald-600" :
+                                  task.status === 'COMPLETED' ? "bg-emerald-50 text-emerald-600" :
                                     task.status === 'SUBMITTED' ? "bg-amber-50 text-amber-600" :
                                       "bg-slate-50 text-slate-400"
                                 )}>
-                                  {task.status === 'COMPLETED' || task.status === 'APPROVED' ? <Check className="h-4 w-4" /> :
+                                  {task.status === 'COMPLETED' ? <Check className="h-4 w-4" /> :
                                     task.status === 'SUBMITTED' ? <Eye className="h-4 w-4" /> :
                                       <Clock className="h-4 w-4" />}
                                 </div>
@@ -832,24 +894,15 @@ export default function SupervisorDashboard() {
                                 <span className={cn("text-[9px] font-black px-2 py-1 rounded-full", statusColors[task.status] || "bg-slate-100 text-slate-500")}>
                                   {task.status}
                                 </span>
-                                {task.status === 'SUBMITTED' && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => setExpandedTaskId(isExpanded ? null : task.id)}
-                                    className="h-7 text-[10px] font-black bg-amber-500 hover:bg-amber-600 text-white px-2 rounded-xl cursor-pointer"
-                                  >
-                                    <Eye className="h-3 w-3 mr-1" /> {isExpanded ? "Hide" : "View"}
-                                  </Button>
-                                )}
                                 <button
-                                  onClick={() => { setEditTask({ ...task }); setShowEditModal(true); }}
-                                  className="h-7 w-7 rounded-lg border-2 border-slate-100 flex items-center justify-center hover:border-slate-300 hover:bg-slate-50 transition-colors cursor-pointer"
+                                  onClick={(e) => { e.stopPropagation(); setEditTask({ ...task }); setShowEditModal(true); }}
+                                  className="h-7 w-7 rounded-lg border-2 border-slate-100 flex items-center justify-center hover:border-slate-300 hover:bg-white transition-colors cursor-pointer"
                                   title="Edit assignment"
                                 >
                                   <Pencil className="h-3 w-3 text-slate-400" />
                                 </button>
                                 <button
-                                  onClick={() => { setDeleteTaskId(task.id); setShowDeleteConfirm(true); }}
+                                  onClick={(e) => { e.stopPropagation(); setDeleteTaskId(task.id); setShowDeleteConfirm(true); }}
                                   className="h-7 w-7 rounded-lg border-2 border-slate-100 flex items-center justify-center hover:border-red-200 hover:bg-red-50 transition-colors cursor-pointer"
                                   title="Delete assignment"
                                 >
@@ -857,30 +910,103 @@ export default function SupervisorDashboard() {
                                 </button>
                               </div>
                             </div>
-                            {/* Submission expanded view */}
+                             {/* Submission expanded view */}
                             {isExpanded && (
                               <div className="border-t-2 border-slate-100 p-5 bg-slate-50 space-y-4">
-                                <div>
-                                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Task Description</p>
-                                  <div className="max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                                    <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap wrap-break-words">{task.description || "No description provided."}</p>
+                                {taskActionId === task.id ? (
+                                  <div className="bg-white p-5 rounded-2xl border-2 border-slate-200 animate-in fade-in slide-in-from-top-2 duration-300 shadow-sm">
+                                    <div className="flex justify-between items-center mb-4">
+                                      <span className="text-[16px] font-medium text-slate-900 ">
+                                        {taskActionType === 'APPROVE' ? "Final Assessment" : "Revision Requirements"}
+                                      </span>
+                                      <button onClick={() => { setTaskActionId(null); setTaskActionType(null); }} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                        <X className="h-4 w-4" />
+                                      </button>
+                                    </div>
+
+                                    {taskActionType === 'APPROVE' && (
+                                      <div className="mb-6">
+                                        <label className="text-[12px] font-medium text-slate-500 mb-2 block">Performance Rating (1-10)</label>
+                                        <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide">
+                                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(val => (
+                                            <button
+                                              key={val}
+                                              onClick={() => setTaskRating(val)}
+                                              className={cn(
+                                                "h-10 w-10 min-w-[40px] rounded-lg font-semibold text-xs transition-all border-2",
+                                                taskRating === val 
+                                                  ? "bg-slate-900 border-slate-900 text-white shadow-lg scale-105" 
+                                                  : "border-slate-100 text-slate-400 hover:border-slate-200 bg-slate-50"
+                                              )}
+                                            >
+                                              {val}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    <div className="mb-6">
+                                      <label className="text-[12px] font-medium text-slate-500 mb-2 block">
+                                        {taskActionType === 'APPROVE' ? "Supervisor Comments (Optional)" : "Feedback for Student (Required)"}
+                                      </label>
+                                      <textarea
+                                        className="w-full p-4 text-sm border-2 border-slate-100 rounded-xl focus:outline-none focus:border-slate-400 min-h-[100px] placeholder:text-slate-300 transition-all resize-none bg-slate-50/50"
+                                        placeholder={taskActionType === 'APPROVE' ? "Well done..." : "What exactly needs to be repeated?..."}
+                                        value={taskComment}
+                                        onChange={(e) => setTaskComment(e.target.value)}
+                                      />
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                      {taskActionType === 'APPROVE' ? (
+                                        <Button
+                                          disabled={isSaving}
+                                          onClick={() => handleApproveTask(task)}
+                                          className="flex-1 h-12 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm rounded-lg shadow-lg shadow-emerald-500/20"
+                                        >
+                                          {isSaving ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <Check className="h-4 w-4 mr-2" />}
+                                          Verify & Approve
+                                        </Button>
+                                      ) : (
+                                        <Button
+                                          disabled={isSaving}
+                                          onClick={() => handleRejectTask(task)}
+                                          className="flex-1 h-12 bg-red-500 hover:bg-red-600 text-white font-semibold text-sm rounded-lg shadow-lg shadow-red-500/20"
+                                        >
+                                          {isSaving ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : <X className="h-4 w-4 mr-2" />}
+                                          Reject & Return
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="pt-3 border-t border-slate-200 flex gap-3">
-                                  <Button
-                                    onClick={() => router.push(`/supervisor/${supervisorId}/ratings/${task.studentId}`)}
-                                    className="h-8 bg-slate-900 hover:bg-black text-white text-xs font-bold px-4 rounded-xl"
-                                  >
-                                    Rate Student
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    onClick={() => setExpandedTaskId(null)}
-                                    className="h-8 text-xs font-bold px-4 rounded-xl"
-                                  >
-                                    Collapse
-                                  </Button>
-                                </div>
+                                ) : (
+                                  <>
+                                    <div>
+                                      <p className="text-[14px] font-semibold text-slate-400 mb-2">Task Description</p>
+                                      <div className="max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                                        <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap wrap-break-words">{task.description || "No description provided."}</p>
+                                      </div>
+                                    </div>
+                                    {task.status === 'SUBMITTED' && (
+                                      <div className="pt-3 border-t border-slate-200 flex gap-3">
+                                        <Button
+                                          onClick={() => { setTaskActionId(task.id); setTaskActionType('REJECT'); setTaskComment(""); }}
+                                          className="h-10 border-2 border-red-100 text-red-500 hover:bg-red-50 text-[14px] font-medium px-6 rounded-md cursor-pointer"
+                                          variant="outline"
+                                        >
+                                          Reject
+                                        </Button>
+                                        <Button
+                                          onClick={() => { setTaskActionId(task.id); setTaskActionType('APPROVE'); setTaskComment(""); setTaskRating(10); }}
+                                          className="h-10 bg-emerald-500 hover:bg-emerald-600 text-white text-[14px] font-medium px-6 rounded-md cursor-pointer shadow-md"
+                                        >
+                                          Approve
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </>
+                                )}
                               </div>
                             )}
                           </div>

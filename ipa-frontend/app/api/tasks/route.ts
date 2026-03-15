@@ -195,14 +195,11 @@ export async function PATCH(request: NextRequest) {
           link: `/supervisor/${task.student.supervisor.id}?tab=tasks`
         }
       });
-    } else if ((status === 'COMPLETED' || status === 'PENDING') && task.student?.user?.id) { // PENDING here likely means "Request Changes" (Rejected) if it was previously IN_PROGRESS, or just reset. 
-      // For "Request Changes", the supervisor usually keeps it PENDING or sends it back to PENDING.
-      // Let's assume PENDING coming from PATCH means "Request Changes" if we want to notify. 
-      // However, the dashboard logic for "Reject" sets status to "PENDING".
-
-      const notifType = status === 'COMPLETED' ? 'SUCCESS' : 'WARNING';
-      const notifTitle = status === 'COMPLETED' ? 'Task Approved' : 'Task Revision Requested';
-      const notifMessage = status === 'COMPLETED'
+    } else if ((status === 'COMPLETED' || status === 'PENDING' || status === 'REJECTED') && task.student?.user?.id) {
+      const isApproved = status === 'COMPLETED';
+      const notifType = isApproved ? 'SUCCESS' : 'WARNING';
+      const notifTitle = isApproved ? 'Task Approved' : 'Task Revision Requested';
+      const notifMessage = isApproved
         ? `Your work for "${task.title}" has been approved!`
         : `Your work for "${task.title}" needs revision.`;
 
@@ -212,7 +209,7 @@ export async function PATCH(request: NextRequest) {
           title: notifTitle,
           message: notifMessage,
           type: notifType,
-          link: `/student/${task.student.id}` // Link to student dashboard
+          link: `/student/${task.student.id}`
         }
       });
     }

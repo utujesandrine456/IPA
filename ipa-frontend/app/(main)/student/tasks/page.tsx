@@ -18,7 +18,8 @@ import {
     ArrowRight,
     AlertCircle,
     X,
-    Check
+    Check,
+    MessageSquare
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { toast, Toaster } from "react-hot-toast";
@@ -28,10 +29,11 @@ interface Task {
     id: number;
     title: string;
     description: string;
-    status: "PENDING" | "SUBMITTED" | "COMPLETED" | "IN_PROGRESS";
+    status: "PENDING" | "SUBMITTED" | "COMPLETED" | "IN_PROGRESS" | "REJECTED";
     date: string;
     submittedAt?: string;
     completedAt?: string;
+    comments?: Array<{ content: string; createdAt: string }>;
 }
 
 export default function StudentTasksPage() {
@@ -114,6 +116,7 @@ export default function StudentTasksPage() {
         switch (status) {
             case "COMPLETED": return "bg-emerald-100 text-emerald-700 border-emerald-200";
             case "SUBMITTED": return "bg-blue-100 text-blue-700 border-blue-200";
+            case "REJECTED": return "bg-red-100 text-red-700 border-red-200";
             case "IN_PROGRESS": return "bg-amber-100 text-amber-700 border-amber-200";
             default: return "bg-slate-100 text-slate-700 border-slate-200";
         }
@@ -199,6 +202,17 @@ export default function StudentTasksPage() {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="p-6 pt-0 mt-auto">
+                                {task.status === "REJECTED" && task.comments && task.comments.length > 0 && (
+                                    <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-100 space-y-2">
+                                        <div className="flex items-center gap-2 text-red-600">
+                                            <MessageSquare className="h-3.5 w-3.5" />
+                                            <span className="text-[10px] font-black uppercase tracking-wider">Supervisor Feedback</span>
+                                        </div>
+                                        <p className="text-xs text-red-700 font-medium leading-relaxed italic line-clamp-3">
+                                            &quot;{task.comments[0].content.split('Feedback: ')[1] || task.comments[0].content}&quot;
+                                        </p>
+                                    </div>
+                                )}
                                 <div className="h-px bg-slate-100 w-full mb-6" />
                                 {task.status === "COMPLETED" ? (
                                     <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-3 rounded-2xl border border-emerald-100">
@@ -212,14 +226,17 @@ export default function StudentTasksPage() {
                                     </div>
                                 ) : (
                                     <Button
-                                        className="w-full h-12 rounded-2xl bg-primary text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all font-bold gap-2"
+                                        className={cn(
+                                            "w-full h-12 rounded-2xl text-white shadow-lg transition-all font-bold gap-2",
+                                            task.status === 'REJECTED' ? "bg-red-500 hover:bg-red-600 shadow-red-500/20" : "bg-primary shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
+                                        )}
                                         onClick={() => {
                                             setSelectedTask(task);
                                             setShowSubmitModal(true);
                                         }}
                                     >
                                         <Upload className="h-4 w-4" />
-                                        Submit Work
+                                        {task.status === 'REJECTED' ? "Repeat Task" : "Submit Work"}
                                     </Button>
                                 )}
                             </CardContent>
