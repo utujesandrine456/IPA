@@ -5,7 +5,7 @@
   "main": "dist/main.js",
   "scripts": {
     "dev": "npx nest start --watch",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/main.js",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
