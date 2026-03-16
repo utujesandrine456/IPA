@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -66,7 +66,7 @@ function StepTextarea({ label, placeholder, value, onChange, required }: {
   );
 }
 
-export default function CompleteProfilePage() {
+function CompleteProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -447,5 +447,24 @@ export default function CompleteProfilePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CompleteProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-14 w-14 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
+              Loading...
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <CompleteProfileContent />
+    </Suspense>
   );
 }

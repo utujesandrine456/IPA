@@ -40,16 +40,8 @@ export async function GET(request: NextRequest) {
           ],
         },
         include: {
-          sender: {
-            include: {
-              user: true,
-            },
-          },
-          receiver: {
-            include: {
-              user: true,
-            },
-          },
+          sender: true,
+          receiver: true,
         },
         orderBy: {
           createdAt: 'desc',
@@ -99,16 +91,8 @@ export async function GET(request: NextRequest) {
         ],
       },
       include: {
-        sender: {
-          include: {
-            user: true,
-          },
-        },
-        receiver: {
-          include: {
-            user: true,
-          },
-        },
+        sender: true,
+        receiver: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -175,16 +159,8 @@ export async function POST(request: NextRequest) {
         content,
       },
       include: {
-        sender: {
-          include: {
-            user: true,
-          },
-        },
-        receiver: {
-          include: {
-            user: true,
-          },
-        },
+        sender: true,
+        receiver: true,
       },
     });
 

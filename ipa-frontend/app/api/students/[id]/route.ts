@@ -3,10 +3,11 @@ import prisma from '@/lib/prisma';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = Number(params.id);
+        const { id: idParam } = await params;
+        const id = Number(idParam);
         if (Number.isNaN(id)) {
             return NextResponse.json({ error: 'Invalid student id' }, { status: 400 });
         }
@@ -44,10 +45,11 @@ export async function GET(
 
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = Number(params.id);
+        const { id: idParam } = await params;
+        const id = Number(idParam);
         const body = await request.json();
         const { absentDays, ...otherData } = body;
 

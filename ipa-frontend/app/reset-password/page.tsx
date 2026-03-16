@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, CheckCircle2, Loader2, Eye, EyeOff, Shield, ChevronRight, AlertTriangle } from "lucide-react";
@@ -13,7 +13,7 @@ const stats = [
     { value: "100%", label: "Placement" },
 ];
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
@@ -204,5 +204,24 @@ export default function ResetPasswordPage() {
                 </motion.div>
             </div>
         </div>
+    );
+}
+
+export default function ResetPasswordPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="h-14 w-14 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
+                            Loading...
+                        </p>
+                    </div>
+                </div>
+            }
+        >
+            <ResetPasswordContent />
+        </Suspense>
     );
 }
