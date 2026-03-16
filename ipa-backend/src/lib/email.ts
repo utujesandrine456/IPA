@@ -16,7 +16,7 @@ export async function sendProfileCompletionEmail(to: string, token: string) {
     const profileLink = `${websiteUrl}/complete-profile?token=${token}`;
 
     const mailOptions = {
-        from: `"IPA System" <${process.env.SMTP_USER}>`,
+        from: `"IAP System" <${process.env.SMTP_USER}>`,
         to,
         subject: "Complete Your Profile",
         html: `
@@ -41,7 +41,7 @@ export async function sendResetPasswordEmail(to: string, token: string) {
     const resetLink = `${websiteUrl}/reset-password?token=${token}`;
 
     const mailOptions = {
-        from: `"IPA System" <${process.env.SMTP_USER}>`,
+        from: `"IAP System" <${process.env.SMTP_USER}>`,
         to,
         subject: "Password Reset Request",
         html: `

@@ -285,4 +285,5 @@ enum WeeklyLogStatus {
   SUBMITTED
   REJECTED
   COMPLETED
+  APPROVED
 }
