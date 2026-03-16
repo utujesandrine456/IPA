@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npx nest start --watch",
     "build": "tsc",
-    "start": "node dist/main.js",
+    "start": "node -r tsconfig-paths/register dist/main.js",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed.ts"
@@ -38,6 +38,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "swagger-ui-express": "^5.0.1",
+    "tsconfig-paths": "^4.2.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
