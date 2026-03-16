@@ -1,10 +1,10 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://iap-l6oe.onrender.com/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:2009/api";
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     if (!API_URL) {
         console.error("[apiFetch] Error: NEXT_PUBLIC_API_URL is not defined in environment variables.");
     }
-
+    
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
     const mergedHeaders = new Headers(options.headers);
