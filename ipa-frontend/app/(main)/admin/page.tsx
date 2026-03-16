@@ -61,6 +61,7 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
     const [sendingInvites, setSendingInvites] = useState(false);
+    const [invitingStudentIds, setInvitingStudentIds] = useState<Set<string>>(new Set());
     const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set());
     const [uploadResult, setUploadResult] = useState<any>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -240,7 +241,11 @@ export default function AdminDashboard() {
         const idsToSend = studentIds || Array.from(selectedStudents);
         if (idsToSend.length === 0) return;
 
-        setSendingInvites(true);
+        if (studentIds && studentIds.length === 1) {
+            setInvitingStudentIds(prev => new Set(prev).add(studentIds[0]));
+        } else {
+            setSendingInvites(true);
+        }
 
         try {
             const result = await apiFetch("/students/send-invites", {
@@ -264,7 +269,15 @@ export default function AdminDashboard() {
             console.error("Error sending invites:", error);
             alert(error.message || "Failed to send invitations");
         } finally {
-            setSendingInvites(false);
+            if (studentIds && studentIds.length === 1) {
+                setInvitingStudentIds(prev => {
+                    const next = new Set(prev);
+                    next.delete(studentIds[0]);
+                    return next;
+                });
+            } else {
+                setSendingInvites(false);
+            }
         }
     };
 
@@ -550,7 +563,7 @@ export default function AdminDashboard() {
                                     ) : (
                                         <>
                                             <Mail className="h-4 w-4 mr-2" />
-                                            Send Invites ({selectedStudents.size})
+                                            Send ({selectedStudents.size})
                                         </>
                                     )}
                                 </Button>
@@ -578,7 +591,7 @@ export default function AdminDashboard() {
                                                     type="checkbox"
                                                     checked={selectedStudents.size === students.filter(s => !s.profileCompleted).length && students.filter(s => !s.profileCompleted).length > 0}
                                                     onChange={toggleSelectAll}
-                                                    className="rounded border-primary/20"
+                                                    className="rounded border-primary/20 accent-primary"
                                                 />
                                             </th>
                                             <th className="px-6 py-3">Name</th>
@@ -587,7 +600,7 @@ export default function AdminDashboard() {
                                             <th className="px-6 py-3">Supervisor</th>
                                             <th className="px-6 py-3">Liaison</th>
                                             <th className="px-6 py-3">Status</th>
-                                            <th className="px-6 py-3 text-right">Actions</th>
+                                            <th className="px-6 py-3 text-right">Send Invite(Complete Profile)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -602,7 +615,7 @@ export default function AdminDashboard() {
                                                             type="checkbox"
                                                             checked={selectedStudents.has(student.id)}
                                                             onChange={() => toggleStudentSelection(student.id)}
-                                                            className="rounded border-primary/20"
+                                                            className="rounded border-primary/20 accent-primary"
                                                         />
                                                     )}
                                                 </td>
@@ -650,9 +663,13 @@ export default function AdminDashboard() {
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     {!student.profileCompleted && (
-                                                        <Button size="sm" onClick={() => handleSendInvites([student.id])} disabled={sendingInvites} className="bg-primary hover:bg-primary/90 text-white">
-                                                            <Mail className="h-3 w-3 mr-1" />
-                                                            Send Invite
+                                                        <Button size="sm" onClick={() => handleSendInvites([student.id])} disabled={sendingInvites || invitingStudentIds.has(student.id)} className="bg-primary hover:bg-primary/90 text-white">
+                                                            {invitingStudentIds.has(student.id) ? (
+                                                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                                            ) : (
+                                                                <Mail className="h-3 w-3 mr-1" />
+                                                            )}
+                                                            {invitingStudentIds.has(student.id) ? "Sending..." : "Send"}
                                                         </Button>
                                                     )}
                                                 </td>

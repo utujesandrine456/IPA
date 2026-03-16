@@ -37,7 +37,9 @@ export class StudentsController {
             properties: {
                 token: { type: 'string', example: 'profile-token-from-email' },
                 password: { type: 'string', example: 'newPassword123' },
-                fullName: { type: 'string', example: 'John Doe' },
+                firstName: { type: 'string', example: 'John' },
+                lastName: { type: 'string', example: 'Doe' },
+                intakeYear: { type: 'string', example: '2024' },
                 phone: { type: 'string', example: '+250788123456' },
                 address: { type: 'string', example: 'Kigali, Rwanda' },
                 sex: { type: 'string', example: 'Male' },

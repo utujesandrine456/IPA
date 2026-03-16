@@ -34,7 +34,9 @@ model Student {
   id                    Int             @id @default(autoincrement())
   userId                Int             @unique
   studentNumber         String          @unique
-  fullName              String
+  firstName             String
+  lastName              String
+  intakeYear            String?
   sex                   String?
   idOrPassport          String?
   dateOfBirth           DateTime?

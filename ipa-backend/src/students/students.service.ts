@@ -111,7 +111,7 @@ export class StudentsService {
 
         // Extract all possible fields from the body
         const {
-            fullName, sex, idOrPassport, dateOfBirth, year, graduationYear,
+            firstName, lastName, intakeYear, sex, idOrPassport, dateOfBirth, year, graduationYear,
             phone, email, address, companyName, companyAddress,
             companyPhone, companyEmail, companyPOBox,
             supervisorName, supervisorDesignation, supervisorEmail,
@@ -122,7 +122,7 @@ export class StudentsService {
         } = body;
 
         const updateData: any = {
-            fullName, sex, idOrPassport,
+            firstName, lastName, intakeYear, sex, idOrPassport,
             dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
             year, graduationYear, phone, email, address,
             companyName, companyAddress, companyPhone, companyEmail, companyPOBox,
@@ -149,11 +149,13 @@ export class StudentsService {
             include: { user: true, supervisor: { include: { user: true } } }
         });
 
-        // Update the associated user's name if fullName was provided
-        if (fullName) {
+        // Update the associated user's name if firstName or lastName was provided
+        if (firstName || lastName) {
+            const student = await this.prisma.student.findUnique({ where: { id: Number(studentId) } });
+            const nameToUpdate = `${firstName || student?.firstName || ""} ${lastName || student?.lastName || ""}`.trim();
             await this.prisma.user.update({
                 where: { id: updatedStudent.userId },
-                data: { name: fullName }
+                data: { name: nameToUpdate }
             });
         }
 
@@ -186,7 +188,7 @@ export class StudentsService {
 
     async completeProfile(body: any) {
         const {
-            token, password, phone, address, companyName, companyAddress,
+            token, password, firstName, lastName, intakeYear, sex, phone, address, companyName, companyAddress,
             companyPhone, companyEmail, supervisorName, supervisorEmail,
             internshipStart, internshipEnd, supervisorId,
         } = body;
@@ -230,7 +232,7 @@ export class StudentsService {
         });
 
         const updateData: any = {
-            phone, address, companyName, companyAddress,
+            firstName, lastName, intakeYear, sex, phone, address, companyName, companyAddress,
             companyPhone, companyEmail, supervisorName, supervisorEmail,
             internshipStart: internshipStart ? new Date(internshipStart) : null,
             internshipEnd: internshipEnd ? new Date(internshipEnd) : null,
@@ -248,6 +250,13 @@ export class StudentsService {
                 user: true,
                 supervisor: { include: { user: true } },
             },
+        });
+
+        // Update the associated user's name
+        const finalName = `${firstName || student.firstName} ${lastName || student.lastName}`.trim();
+        await this.prisma.user.update({
+            where: { id: student.userId },
+            data: { name: finalName }
         });
 
         return {
@@ -289,14 +298,27 @@ export class StudentsService {
             }, {} as Record<string, unknown>);
 
             const studentNumber = extractValue(normalizedRow, ['student id', 'student_id', 'student number', 'studentnumber', 'student_no', 'studentno', 'matric', 'matric no']);
+            const firstName = extractValue(normalizedRow, ['first name', 'firstname', 'fname']);
+            const lastName = extractValue(normalizedRow, ['last name', 'lastname', 'lname', 'surname']);
             const fullName = extractValue(normalizedRow, ['name', 'full name', 'fullname', 'student name']);
+            
+            let fName = firstName;
+            let lName = lastName;
+            
+            if (!fName || !lName) {
+                if (fullName) {
+                    const parts = fullName.split(' ');
+                    fName = parts[0];
+                    lName = parts.slice(1).join(' ');
+                }
+            }
             const sex = extractValue(normalizedRow, ['sex', 'gender']) || '';
             const idOrPassport = extractValue(normalizedRow, ['id_or_passport', 'id or passport', 'passport', 'idpassport', 'id']) || '';
             const phone = extractValue(normalizedRow, ['phone', 'phone number', 'phone_number', 'mobile', 'mobile number']) || '';
             const email = extractValue(normalizedRow, ['email', 'email address', 'email_address', 'e-mail']);
 
-            if (!studentNumber || !fullName || !email) {
-                errors.push({ row: i + 2, error: 'Missing required fields (Student ID, Name or Email)' });
+            if (!studentNumber || !fName || !lName || !email) {
+                errors.push({ row: i + 2, error: 'Missing required fields (Student ID, First Name, Last Name or Email)' });
                 continue;
             }
 
@@ -327,13 +349,14 @@ export class StudentsService {
 
                 await this.prisma.user.create({
                     data: {
-                        name: fullName,
+                        name: `${fName} ${lName}`.trim(),
                         email,
                         role: 'STUDENT',
                         studentProfile: {
                             create: {
                                 studentNumber: String(studentNumber),
-                                fullName: String(fullName),
+                                firstName: String(fName),
+                                lastName: String(lName),
                                 sex: sex ? String(sex) : null,
                                 idOrPassport: idOrPassport ? String(idOrPassport) : null,
                                 phone: phone ? String(phone) : null,

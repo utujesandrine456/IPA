@@ -155,7 +155,7 @@ export class WeeklyLogsService {
 
             let cy = 160;
             doc.font(fontBold).fontSize(11).text('Student details:', 40, cy); cy += 15;
-            drawFormBox(40, cy, 515, 35, 'Name of Student', student.fullName); cy += 40;
+            drawFormBox(40, cy, 515, 35, 'Name of Student', `${student.firstName} ${student.lastName}`); cy += 40;
             drawFormBox(40, cy, 515, 35, 'Date of Birth', student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : ''); cy += 40;
             drawFormBox(40, cy, 250, 35, 'ID/Passport No.', student.idOrPassport);
             drawFormBox(305, cy, 250, 35, 'Reg No.', student.studentNumber); cy += 40;
@@ -397,7 +397,7 @@ export class WeeklyLogsService {
             await this.notificationsService.createNotification({
                 userId: weeklyLog.student.supervisor.userId,
                 title: 'Weekly Log Submitted',
-                message: `${weeklyLog.student.fullName} submitted Week ${weeklyLog.weekNumber}`,
+                message: `${weeklyLog.student.firstName} ${weeklyLog.student.lastName} submitted Week ${weeklyLog.weekNumber}`,
                 type: 'INFO',
             });
         }

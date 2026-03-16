@@ -58,6 +58,24 @@ function LogbookInput({ label, value, onChange, type = "text" }: { label: string
     );
 }
 
+function LogbookSelect({ label, value, onChange, options }: { label: string; value?: string; onChange: (v: string) => void; options: { label: string; value: string }[] }) {
+    return (
+        <div className="space-y-2 group">
+            <label className="text-xs font-semibold text-slate-500 group-hover:text-primary transition-colors">{label}</label>
+            <select
+                className="h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-800 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm outline-none appearance-none"
+                value={value ?? ""}
+                onChange={(e) => onChange(e.target.value)}
+            >
+                <option value="" disabled>Select {label}</option>
+                {options.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+            </select>
+        </div>
+    );
+}
+
 function StatusBadge({ status }: { status: string }) {
     const isCompleted = status === "COMPLETED";
     const isRejected = status === "REJECTED";
@@ -261,6 +279,67 @@ export default function StudentLogbookPage() {
             fetchData();
         }
     }, [currentStep]);
+
+    // Auto-fill logic when student data is available
+    useEffect(() => {
+        if (student) {
+            // Auto-fill Report if it's empty
+            setReport(prev => {
+                const newReport = { ...prev };
+                let changed = false;
+
+                if (!newReport.nameOfUnit && student.firstName) {
+                    newReport.nameOfUnit = `${student.firstName} ${student.lastName}`;
+                    changed = true;
+                }
+                
+                // Note: user said "once they must be filled automatically every-when they are need"
+                // So we check if fields are empty and fill them from student profile
+                if (!newReport.phoneNo && student.phone) {
+                    newReport.phoneNo = student.phone;
+                    changed = true;
+                }
+                
+                if (!newReport.regNo && student.studentNumber) {
+                    newReport.regNo = student.studentNumber;
+                    changed = true;
+                }
+
+                if (!newReport.iapCompanyAttached && student.companyName) {
+                    newReport.iapCompanyAttached = student.companyName;
+                    changed = true;
+                }
+
+                return changed ? newReport : prev;
+            });
+
+            // Update weekly logs with dates and supervisor if they are missing
+            if (student.internshipStart && student.internshipEnd) {
+                setWeeklyLogs(prev => {
+                    return prev.map(log => {
+                        const weekData = generatedWeeksList.find(w => w.number === log.weekNumber);
+                        const updated = { ...log };
+                        let changed = false;
+
+                        if (!updated.startDate && weekData) {
+                            updated.startDate = weekData.start;
+                            changed = true;
+                        }
+                        if (!updated.endDate && weekData) {
+                            updated.endDate = weekData.end;
+                            changed = true;
+                        }
+                        if (!updated.supervisorName && student.supervisorName) {
+                            updated.supervisorName = student.supervisorName;
+                            changed = true;
+                        }
+
+                        return changed ? updated : log;
+                    });
+                });
+            }
+        }
+    }, [student]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -1480,11 +1559,26 @@ export default function StudentLogbookPage() {
                                     </CardHeader>
                                     <CardContent className="p-8">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <LogbookInput label="Name of Student" value={student?.fullName} onChange={(v) => setStudent({ ...student, fullName: v })} />
+                                            <LogbookInput label="First Name" value={student?.firstName} onChange={(v) => setStudent({ ...student, firstName: v })} />
+                                            <LogbookInput label="Last Name" value={student?.lastName} onChange={(v) => setStudent({ ...student, lastName: v })} />
                                             <LogbookInput label="Date of Birth" type="date" value={student?.dateOfBirth ? new Date(student.dateOfBirth).toISOString().split('T')[0] : ''} onChange={(v) => setStudent({ ...student, dateOfBirth: v })} />
-                                            <LogbookInput label="Sex" value={student?.sex} onChange={(v) => setStudent({ ...student, sex: v })} />
+                                            <LogbookSelect 
+                                                label="Sex" 
+                                                value={student?.sex} 
+                                                onChange={(v) => setStudent({ ...student, sex: v })} 
+                                                options={[
+                                                    { label: "Male", value: "Male" },
+                                                    { label: "Female", value: "Female" }
+                                                ]}
+                                            />
                                             <LogbookInput label="ID/Passport No." value={student?.idOrPassport} onChange={(v) => setStudent({ ...student, idOrPassport: v })} />
                                             <LogbookInput label="Reg No." value={student?.studentNumber} onChange={(v) => setStudent({ ...student, studentNumber: v })} />
+                                            <LogbookSelect 
+                                                label="Intake Year" 
+                                                value={student?.intakeYear} 
+                                                onChange={(v) => setStudent({ ...student, intakeYear: v })} 
+                                                options={Array.from({ length: 10 }, (_, i) => ({ label: String(new Date().getFullYear() - i), value: String(new Date().getFullYear() - i) }))}
+                                            />
                                             <LogbookInput label="Graduation Year" value={student?.graduationYear} onChange={(v) => setStudent({ ...student, graduationYear: v })} />
                                             <LogbookInput label="Cell Phone No." value={student?.phone} onChange={(v) => setStudent({ ...student, phone: v })} />
                                             <LogbookInput label="Internship Start Date" type="date" value={student?.internshipStart ? new Date(student.internshipStart).toISOString().split('T')[0] : ''} onChange={(v) => setStudent({ ...student, internshipStart: v })} />
