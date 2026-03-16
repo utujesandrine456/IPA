@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import bcrypt from 'bcryptjs';
 import pkg from 'jsonwebtoken';
@@ -176,7 +176,7 @@ export class AuthService {
   async forgotPassword(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return { message: 'If an account exists with that email, a reset link has been sent.' };
+      throw new NotFoundException('Account with this email was not found');
     }
 
     const token = generateToken(64);

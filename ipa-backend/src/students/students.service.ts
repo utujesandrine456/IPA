@@ -149,6 +149,14 @@ export class StudentsService {
             include: { user: true, supervisor: { include: { user: true } } }
         });
 
+        // Update the associated user's name if fullName was provided
+        if (fullName) {
+            await this.prisma.user.update({
+                where: { id: updatedStudent.userId },
+                data: { name: fullName }
+            });
+        }
+
         return { message: 'Profile updated successfully', student: updatedStudent };
     }
 

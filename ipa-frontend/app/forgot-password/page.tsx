@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, ArrowLeft, CheckCircle2, Loader2, ChevronRight, Shield } from "lucide-react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import toast, { Toaster } from "react-hot-toast";
 
 const stats = [
     { value: "950+", label: "Graduates" },
@@ -25,13 +26,21 @@ export default function ForgotPasswordPage() {
         setError("");
 
         try {
-            await apiFetch("/auth/forgot-password", {
+            const res = await apiFetch("/auth/forgot-password", {
                 method: "POST",
                 body: JSON.stringify({ email }),
             });
-            setSent(true);
+
+            if (res.ok) {
+                setSent(true);
+                toast.success("Reset link sent successfully!");
+            } else {
+                setError(res.error || "An error occurred.");
+                toast.error(res.error || "An error occurred.");
+            }
         } catch (err: any) {
             setError(err.message || "An error occurred. Please try again.");
+            toast.error("An unexpected error occurred.");
         } finally {
             setLoading(false);
         }
@@ -244,6 +253,7 @@ export default function ForgotPasswordPage() {
                     </AnimatePresence>
                 </motion.div>
             </div>
+            <Toaster position="top-right" />
         </div>
     );
 }

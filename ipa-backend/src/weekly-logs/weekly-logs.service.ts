@@ -374,22 +374,11 @@ export class WeeklyLogsService {
 
         if (!log) throw new NotFoundException('Weekly log not found');
 
-        // Check if student is already rated
-        const rating = await this.prisma.rating.findUnique({
-            where: { studentId: log.studentId }
-        });
-
-        const status = rating ? 'COMPLETED' : 'SUBMITTED';
+        const status = 'SUBMITTED';
 
         const updateData: any = { status: status as WeeklyLogStatus };
         if (data.generalStatement !== undefined) {
             updateData.generalStatement = data.generalStatement;
-        }
-
-        if (rating) {
-            updateData.approvedAt = new Date();
-            updateData.supervisorSignature = true;
-            updateData.supervisorDate = new Date();
         }
 
         const weeklyLog = await this.prisma.weeklyLog.update({
@@ -404,20 +393,12 @@ export class WeeklyLogsService {
             },
         });
 
-        if (status === 'SUBMITTED' && weeklyLog.student?.supervisor?.userId) {
+        if (weeklyLog.student?.supervisor?.userId) {
             await this.notificationsService.createNotification({
                 userId: weeklyLog.student.supervisor.userId,
                 title: 'Weekly Log Submitted',
                 message: `${weeklyLog.student.fullName} submitted Week ${weeklyLog.weekNumber}`,
                 type: 'INFO',
-            });
-        } else if (status === 'COMPLETED') {
-            await this.notificationsService.createNotification({
-                userId: weeklyLog.student.userId,
-                title: 'Weekly Log Auto-Approved',
-                message: `Your Weekly Log for Week ${weeklyLog.weekNumber} has been automatically approved.`,
-                type: 'SUCCESS',
-                link: '/student/logbook',
             });
         }
 

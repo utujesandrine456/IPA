@@ -423,10 +423,6 @@ export default function SupervisorLogbookPage() {
                             </div>
 
                             <div className="p-8 bg-slate-50/80 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-3 w-3 rounded-full bg-amber-400 animate-pulse"></div>
-                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Awaiting Verification</span>
-                                </div>
                                 <div className="flex gap-4 w-full md:w-auto">
                                     {selectedWeeklyLog.status !== 'COMPLETED' ? (
                                         <>

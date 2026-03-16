@@ -254,8 +254,8 @@ export default function StudentDashboard() {
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-1">
-                                    <p className="text-md font-medium text-slate-400">{stat.label}</p>
-                                    <p className="text-lg font-semibold text-slate-900">{stat.value}</p>
+                                    <p className="text-sm font-medium text-slate-400">{stat.label}</p>
+                                    <p className="text-md font-semibold text-slate-900">{stat.value}</p>
                                 </div>
                                 <div className={cn("p-4 rounded-2xl", stat.bg)}>
                                     <stat.icon className={cn("h-6 w-6", stat.color)} />

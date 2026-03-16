@@ -149,7 +149,7 @@ export default function UsersPage() {
                     <div className="relative">
                         <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 pointer-events-none" />
                         <select
-                            className="w-full pl-10 pr-10 py-4 bg-white border-2 border-slate-100 rounded-lg appearance-none text-slate-600 font-black tracking-widest text-xs focus:ring-0 focus:border-primary/20"
+                            className="w-full pl-10 pr-10 py-4 bg-white border-2 border-slate-100 rounded-lg appearance-none text-slate-600 font-bold text-md focus:ring-0 focus:border-primary/20"
                             value={filterRole}
                             onChange={(e) => setFilterRole(e.target.value)}
                         >
@@ -165,7 +165,7 @@ export default function UsersPage() {
                     <Button
                         onClick={() => fetchUsers()}
                         disabled={loading}
-                        className="w-full h-full py-4 bg-primary hover:bg-primary/90 text-white rounded-lg shadow-lg shadow-primary/20 font-black tracking-[0.2em] text-xs gap-3 transition-all active:scale-95 group"
+                        className="w-full h-full py-3 bg-primary hover:bg-primary/90 text-white rounded-lg shadow-lg shadow-primary/20 font-bold text-md gap-3 transition-all active:scale-95 group"
                     >
                         <RefreshCw className={cn("h-4 w-4 transition-transform group-hover:rotate-180 duration-500", loading && "animate-spin")} />
                         Sync
@@ -179,11 +179,11 @@ export default function UsersPage() {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-100">
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">User Identity</th>
-                                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Access</th>
-                                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Status</th>
-                                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Organization</th>
-                                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-right">Ops</th>
+                                <th className="px-8 py-6 text-[14px] font-black uppercase text-slate-400">User Identity</th>
+                                <th className="px-6 py-6 text-[14px] font-black uppercase text-slate-400">Access</th>
+                                <th className="px-6 py-6 text-[14px] font-black uppercase text-slate-400">Status</th>
+                                <th className="px-6 py-6 text-[14px] font-black uppercase text-slate-400">Organization</th>
+                                <th className="px-8 py-6 text-[14px] font-black uppercase text-slate-400 text-right">Ops</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -202,7 +202,7 @@ export default function UsersPage() {
                                                     {getRoleIcon(user.role)}
                                                 </div>
                                                 <div>
-                                                    <p className="font-black text-slate-900 text-sm uppercase tracking-tight">{user.name}</p>
+                                                    <p className="font-bold text-slate-900 text-sm uppercase tracking-tight">{user.name}</p>
                                                     <p className="text-xs font-medium text-slate-400 lowercase">{user.email}</p>
                                                 </div>
                                             </div>
@@ -272,15 +272,6 @@ export default function UsersPage() {
                             )}
                         </tbody>
                     </table>
-                </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between px-4 py-2 opacity-50">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Authorized Access Only</p>
-                <div className="flex gap-4">
-                    <CheckCircle2 className="h-3 w-3 text-primary" />
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Database Encrypted</span>
                 </div>
             </div>
         </div>
