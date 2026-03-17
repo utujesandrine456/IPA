@@ -1,13 +1,11 @@
 import { Resend } from 'resend';
 import * as dotenv from 'dotenv';
 
-// Load .env explicitly for standalone usage/utils
 dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Resend free tier usually requires sending from onboarding@resend.dev unless domain is verified
-const FROM_EMAIL = "onboarding@resend.dev"; 
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
 export async function sendProfileCompletionEmail(to: string, token: string) {
     const websiteUrl = process.env.WEBSITE_URL || "https://iap-system.vercel.app";
