@@ -1,91 +1,81 @@
-import nodemailer from "nodemailer";
+import { Resend } from 'resend';
 import * as dotenv from 'dotenv';
-import path from 'path';
 
 // Load .env explicitly for standalone usage/utils
 dotenv.config();
 
-console.log("SMTP CONFIG CHECK:", {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    user: process.env.SMTP_USER,
-    hasPassword: !!process.env.SMTP_PASSWORD
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
-    },
-    family: 4, // Force IPv4
-    connectionTimeout: 15000, // 15 seconds
-    greetingTimeout: 15000,
-    socketTimeout: 20000,
-    logger: true, // Log SMTP traffic
-    debug: true,  // Include debug info
-    tls: {
-        rejectUnauthorized: false
-    }
-} as any);
-
+// Resend free tier usually requires sending from onboarding@resend.dev unless domain is verified
+const FROM_EMAIL = "onboarding@resend.dev"; 
 
 export async function sendProfileCompletionEmail(to: string, token: string) {
     const websiteUrl = process.env.WEBSITE_URL || "https://iap-system.vercel.app";
     const profileLink = `${websiteUrl}/complete-profile?token=${token}`;
 
-    const mailOptions = {
-        from: `"IAP System" <${process.env.SMTP_USER}>`,
-        to,
-        subject: "Complete Your Profile",
-        html: `
-      <p>Hello,</p>
-      <p>Please complete your profile by clicking the link below:</p>
-      <a href="${profileLink}">Complete Profile</a>
-      <p>Thank you!</p>
-    `,
-    };
-
     try {
-        if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
-            console.error("SMTP configuration is missing in environment variables!");
-            throw new Error("Email configuration is missing on the server.");
+        console.log(`RESEND: Attempting to send profile completion email to ${to}`);
+        const { data, error } = await resend.emails.send({
+            from: `IAP System <${FROM_EMAIL}>`,
+            to: [to],
+            subject: "Complete Your Profile",
+            html: `
+                <div style="font-family: sans-serif; padding: 20px;">
+                    <h2>Welcome to IAP System</h2>
+                    <p>Hello,</p>
+                    <p>Please complete your profile by clicking the button below:</p>
+                    <a href="${profileLink}" style="display: inline-block; padding: 10px 20px; background-color: #0070f3; color: white; text-decoration: none; border-radius: 5px;">Complete Profile</a>
+                    <p>Or copy this link: ${profileLink}</p>
+                    <p>Thank you!</p>
+                </div>
+            `,
+        });
+
+        if (error) {
+            console.error("Resend Error (Profile):", error);
+            throw new Error(`Resend API Error: ${error.message}`);
         }
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent:", info.messageId);
-        return info;
+        console.log("Email sent via Resend successfully:", data?.id);
+        return data;
     } catch (error: any) {
-        console.error("CRITICAL: Error sending profile completion email:", error);
-        // Throw a more descriptive error for the frontend to show
-        const detail = error?.message || "Unknown SMTP error";
-        throw new Error(`SMTP Error: ${detail}`);
+        console.error("CRITICAL: Error sending profile completion email via Resend:", error);
+        throw new Error(`Email Service Error: ${error.message || "Unknown error"}`);
     }
 }
+
 export async function sendResetPasswordEmail(to: string, token: string) {
-    const websiteUrl = process.env.WEBSITE_URL || "http://localhost:3000";
+    const websiteUrl = process.env.WEBSITE_URL || "https://iap-system.vercel.app";
     const resetLink = `${websiteUrl}/reset-password?token=${token}`;
 
-    const mailOptions = {
-        from: `"IAP System" <${process.env.SMTP_USER}>`,
-        to,
-        subject: "Password Reset Request",
-        html: `
-      <p>Hello,</p>
-      <p>You requested a password reset. Please click the link below to set a new password:</p>
-      <a href="${resetLink}">Reset Password</a>
-      <p>If you did not request this, please ignore this email.</p>
-      <p>Thank you!</p>
-    `,
-    };
-
     try {
-        const info = await transporter.sendMail(mailOptions);
-        console.log("Reset email sent:", info.messageId);
-        return info;
+        console.log(`RESEND: Attempting to send password reset email to ${to}`);
+        const { data, error } = await resend.emails.send({
+            from: `IAP System <${FROM_EMAIL}>`,
+            to: [to],
+            subject: "Password Reset Request",
+            html: `
+                <div style="font-family: sans-serif; padding: 20px;">
+                    <h2>Password Reset</h2>
+                    <p>Hello,</p>
+                    <p>You requested a password reset. Please click the button below to set a new password:</p>
+                    <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #0070f3; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+                    <p>Or copy this link: ${resetLink}</p>
+                    <p>If you did not request this, please ignore this email.</p>
+                    <p>Thank you!</p>
+                </div>
+            `,
+        });
+
+        if (error) {
+            console.error("Resend Error (Reset):", error);
+            throw new Error(`Resend API Error: ${error.message}`);
+        }
+
+        console.log("Reset email sent via Resend successfully:", data?.id);
+        return data;
     } catch (error: any) {
-        console.error("CRITICAL: Error sending reset email:", error);
-        const detail = error?.message || "Unknown SMTP error";
-        throw new Error(`SMTP Error: ${detail}`);
+        console.error("CRITICAL: Error sending reset email via Resend:", error);
+        throw new Error(`Email Service Error: ${error.message || "Unknown error"}`);
     }
 }
