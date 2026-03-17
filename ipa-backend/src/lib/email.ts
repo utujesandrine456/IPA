@@ -14,13 +14,16 @@ console.log("SMTP CONFIG CHECK:", {
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: 465,
-    secure: true, // true for 465, false for other ports
+    port: 587,
+    secure: false, // false for 587 (STARTTLS), true for 465 (SSL)
     family: 4, // Force IPv4 to avoid ENETUNREACH on IPv6
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASSWORD,
     },
+    tls: {
+        rejectUnauthorized: false // Helps in some cloud environments
+    }
 } as any);
 
 
