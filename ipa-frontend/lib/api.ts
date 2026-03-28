@@ -30,10 +30,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
                 ? errorData.message[0]
                 : errorData.message || errorData.error || "An error occurred";
 
-            // Handle Unauthorized gracefully (let the caller handle redirection if needed)
             if (response.status === 401 && endpoint === "/auth/me") {
-                // Return structured error but don't force a location.href reload
-                // which can be disruptive during navigation/refresh
                 return {
                     ok: false,
                     status: 401,
@@ -41,7 +38,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
                 };
             }
 
-            // Return a structured error instead of throwing
             return {
                 ok: false,
                 status: response.status,
