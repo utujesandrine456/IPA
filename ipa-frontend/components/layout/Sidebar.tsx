@@ -70,8 +70,6 @@ export function Sidebar({ role, userId: propUserId }: SidebarProps) {
         window.location.href = "/login";
     };
 
-    const effectiveUserId = user?.id || propUserId || "";
-
     const links = {
         admin: [
             { href: "/admin", label: "Dashboard", icon: LayoutDashboard },

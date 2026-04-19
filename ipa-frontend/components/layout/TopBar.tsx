@@ -175,7 +175,7 @@ export function TopBar({ role, userId }: TopBarProps) {
                                                         key={notif.id} 
                                                         className={cn(
                                                             "p-4 hover:bg-neutral/5 transition-colors cursor-default",
-                                                            !notif.read && "bg-primary/[0.02]"
+                                                            !notif.read && "bg-primary/2"
                                                         )}
                                                     >
                                                         <div className="flex justify-between items-start gap-2 mb-1">
