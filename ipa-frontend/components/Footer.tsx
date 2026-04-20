@@ -3,8 +3,35 @@ import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin, Shield } f
 
 export function Footer() {
     return (
-        <footer className="bg-primary text-white pt-20 pb-10">
-            <div className="max-w-7xl mx-auto px-6">
+        <footer className="relative bg-primary text-white pt-20 pb-10 overflow-hidden">
+            {/* Robust CSS Geometric Background */}
+            <div className="absolute inset-0 pointer-events-none opacity-100 overflow-hidden">
+                <div
+                    className="absolute inset-0 opacity-[0.4]"
+                    style={{
+                        backgroundImage: `
+                      linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px)
+                    `,
+                        backgroundSize: '40px 40px'
+                    }}
+                />
+                <div
+                    className="absolute inset-0 opacity-[0.6]"
+                    style={{
+                        backgroundImage: `radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px)`,
+                        backgroundSize: '40px 40px'
+                    }}
+                />
+                <div
+                    className="absolute inset-0 opacity-[0.4]"
+                    style={{
+                        backgroundImage: `radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
+                        backgroundSize: '20px 20px'
+                    }}
+                />
+            </div>
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     <div className="space-y-6">
                         <div className="flex items-center gap-3">
