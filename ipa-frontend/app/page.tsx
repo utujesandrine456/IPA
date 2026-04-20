@@ -97,13 +97,13 @@ export default function LandingPage() {
 
               <motion.div variants={fadeInUp} className="flex flex-wrap gap-5">
                 <Link href="/instructions">
-                  <Button size="lg" className="h-16 px-10 text-lg rounded-lg cursor-pointer shadow-xl shadow-primary/10 hover:scale-105 transition-transform bg-primary text-white hover:bg-primary/95 border border-primary">
+                  <Button size="lg" className="h-16 px-6 text-lg rounded-lg cursor-pointer shadow-xl shadow-primary/10 hover:scale-105 transition-transform bg-white text-primary hover:bg-white/95 border border-primary">
                     Apply Now
                     <ArrowRight className="ml-3 h-6 w-6" />
                   </Button>
                 </Link>
                 <Link href="/objectives">
-                  <Button variant="outline" size="lg" className="h-16 px-10 text-lg cursor-pointer rounded-lg border-2 border-gray-200 hover:bg-gray-50 transition-all text-white hover:text-primary font-semibold">
+                  <Button variant="outline" size="lg" className="h-16 px-6 text-lg cursor-pointer rounded-lg border-2 border-gray-200 hover:bg-gray-50 transition-all text-white hover:text-primary font-semibold">
                     View Objectives
                   </Button>
                 </Link>
@@ -111,7 +111,7 @@ export default function LandingPage() {
 
               <motion.div
                 variants={fadeInUp}
-                className="mt-12 flex items-center gap-4 text-gray-500"
+                className="mt-12 flex items-center gap-4 text-white/0"
               >
                 <div className="flex -space-x-4">
                   {[1, 2, 3, 4].map((i) => (
@@ -121,7 +121,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <p className="text-sm font-medium">Join 2,000+ students already enrolled</p>
-              </motion.div>
+              </motion.div>8
             </motion.div>
 
             <motion.div
