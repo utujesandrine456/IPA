@@ -54,7 +54,6 @@ export default function NotificationsPage() {
                 });
                 setNotifications(notifications.map((n: any) => n.id === id ? { ...n, read: true } : n));
             } else {
-                // Mark all as read by iterating each notification
                 await Promise.all(
                     notifications
                         .filter((n) => !n.read)
@@ -166,14 +165,14 @@ export default function NotificationsPage() {
                                                 {!notif.read && (
                                                     <button
                                                         onClick={() => markAsRead(notif.id)}
-                                                        className="text-xs font-semibold text-primary hover:underline"
+                                                        className="text-sm font-semibold text-primary hover:underline"
                                                     >
                                                         Mark as read
                                                     </button>
                                                 )}
                                                 <button
                                                     onClick={() => deleteNotification(notif.id)}
-                                                    className="text-xs font-semibold text-red-500 hover:underline"
+                                                    className="text-sm font-semibold text-red-500 hover:underline"
                                                 >
                                                     Delete
                                                 </button>

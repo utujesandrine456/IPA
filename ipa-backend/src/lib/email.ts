@@ -41,11 +41,11 @@ export class EmailService {
             subject: "Complete Your Profile - IAP System",
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                    <h2 style="color: #0070f3;">Welcome to IAP System</h2>
+                    <h2 style="color: #1A264A;">Welcome to IAP System</h2>
                     <p>Hello,</p>
                     <p>Your account has been created. Please complete your profile by clicking the button below:</p>
                     <div style="margin: 30px 0;">
-                        <a href="${profileLink}" style="background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Complete Profile</a>
+                        <a href="${profileLink}" style="background-color: #1A264A; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Complete Profile</a>
                     </div>
                     <p>If the button doesn't work, copy and paste this link into your browser:</p>
                     <p>${profileLink}</p>
@@ -79,11 +79,11 @@ export class EmailService {
             subject: "Password Reset Request - IAP System",
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                    <h2 style="color: #0070f3;">Password Reset</h2>
+                    <h2 style="color: #1A264A;">Password Reset</h2>
                     <p>Hello,</p>
                     <p>We received a request to reset your password. Click the button below to set a new one:</p>
                     <div style="margin: 30px 0;">
-                        <a href="${resetLink}" style="background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
+                        <a href="${resetLink}" style="background-color: #1A264A; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
                     </div>
                     <p>If you did not request this, you can safely ignore this email.</p>
                     <p>If the button doesn't work, copy and paste this link:</p>
@@ -115,9 +115,9 @@ export class EmailService {
             subject: 'IAP System: Your 2FA Verification Code',
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd;">
-                    <h2 style="color: #0070f3;">Your Verification Code</h2>
+                    <h2 style="color: #1A264A;">Your Verification Code</h2>
                     <p>Please enter the following 6-digit code to complete your login:</p>
-                    <div style="font-size: 32px; font-weight: bold; color: #0070f3; padding: 10px; border: 1px dashed #0070f3; text-align: center;">
+                    <div style="font-size: 32px; font-weight: bold; color: #1A264A; padding: 10px; border: 1px dashed #1A264A; text-align: center;">
                         ${otp}
                     </div>
                     <p>This code will expire in 10 minutes.</p>

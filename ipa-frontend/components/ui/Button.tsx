@@ -29,7 +29,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             <button
                 ref={ref}
                 className={cn(
-                    "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none active:scale-95",
+                    "inline-flex items-center cursor-pointer justify-center rounded-md font-medium transition-all duration-200 disabled:opacity-80 disabled:pointer-events-none active:scale-95",
                     variants[variant],
                     sizes[size],
                     className
@@ -49,5 +49,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
 );
 Button.displayName = "Button";
+
 
 export { Button };

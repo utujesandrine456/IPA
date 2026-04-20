@@ -97,15 +97,19 @@ export default function LandingPage() {
 
               <motion.div variants={fadeInUp} className="flex flex-wrap gap-5">
                 <Link href="/instructions">
-                  <Button size="lg" className="h-16 px-6 text-lg rounded-lg cursor-pointer shadow-xl shadow-primary/10 hover:scale-105 transition-transform bg-white text-primary hover:bg-white/95 border border-primary">
-                    Apply Now
-                    <ArrowRight className="ml-3 h-6 w-6" />
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button size="lg" className="h-16 px-6 text-lg rounded-lg cursor-pointer shadow-xl shadow-primary/10 bg-white text-primary hover:bg-white/95 border border-primary transition-all">
+                      Apply Now
+                      <ArrowRight className="ml-3 h-6 w-6" />
+                    </Button>
+                  </motion.div>
                 </Link>
                 <Link href="/objectives">
-                  <Button variant="outline" size="lg" className="h-16 px-6 text-lg cursor-pointer rounded-lg border-2 border-gray-200 hover:bg-gray-50 transition-all text-white hover:text-primary font-semibold">
-                    View Objectives
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button variant="outline" size="lg" className="h-16 px-6 text-lg cursor-pointer rounded-lg border-2 border-gray-200 hover:bg-gray-50 transition-all text-white hover:text-primary font-semibold">
+                      View Objectives
+                    </Button>
+                  </motion.div>
                 </Link>
               </motion.div>
 
@@ -139,10 +143,18 @@ export default function LandingPage() {
                 ].map((card, i) => (
                   <motion.div
                     key={i}
-                    whileHover={{ y: -10 }}
-                    className="p-8 rounded-2xl bg-white shadow-xl shadow-primary/20 border border-primary/5 flex flex-col items-start gap-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    whileHover={{
+                      y: -10,
+                      transition: { duration: 0.3, ease: "easeOut" },
+                      boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
+                    }}
+                    className="p-8 rounded-2xl bg-white shadow-xl shadow-primary/20 border border-primary/5 flex flex-col items-start gap-4 cursor-pointer group"
                   >
-                    <div className={`h-14 w-14 rounded-2xl ${card.color} flex items-center justify-center text-primary`}>
+                    <div className={`h-14 w-14 rounded-2xl ${card.color} flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300`}>
                       <card.icon className="h-7 w-7" />
                     </div>
                     <div>
@@ -182,12 +194,14 @@ export default function LandingPage() {
               ].map((item, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="bg-white p-8 rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 relative z-10 group hover:border-primary/20 transition-all duration-300"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.15, duration: 0.5 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5, boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
+                  className="bg-white p-8 rounded-[2.5rem] border border-primary/5 shadow-xl shadow-primary/5 relative z-10 group hover:border-primary/20 transition-all duration-300 cursor-pointer"
                 >
-                  <div className="text-5xl font-bold text-primary/10 mb-6 group-hover:text-primary/20 transition-colors italic">
+                  <div className="text-5xl font-bold text-primary/10 mb-6 group-hover:text-primary/30 transition-colors italic">
                     {item.step}
                   </div>
                   <h3 className="text-xl font-bold text-primary mb-3">
@@ -248,9 +262,11 @@ export default function LandingPage() {
               ].map((item, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -12, transition: { duration: 0.4, ease: "easeOut" } }}
                   className="bg-white cursor-pointer p-10 rounded-[3rem] border border-primary/5 hover:border-primary/20 shadow-lg shadow-primary/5 transition-all duration-500 group"
                 >
                   <div className="flex gap-1 mb-6 text-yellow-500">
@@ -486,10 +502,10 @@ export default function LandingPage() {
                 </motion.p>
                 <Link href="/login">
                   <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <Button size="md" className="bg-white text-primary hover:bg-white/95 h-14 px-8 rounded-md font-medium shadow-2xl cursor-pointer text-md">
+                    <Button size="md" className="bg-white text-primary hover:bg-white/95 h-14 px-8 rounded-md font-medium shadow-2xl cursor-pointer text-md transition-all">
                       Get Started
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>

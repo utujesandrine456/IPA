@@ -61,7 +61,7 @@ export function Sidebar({ role, userId: propUserId }: SidebarProps) {
         };
 
         fetchUnread();
-        const interval = setInterval(fetchUnread, 15000); // 15s poll
+        const interval = setInterval(fetchUnread, 15000); 
         return () => clearInterval(interval);
     }, [propUserId]);
 
@@ -116,12 +116,12 @@ export function Sidebar({ role, userId: propUserId }: SidebarProps) {
                                 <Link
                                     href={link.href}
                                     className={cn(
-                                        "flex items-center justify-between rounded-lg p-2 text-neutral-dark hover:bg-neutral/5 group transition-colors",
-                                        isActive && "bg-primary/10 text-primary"
+                                        "flex items-center justify-between rounded-lg p-3 text-neutral-dark hover:bg-primary/80 hover:text-white group transition-colors",
+                                        isActive && "bg-primary text-white"
                                     )}
                                 >
                                     <div className="flex items-center">
-                                        <Icon className={cn("h-5 w-5 transition duration-75", isActive ? "text-primary" : "text-neutral group-hover:text-primary")} />
+                                        <Icon className={cn("h-5 w-5 transition duration-75", isActive ? "text-white" : "text-neutral group-hover:text-white")} />
                                         <span className="ml-3">{link.label}</span>
                                     </div>
                                     {link.label === "Notifications" && unreadCount > 0 && (

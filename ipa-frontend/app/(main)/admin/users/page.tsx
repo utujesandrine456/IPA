@@ -116,16 +116,16 @@ export default function UsersPage() {
             {/* Header Section */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="space-y-1">
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 ">User Management</h1>
-                    <p className="text-slate-500 text-sm font-medium tracking-wide">System Administration & Access Governance </p>
+                    <h1 className="text-4xl font-bold tracking-tight text-slate-900 ">User Management</h1>
+                    <p className="text-primary/80 text-md font-medium">System Administration & Access Governance </p>
                 </div>
 
                 <div className="flex items-center gap-4 bg-white p-1.5 rounded-lg shadow-sm border border-slate-100">
                     <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-xl">
                         <UserCog className="h-5 w-5 text-primary" />
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Users</p>
-                            <p className="text-xl font-black text-primary leading-none">{users.length}</p>
+                            <p className="text-[14px] font-semibold text-primary">Total Users</p>
+                            <p className="text-2xl font-bold text-primary leading-none text-center">{users.length}</p>
                         </div>
                     </div>
                 </div>
@@ -139,7 +139,7 @@ export default function UsersPage() {
                         <input
                             type="text"
                             placeholder="Search records..."
-                            className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-100 rounded-lg focus:outline-none focus:border-primary/20 transition-all text-slate-700 placeholder:text-slate-300 font-bold"
+                            className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-100 rounded-md focus:outline-none focus:border-primary/20 transition-all text-slate-700 placeholder:text-slate-300 font-medium"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -147,9 +147,9 @@ export default function UsersPage() {
                 </div>
                 <div className="md:col-span-6 lg:col-span-2">
                     <div className="relative">
-                        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 pointer-events-none" />
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 pointer-events-none" />
                         <select
-                            className="w-full pl-10 pr-10 py-4 bg-white border-2 border-slate-100 rounded-lg appearance-none text-slate-600 font-bold text-md focus:ring-0 focus:border-primary/20"
+                            className="w-full px-8 py-4 bg-white border-2 border-slate-100 rounded-lg appearance-none text-slate-600 font-medium text-md focus:ring-0 focus:border-primary/10"
                             value={filterRole}
                             onChange={(e) => setFilterRole(e.target.value)}
                         >
@@ -165,10 +165,10 @@ export default function UsersPage() {
                     <Button
                         onClick={() => fetchUsers()}
                         disabled={loading}
-                        className="w-full h-full py-3 bg-primary hover:bg-primary/90 text-white rounded-lg shadow-lg shadow-primary/20 font-bold text-md gap-3 transition-all active:scale-95 group"
+                        className="w-full h-full py-4 bg-primary hover:bg-primary/90 text-white rounded-lg shadow-lg shadow-primary/20 font-semibold text-md gap-3 transition-all active:scale-95 group"
                     >
                         <RefreshCw className={cn("h-4 w-4 transition-transform group-hover:rotate-180 duration-500", loading && "animate-spin")} />
-                        Sync
+                        Refresh
                     </Button>
                 </div>
             </div>
@@ -179,11 +179,11 @@ export default function UsersPage() {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-100">
-                                <th className="px-8 py-6 text-[14px] font-black uppercase text-slate-400">User Identity</th>
-                                <th className="px-6 py-6 text-[14px] font-black uppercase text-slate-400">Access</th>
-                                <th className="px-6 py-6 text-[14px] font-black uppercase text-slate-400">Status</th>
-                                <th className="px-6 py-6 text-[14px] font-black uppercase text-slate-400">Organization</th>
-                                <th className="px-8 py-6 text-[14px] font-black uppercase text-slate-400 text-right">Ops</th>
+                                <th className="px-8 py-6 text-[16px] font-semibold text-primary">User Identity</th>
+                                <th className="px-6 py-6 text-[16px] font-semibold text-primary">Access</th>
+                                <th className="px-6 py-6 text-[16px] font-semibold text-primary">Status</th>
+                                <th className="px-6 py-6 text-[16px] font-semibold text-primary">Organization</th>
+                                <th className="px-8 py-6 text-[16px] font-semibold text-primary text-right">Ops</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -195,26 +195,26 @@ export default function UsersPage() {
                                 ))
                             ) : filteredUsers.length > 0 ? (
                                 filteredUsers.map((user) => (
-                                    <tr key={user.id} className="group hover:bg-slate-50/50 transition-all">
+                                    <tr key={user.id} className="group cursor-pointer hover:bg-slate-50/50 transition-all">
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-4">
                                                 <div className="h-10 w-10 rounded-xl bg-white border-2 border-slate-100 flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform">
                                                     {getRoleIcon(user.role)}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-slate-900 text-sm uppercase tracking-tight">{user.name}</p>
-                                                    <p className="text-xs font-medium text-slate-400 lowercase">{user.email}</p>
+                                                    <p className="font-semibold text-slate-900 text-md">{user.name}</p>
+                                                    <p className="text-xs font-medium text-slate-400">{user.email}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-6">
-                                            <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-[9px] font-black text-slate-600 uppercase tracking-widest shadow-sm">
+                                            <span className="px-3 py-1 bg-white border border-slate-200 lowercase rounded-md text-[12px] font-semibold text-slate-600 shadow-sm">
                                                 {user.role}
                                             </span>
                                         </td>
                                         <td className="px-6 py-6">
                                             <div className={cn(
-                                                "inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest",
+                                                "inline-flex items-center gap-2 px-3 py-1 rounded-md text-[12px] font-semibold",
                                                 user.isActive ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"
                                             )}>
                                                 {user.isActive ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
@@ -224,16 +224,16 @@ export default function UsersPage() {
                                         <td className="px-6 py-6">
                                             {user.role === 'STUDENT' && user.studentProfile ? (
                                                 <div className="space-y-0.5">
-                                                    <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Student ID</p>
-                                                    <p className="text-xs font-bold text-slate-700">{user.studentProfile.studentNumber}</p>
+                                                    <p className="text-[16px] font-semibold text-primary">Student ID</p>
+                                                    <p className="text-xs font-medium text-slate-400">{user.studentProfile.studentNumber}</p>
                                                 </div>
                                             ) : user.role === 'SUPERVISOR' && user.supervisorProfile ? (
                                                 <div className="space-y-0.5">
-                                                    <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Dept</p>
-                                                    <p className="text-xs font-bold text-slate-700 truncate max-w-[150px]">{user.supervisorProfile.department}</p>
+                                                    <p className="text-[16px] font-semibold text-primary">Dept</p>
+                                                    <p className="text-xs font-medium text-slate-400 truncate max-w-[150px]">{user.supervisorProfile.department}</p>
                                                 </div>
                                             ) : (
-                                                <span className="text-[10px] font-black text-slate-200 uppercase tracking-widest">Global Admin</span>
+                                                <span className="text-[10px] font-black text-slate-200">Global Admin</span>
                                             )}
                                         </td>
                                         <td className="px-8 py-6 text-right">
