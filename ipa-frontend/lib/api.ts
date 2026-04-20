@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://iap-l6oe.onrender.com/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://iap-backend-m1r6.onrender.com/api";
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     if (!API_URL) {

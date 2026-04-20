@@ -422,7 +422,7 @@ export default function LiaisonDashboard() {
                                                 size="sm"
                                                 className="font-bold shadow-sm"
                                                 onClick={() => {
-                                                    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:2009/api";
+                                                    const base = process.env.NEXT_PUBLIC_API_URL || "https://iap-backend-m1r6.onrender.com/api";
                                                     window.open(`${base}/weekly-logs/${log.id}/pdf`, "_blank");
                                                 }}
                                             >
