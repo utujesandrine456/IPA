@@ -64,10 +64,6 @@ export default function LandingPage() {
                 backgroundSize: '20px 20px'
               }}
             />
-
-            {/* Soft decorative elements for color volume */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px]" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px]" />
           </div>
 
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center relative z-10">
